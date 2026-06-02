@@ -18,7 +18,9 @@
     "security:check": "npm run security:audit && npm run security:signatures",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "codegen": "graphql-codegen --config codegen.ts",
+    "codegen:watch": "graphql-codegen --config codegen.ts --watch"
   },
   "dependencies": {
     "@ant-design/icons": "^6.2.5",
@@ -32,6 +34,11 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@graphql-codegen/cli": "^7.1.2",
+    "@graphql-codegen/import-types-preset": "^4.0.1",
+    "@graphql-codegen/typed-document-node": "^7.0.3",
+    "@graphql-codegen/typescript": "^6.0.2",
+    "@graphql-codegen/typescript-operations": "^6.0.3",
     "@tailwindcss/vite": "^4.3.0",
     "@types/node": "^24.12.4",
     "@types/react": "^19.2.15",

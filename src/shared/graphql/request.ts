@@ -43,6 +43,20 @@ function parseGraphQLDocument(query: string): ParsedGraphQLDocument {
   return parsedDocument;
 }
 
+function resolveParsedDocument(query: string | DocumentNode): ParsedGraphQLDocument {
+  if (typeof query === 'string') {
+    return parseGraphQLDocument(query);
+  }
+
+  const operation = getOperationAST(query, undefined) ?? null;
+
+  return {
+    document: query,
+    operation,
+    operationName: operation?.name?.value,
+  };
+}
+
 function buildOperationContext(options: ExecuteGraphQLOptions) {
   if (options.authMode === 'none') {
     return {
@@ -63,11 +77,11 @@ function buildOperationContext(options: ExecuteGraphQLOptions) {
 }
 
 async function dispatchGraphQLRequest<TData, TVariables extends OperationVariables>(
-  query: string,
+  query: string | DocumentNode,
   variables: TVariables,
   options: ExecuteGraphQLOptions,
 ): Promise<TData> {
-  const { document, operation, operationName } = parseGraphQLDocument(query);
+  const { document, operation, operationName } = resolveParsedDocument(query);
   const client = getGraphQLClient();
   const context = buildOperationContext(options);
 
@@ -108,16 +122,16 @@ async function dispatchGraphQLRequest<TData, TVariables extends OperationVariabl
   return result.data;
 }
 
-function tryExtractOperationName(query: string): string | undefined {
+function tryExtractOperationName(query: string | DocumentNode): string | undefined {
   try {
-    return parseGraphQLDocument(query).operationName;
+    return resolveParsedDocument(query).operationName;
   } catch {
     return undefined;
   }
 }
 
 export async function executeGraphQL<TData, TVariables extends OperationVariables>(
-  query: string,
+  query: string | DocumentNode,
   variables: TVariables,
   options: ExecuteGraphQLOptions = {},
 ): Promise<TData> {

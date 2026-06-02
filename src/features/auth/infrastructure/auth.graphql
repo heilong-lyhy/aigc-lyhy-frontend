@@ -1,0 +1,68 @@
+# src/features/auth/infrastructure/auth.graphql
+
+mutation Login($input: AuthLoginInput!) {
+  login(input: $input) {
+    accessToken
+    accountId
+    refreshToken
+    role
+    userInfo {
+      accountId
+      avatarUrl
+      gender
+      id
+      nickname
+      phone
+    }
+  }
+}
+
+mutation Register($input: RegisterInput!) {
+  register(input: $input) {
+    accountId
+    message
+    success
+  }
+}
+
+mutation ResetPassword($input: ResetPasswordInput!) {
+  resetPassword(input: $input) {
+    accountId
+    message
+    success
+  }
+}
+
+query BasicUserInfo($accountId: Int!) {
+  basicUserInfo(accountId: $accountId) {
+    accountId
+    avatarUrl
+    gender
+    id
+    nickname
+    phone
+  }
+}
+
+query UserInfo($accountId: Int!) {
+  userInfo(accountId: $accountId) {
+    accountId
+    accessGroup
+    address
+    avatarUrl
+    birthDate
+    createdAt
+    email
+    gender
+    geographic
+    id
+    nickname
+    notifyCount
+    phone
+    signature
+    tags
+    unreadCount
+    updatedAt
+    userState
+  }
+}

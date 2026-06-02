@@ -10,8 +10,10 @@ export type {
   Gender,
   IdentityType,
   LoginResult,
+  LoginType,
   RegisterInput,
   RegisterResult,
+  RegisterType,
   ResetPasswordResult,
   UserState,
 } from './types';

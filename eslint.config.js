@@ -218,7 +218,7 @@ const localRules = {
 };
 
 export default defineConfig([
-  globalIgnores(['dist', 'docs/backend/**']),
+  globalIgnores(['dist', 'docs/backend/**', 'src/shared/graphql/__generated__']),
   {
     files: ['**/*.{ts,tsx}'],
     plugins: {

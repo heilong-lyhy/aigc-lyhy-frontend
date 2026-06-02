@@ -1,144 +1,144 @@
-import { executeGraphQL } from '@/shared/graphql';
-
 import type {
-  AuthCredentials,
-  BasicUserInfo,
-  FullUserInfo,
-  LoginResult,
-  RegisterInput,
-  RegisterResult,
-  ResetPasswordResult,
-} from '../types';
+  BasicUserInfoQuery,
+  BasicUserInfoQueryVariables,
+  LoginMutation,
+  LoginMutationVariables,
+  RegisterMutation,
+  RegisterMutationVariables,
+  ResetPasswordMutation,
+  ResetPasswordMutationVariables,
+  UserInfoQuery,
+  UserInfoQueryVariables,
+} from '@/shared/graphql';
+import {
+  BasicUserInfoDocument,
+  executeGraphQL,
+  LoginDocument,
+  RegisterDocument,
+  ResetPasswordDocument,
+  UserInfoDocument,
+} from '@/shared/graphql';
 
-const LOGIN_MUTATION = `
-  mutation Login($input: AuthLoginInput!) {
-    login(input: $input) {
-      accessToken
-      accountId
-      refreshToken
-      role
-      userInfo {
-        accountId
-        avatarUrl
-        gender
-        id
-        nickname
-        phone
-      }
-    }
-  }
-`;
+import type { AuthCredentials, BasicUserInfo, FullUserInfo, LoginResult, RegisterInput, RegisterResult, ResetPasswordResult } from '../types';
 
-const REGISTER_MUTATION = `
-  mutation Register($input: RegisterInput!) {
-    register(input: $input) {
-      accountId
-      message
-      success
-    }
-  }
-`;
+function mapLoginResult(raw: LoginMutation['login']): LoginResult {
+  return {
+    accessToken: raw.accessToken,
+    accountId: raw.accountId,
+    refreshToken: raw.refreshToken,
+    role: raw.role,
+    userInfo: raw.userInfo
+      ? {
+          accountId: raw.userInfo.accountId,
+          avatarUrl: raw.userInfo.avatarUrl ?? null,
+          gender: raw.userInfo.gender,
+          id: raw.userInfo.id,
+          nickname: raw.userInfo.nickname,
+          phone: raw.userInfo.phone ?? null,
+        }
+      : null,
+  };
+}
 
-const RESET_PASSWORD_MUTATION = `
-  mutation ResetPassword($input: ResetPasswordInput!) {
-    resetPassword(input: $input) {
-      accountId
-      message
-      success
-    }
-  }
-`;
+function mapRegisterResult(raw: RegisterMutation['register']): RegisterResult {
+  return {
+    accountId: raw.accountId ?? null,
+    message: raw.message,
+    success: raw.success,
+  };
+}
 
-const BASIC_USER_INFO_QUERY = `
-  query BasicUserInfo($accountId: Int!) {
-    basicUserInfo(accountId: $accountId) {
-      accountId
-      avatarUrl
-      gender
-      id
-      nickname
-      phone
-    }
-  }
-`;
+function mapResetPasswordResult(raw: ResetPasswordMutation['resetPassword']): ResetPasswordResult {
+  return {
+    accountId: raw.accountId ?? null,
+    message: raw.message ?? null,
+    success: raw.success,
+  };
+}
 
-const USER_INFO_QUERY = `
-  query UserInfo($accountId: Int!) {
-    userInfo(accountId: $accountId) {
-      accountId
-      accessGroup
-      address
-      avatarUrl
-      birthDate
-      createdAt
-      email
-      gender
-      geographic
-      id
-      nickname
-      notifyCount
-      phone
-      signature
-      tags
-      unreadCount
-      updatedAt
-      userState
-    }
-  }
-`;
+function mapBasicUserInfo(raw: BasicUserInfoQuery['basicUserInfo']): BasicUserInfo {
+  return {
+    accountId: raw.accountId,
+    avatarUrl: raw.avatarUrl ?? null,
+    gender: raw.gender,
+    id: raw.id,
+    nickname: raw.nickname,
+    phone: raw.phone ?? null,
+  };
+}
+
+function mapFullUserInfo(raw: UserInfoQuery['userInfo']): FullUserInfo {
+  return {
+    accountId: raw.accountId,
+    accessGroup: raw.accessGroup,
+    address: raw.address ?? null,
+    avatarUrl: raw.avatarUrl ?? null,
+    birthDate: raw.birthDate ?? null,
+    createdAt: raw.createdAt,
+    email: raw.email ?? null,
+    geographic: raw.geographic ?? null,
+    gender: raw.gender,
+    id: raw.id,
+    nickname: raw.nickname,
+    notifyCount: raw.notifyCount,
+    phone: raw.phone ?? null,
+    signature: raw.signature ?? null,
+    tags: raw.tags ? [...raw.tags] : null,
+    unreadCount: raw.unreadCount,
+    updatedAt: raw.updatedAt,
+    userState: raw.userState,
+  };
+}
 
 export async function loginWithPassword(credentials: AuthCredentials): Promise<LoginResult> {
-  const data = await executeGraphQL<{ login: LoginResult }, { input: AuthCredentials }>(
-    LOGIN_MUTATION,
+  const data = await executeGraphQL<LoginMutation, LoginMutationVariables>(
+    LoginDocument,
     { input: credentials },
     { allowAuthRetry: false, authMode: 'none' },
   );
 
-  return data.login;
+  return mapLoginResult(data.login);
 }
 
 export async function registerAccount(input: RegisterInput): Promise<RegisterResult> {
-  const data = await executeGraphQL<{ register: RegisterResult }, { input: RegisterInput }>(
-    REGISTER_MUTATION,
+  const data = await executeGraphQL<RegisterMutation, RegisterMutationVariables>(
+    RegisterDocument,
     { input },
     { allowAuthRetry: false, authMode: 'none' },
   );
 
-  return data.register;
+  return mapRegisterResult(data.register);
 }
 
 export async function resetPassword(
   token: string,
   newPassword: string,
 ): Promise<ResetPasswordResult> {
-  const data = await executeGraphQL<
-    { resetPassword: ResetPasswordResult },
-    { input: { token: string; newPassword: string } }
-  >(
-    RESET_PASSWORD_MUTATION,
+  const data = await executeGraphQL<ResetPasswordMutation, ResetPasswordMutationVariables>(
+    ResetPasswordDocument,
     { input: { token, newPassword } },
     { allowAuthRetry: false, authMode: 'none' },
   );
 
-  return data.resetPassword;
+  return mapResetPasswordResult(data.resetPassword);
 }
 
 export async function fetchBasicUserInfo(accountId: number): Promise<BasicUserInfo> {
-  const data = await executeGraphQL<{ basicUserInfo: BasicUserInfo }, { accountId: number }>(
-    BASIC_USER_INFO_QUERY,
+  const data = await executeGraphQL<BasicUserInfoQuery, BasicUserInfoQueryVariables>(
+    BasicUserInfoDocument,
     { accountId },
     { authMode: 'required' },
   );
 
-  return data.basicUserInfo;
+  return mapBasicUserInfo(data.basicUserInfo);
 }
 
 export async function fetchFullUserInfo(accountId: number): Promise<FullUserInfo> {
-  const data = await executeGraphQL<{ userInfo: FullUserInfo }, { accountId: number }>(
-    USER_INFO_QUERY,
+  const data = await executeGraphQL<UserInfoQuery, UserInfoQueryVariables>(
+    UserInfoDocument,
     { accountId },
     { authMode: 'required' },
   );
 
-  return data.userInfo;
+  return mapFullUserInfo(data.userInfo);
 }
