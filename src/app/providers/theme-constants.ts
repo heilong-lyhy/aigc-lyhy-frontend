@@ -1,6 +1,6 @@
-// src/app/providers/theme-constants.ts
+import type { FontScale } from '@/shared/theme-infrastructure';
 
-export type FontScale = 'compact' | 'standard' | 'comfortable';
+export type { FontScale };
 
 export const FONT_SCALE_CONFIG: Record<
   FontScale,

@@ -1,35 +1,20 @@
-// src/app/providers/theme-provider.tsx
-
 import { type ReactNode, useEffect, useMemo, useState } from 'react';
 import { ConfigProvider } from 'antd';
 
 import { createAppThemeConfig } from '@/app/theme';
 
+import {
+  readStoredColorScheme,
+  readStoredFontScale,
+  writeStoredColorScheme,
+  writeStoredFontScale,
+} from '@/shared/theme-infrastructure';
+
 import { FONT_SCALE_CONFIG, type FontScale } from './theme-constants';
 import { ThemeContext } from './use-theme';
 
-function readStoredFontScale(): FontScale {
-  try {
-    const saved = localStorage.getItem('font-scale');
-
-    if (saved === 'compact' || saved === 'standard' || saved === 'comfortable') {
-      return saved;
-    }
-  } catch {
-    return 'standard';
-  }
-
-  return 'standard';
-}
-
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [isDark, setIsDark] = useState(() => {
-    try {
-      return localStorage.getItem('color-scheme') === 'dark';
-    } catch {
-      return false;
-    }
-  });
+  const [isDark, setIsDark] = useState(readStoredColorScheme);
   const [fontScale, setFontScale] = useState<FontScale>(readStoredFontScale);
   const themeConfig = useMemo(
     () =>
@@ -42,12 +27,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     document.documentElement.style.fontSize = FONT_SCALE_CONFIG[fontScale].htmlFontSize;
-
-    try {
-      localStorage.setItem('font-scale', fontScale);
-    } catch {
-      // Storage can be unavailable in restricted browsers.
-    }
+    writeStoredFontScale(fontScale);
   }, [fontScale]);
 
   useEffect(() => {
@@ -61,11 +41,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       root.style.colorScheme = 'light';
     }
 
-    try {
-      localStorage.setItem('color-scheme', isDark ? 'dark' : 'light');
-    } catch {
-      // Storage can be unavailable in restricted browsers.
-    }
+    writeStoredColorScheme(isDark);
   }, [isDark]);
 
   return (

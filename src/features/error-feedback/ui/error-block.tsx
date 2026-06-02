@@ -1,5 +1,3 @@
-// src/features/error-feedback/ui/error-block.tsx
-
 import { Button, Flex, Typography } from 'antd';
 import type { ReactNode } from 'react';
 import { useNavigate } from 'react-router';
@@ -19,18 +17,6 @@ type ErrorBlockProps = {
   tone: 'error' | 'neutral' | 'warning';
 };
 
-const TONE_STYLES = {
-  error: {
-    codeColor: 'var(--ant-color-error)',
-  },
-  neutral: {
-    codeColor: 'var(--ant-color-text-quaternary)',
-  },
-  warning: {
-    codeColor: 'var(--ant-color-warning)',
-  },
-};
-
 export function ErrorBlock({
   actions,
   description,
@@ -40,55 +26,36 @@ export function ErrorBlock({
   tone,
 }: ErrorBlockProps) {
   const navigate = useNavigate();
-  const toneStyle = TONE_STYLES[tone];
 
   return (
-    <div className="error-block-root flex items-center justify-center overflow-hidden">
+    <div
+      className="error-block-root flex items-center justify-center overflow-hidden"
+      data-tone={tone}
+    >
       <div className="error-block-shell flex w-full flex-col items-center text-center">
         <div className="error-block-visual relative flex w-full items-center justify-center">
           <div
             aria-hidden
-            className="error-block-icon pointer-events-none absolute inset-0 flex items-center justify-center"
-            style={{ color: toneStyle.codeColor }}
+            className="error-block-icon error-block-tone-color pointer-events-none absolute inset-0 flex items-center justify-center"
           >
             {icon}
           </div>
           <div className="error-block-content relative">
             <Flex align="center" gap={6} vertical>
-              <span
-                className="error-block-status-code select-none"
-                style={{ color: toneStyle.codeColor }}
-              >
+              <span className="error-block-status-code error-block-tone-color select-none">
                 {statusCode}
               </span>
-              <Typography.Title
-                level={4}
-                style={{
-                  color: toneStyle.codeColor,
-                  fontSize: 'var(--error-block-title-font-size)',
-                  fontWeight: 'var(--error-block-title-font-weight)',
-                  letterSpacing: 'var(--error-block-title-letter-spacing)',
-                  marginBottom: 0,
-                  textTransform: 'uppercase',
-                }}
-              >
-                {title}
-              </Typography.Title>
+              <div className="error-block-title">
+                <Typography.Title level={4}>{title}</Typography.Title>
+              </div>
             </Flex>
           </div>
         </div>
 
         <Flex align="center" gap={8} vertical>
-          <Typography.Paragraph
-            type="secondary"
-            style={{
-              marginBottom: 0,
-              maxWidth: 'var(--error-block-description-max-width)',
-              whiteSpace: 'pre-line',
-            }}
-          >
-            {description}
-          </Typography.Paragraph>
+          <div className="error-block-description">
+            <Typography.Paragraph type="secondary">{description}</Typography.Paragraph>
+          </div>
         </Flex>
 
         {actions && actions.length > 0 ? (

@@ -108,28 +108,18 @@ export function AigcSidecar({ onClose, onNavigate, open, routeCandidates }: Aigc
           <span>从这里开始</span>
         </div>
       }
-      styles={{
-        body: { display: 'flex', flexDirection: 'column', paddingTop: 16 },
-        header: { borderBottom: '1px solid var(--color-ai-accent-border)' },
-        section: {
-          borderInlineStart: '1px solid var(--color-ai-accent-border)',
-          pointerEvents: 'auto',
-        },
-        wrapper: {
-          maxWidth: '100vw',
-          pointerEvents: 'none',
-          width: 'clamp(360px, 36vw, 560px)',
-        },
-      }}
-      zIndex={1100}
       onClose={onClose}
     >
       <div className="sidecar-root-stack flex h-full w-full flex-col" data-layout-surface="sidecar">
-        <Typography.Paragraph style={{ marginBottom: 0 }}>
-          这里是本地路由与提示协作入口。关闭后，不影响主页面操作。
-        </Typography.Paragraph>
+        <div className="sidecar-intro-text">
+          <Typography.Paragraph>
+            这里是本地路由与提示协作入口。关闭后，不影响主页面操作。
+          </Typography.Paragraph>
+        </div>
 
-        <Divider style={{ marginBlock: 0 }} />
+        <div className="sidecar-intro-divider">
+          <Divider />
+        </div>
 
         <div className="flex-1 overflow-y-auto">
           <div className="sidecar-scroll-stack flex h-full flex-col justify-center">
@@ -161,16 +151,19 @@ export function AigcSidecar({ onClose, onNavigate, open, routeCandidates }: Aigc
                         >
                           <div className="flex items-center justify-between gap-3">
                             <div className="min-w-0">
-                              <Typography.Text strong style={{ fontSize: 'var(--ant-font-size)' }}>
-                                {suggestion.label}
-                              </Typography.Text>
-                              <Typography.Paragraph
-                                ellipsis={{ rows: 1 }}
-                                style={{ fontSize: 'var(--ant-font-size-sm)', margin: 0 }}
-                                type="secondary"
-                              >
-                                {suggestion.description}
-                              </Typography.Paragraph>
+                              <div className="sidecar-suggestion-title">
+                                <Typography.Text strong>
+                                  {suggestion.label}
+                                </Typography.Text>
+                              </div>
+                              <div className="sidecar-suggestion-description">
+                                <Typography.Paragraph
+                                  ellipsis={{ rows: 1 }}
+                                  type="secondary"
+                                >
+                                  {suggestion.description}
+                                </Typography.Paragraph>
+                              </div>
                             </div>
                             <Button
                               size="small"

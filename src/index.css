@@ -580,6 +580,45 @@ body {
   line-height: 1;
 }
 
+.error-block-tone-color {
+  color: var(--ant-color-text-quaternary);
+}
+
+[data-tone='error'] .error-block-tone-color {
+  color: var(--ant-color-error);
+}
+
+[data-tone='warning'] .error-block-tone-color {
+  color: var(--ant-color-warning);
+}
+
+.error-block-title {
+  font-size: var(--error-block-title-font-size);
+  font-weight: var(--error-block-title-font-weight);
+  letter-spacing: var(--error-block-title-letter-spacing);
+  margin-bottom: 0;
+  text-transform: uppercase;
+}
+
+.error-block-title .ant-typography {
+  color: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  letter-spacing: inherit;
+  margin-bottom: 0;
+  text-transform: inherit;
+}
+
+.error-block-description {
+  margin-bottom: 0;
+  max-width: var(--error-block-description-max-width);
+  white-space: pre-line;
+}
+
+.error-block-description .ant-typography {
+  margin-bottom: 0;
+}
+
 .route-suggestion-list {
   display: flex;
   flex-direction: column;
@@ -614,13 +653,65 @@ body {
   margin-top: 4px;
 }
 
+.entry-sidecar-drawer {
+  z-index: var(--z-index-sidecar-container);
+}
+
+.entry-sidecar-drawer .ant-drawer-body {
+  display: flex;
+  flex-direction: column;
+  padding-top: 16px;
+}
+
+.entry-sidecar-drawer .sidecar-intro-text {
+  margin-bottom: 0;
+}
+
+.entry-sidecar-drawer .sidecar-intro-text .ant-typography {
+  margin-bottom: 0;
+}
+
+.entry-sidecar-drawer .sidecar-intro-divider {
+  margin-block: 0;
+}
+
+.entry-sidecar-drawer .sidecar-intro-divider .ant-divider {
+  margin-block: 0;
+}
+
+.entry-sidecar-drawer .sidecar-suggestion-title {
+  font-size: var(--ant-font-size);
+}
+
+.entry-sidecar-drawer .sidecar-suggestion-title .ant-typography {
+  font-size: inherit;
+}
+
+.entry-sidecar-drawer .sidecar-suggestion-description {
+  font-size: var(--ant-font-size-sm);
+  margin: 0;
+}
+
+.entry-sidecar-drawer .sidecar-suggestion-description .ant-typography {
+  font-size: inherit;
+  margin: 0;
+}
+
+.entry-sidecar-drawer .ant-drawer-content-wrapper {
+  max-width: 100vw;
+  pointer-events: none;
+  width: clamp(360px, 36vw, 560px);
+}
+
 .entry-sidecar-drawer .ant-drawer-content {
   background: linear-gradient(
     180deg,
     color-mix(in srgb, var(--color-ai-accent) 8%, var(--ant-color-bg-container)) 0%,
     var(--ant-color-bg-container) 42%
   );
+  border-inline-start: 1px solid var(--color-ai-accent-border);
   color: var(--color-ai-text);
+  pointer-events: auto;
 }
 
 .entry-sidecar-drawer .ant-drawer-header {
@@ -629,6 +720,7 @@ body {
     color-mix(in srgb, var(--color-ai-accent) 18%, var(--ant-color-bg-container)) 0%,
     color-mix(in srgb, var(--color-ai-accent-bg) 82%, var(--ant-color-bg-container)) 100%
   );
+  border-bottom: 1px solid var(--color-ai-accent-border);
 }
 
 .entry-sidecar-drawer .ant-drawer-title {
