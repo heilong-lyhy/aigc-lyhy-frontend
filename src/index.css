@@ -1,6 +1,7 @@
 /* src/index.css */
 
 @import 'tailwindcss';
+@import 'highlight.js/styles/github.css' layer(highlight);
 
 @custom-variant dark (&:where(.dark, .dark *));
 

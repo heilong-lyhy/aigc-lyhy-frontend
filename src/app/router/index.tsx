@@ -13,6 +13,7 @@ import { AppLayout } from '@/app/layout';
 import AccountPage from '@/pages/account';
 import AuthPage from '@/pages/auth';
 import { BlogHomePage } from '@/pages/blog-home';
+import { BlogPostPage } from '@/pages/blog-post';
 import { ErrorPreviewPage } from '@/pages/error-preview';
 import { HomePage } from '@/pages/home';
 import { ProjectStructurePage } from '@/pages/project-structure';
@@ -81,6 +82,10 @@ const router = createBrowserRouter([
       {
         element: <BlogHomePage />,
         path: 'blog',
+      },
+      {
+        element: <BlogPostPage />,
+        path: 'blog/:slug',
       },
       {
         element: <AccountPage />,

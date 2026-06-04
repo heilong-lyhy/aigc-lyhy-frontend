@@ -1,6 +1,7 @@
 // src/pages/blog-home/index.tsx
 
 import { useCallback, useState } from 'react';
+import { useNavigate } from 'react-router';
 
 import {
   BlogSidebar,
@@ -22,6 +23,7 @@ const DEFAULT_PAGINATION: PaginationInput = { offset: 0, limit: 6 };
 const USE_MOCK_FALLBACK = true;
 
 export function BlogHomePage() {
+  const navigate = useNavigate();
   const [pagination, setPagination] = useState<PaginationInput>(DEFAULT_PAGINATION);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | undefined>();
   const [selectedTagId, setSelectedTagId] = useState<string | undefined>();
@@ -66,6 +68,13 @@ export function BlogHomePage() {
     setPagination(DEFAULT_PAGINATION);
   }, []);
 
+  const handlePostClick = useCallback(
+    (slug: string) => {
+      navigate(`/blog/${slug}`);
+    },
+    [navigate],
+  );
+
   const isSidebarLoading = isLoadingCategories || isLoadingTags || isLoadingProfile;
 
   const displayPosts = postsData?.items ?? [];
@@ -88,6 +97,7 @@ export function BlogHomePage() {
             tags={tags}
             total={displayTotal}
             onPaginationChange={handlePaginationChange}
+            onPostClick={handlePostClick}
             onRetry={refetchPosts}
           />
         </main>

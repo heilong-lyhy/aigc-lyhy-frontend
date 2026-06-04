@@ -25,7 +25,15 @@ export { CategorySidebar } from './ui/category-sidebar';
 export { EmptyState } from './ui/empty-state';
 export { ErrorState } from './ui/error-state';
 export { LoadingSkeleton } from './ui/loading-skeleton';
+export { MarkdownRenderer } from './ui/markdown-renderer';
 export { Pagination } from './ui/pagination';
 export { PostCard } from './ui/post-card';
+export { PostDetailFooter } from './ui/post-detail-footer';
+export { PostDetailHeader } from './ui/post-detail-header';
+export { PostDetailToc } from './ui/post-detail-toc';
+export { PostErrorBoundary } from './ui/post-error-boundary';
 export { PostList } from './ui/post-list';
 export { TagCloud } from './ui/tag-cloud';
+
+// ── UI 类型 ──
+export type { TocItem } from './ui/markdown-renderer';

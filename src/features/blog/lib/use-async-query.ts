@@ -28,6 +28,8 @@ function createReducer<T>() {
         return { data: action.payload, isLoading: false, error: null };
       case 'FETCH_ERROR':
         return { ...state, isLoading: false, error: action.payload };
+      default:
+        return state;
     }
   };
 }

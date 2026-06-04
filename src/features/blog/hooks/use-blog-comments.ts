@@ -31,6 +31,7 @@ export function useBlogComments(options: UseBlogCommentsOptions): UseBlogComment
   const { postId, pagination, status, autoLoad = true } = options;
 
   const fetcher = useCallback(async (): Promise<PaginatedResult<BlogComment>> => {
+    if (!postId) throw new Error('postId is required');
     return await fetchBlogComments(postId, pagination, { status });
   }, [postId, pagination, status]);
 

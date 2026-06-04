@@ -67,15 +67,19 @@ function reducer(state: State, action: Action): State {
       return { ...state, isLoading: false, error: action.payload };
     case 'MUTATION_ERROR':
       return { ...state, isLoading: false, mutationError: action.payload };
+    default:
+      return state;
   }
 }
 
 export function useLike(options: UseLikeOptions): UseLikeResult {
   const { targetType, targetId, fingerprint, autoCheck = true } = options;
+  const enabled = targetId !== '';
 
   const [state, dispatch] = useReducer(reducer, initialState);
 
   const checkStatus = useCallback(async () => {
+    if (!enabled) return;
     dispatch({ type: 'CHECK_START' });
     try {
       const result = await checkBlogLiked(targetType, targetId);
@@ -84,15 +88,16 @@ export function useLike(options: UseLikeOptions): UseLikeResult {
       const message = err instanceof Error ? err.message : 'Failed to check like status';
       dispatch({ type: 'FETCH_ERROR', payload: message });
     }
-  }, [targetType, targetId]);
+  }, [enabled, targetType, targetId]);
 
   useEffect(() => {
-    if (autoCheck) {
+    if (autoCheck && enabled) {
       void checkStatus();
     }
-  }, [autoCheck, checkStatus]);
+  }, [autoCheck, enabled, checkStatus]);
 
   const toggle = useCallback(async () => {
+    if (!enabled) return;
     dispatch({ type: 'TOGGLE_START' });
     try {
       const result = await toggleBlogLike({ targetType, targetId, fingerprint });
@@ -101,7 +106,7 @@ export function useLike(options: UseLikeOptions): UseLikeResult {
       const message = err instanceof Error ? err.message : 'Failed to toggle like';
       dispatch({ type: 'MUTATION_ERROR', payload: message });
     }
-  }, [targetType, targetId, fingerprint]);
+  }, [enabled, targetType, targetId, fingerprint]);
 
   return {
     liked: state.liked,
