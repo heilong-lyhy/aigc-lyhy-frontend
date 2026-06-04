@@ -12,6 +12,7 @@ import { AppLayout } from '@/app/layout';
 
 import AccountPage from '@/pages/account';
 import AuthPage from '@/pages/auth';
+import { BlogHomePage } from '@/pages/blog-home';
 import { ErrorPreviewPage } from '@/pages/error-preview';
 import { HomePage } from '@/pages/home';
 import { ProjectStructurePage } from '@/pages/project-structure';
@@ -76,6 +77,10 @@ const router = createBrowserRouter([
       {
         element: <AuthPage />,
         path: 'auth',
+      },
+      {
+        element: <BlogHomePage />,
+        path: 'blog',
       },
       {
         element: <AccountPage />,

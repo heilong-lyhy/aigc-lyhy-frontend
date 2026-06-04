@@ -21,6 +21,14 @@ const STABLE_NAVIGATION_ITEMS: NavigationItem[] = [
     path: '/account',
     tags: ['account', 'profile', 'user', '账户', '个人资料'],
   },
+  {
+    description: '技术文章与生活随笔。',
+    id: 'blog',
+    kind: 'stable',
+    label: 'Blog',
+    path: '/blog',
+    tags: ['blog', 'article', 'post', '博客', '文章'],
+  },
 ];
 
 const LAB_NAVIGATION_ITEMS: NavigationItem[] = [
