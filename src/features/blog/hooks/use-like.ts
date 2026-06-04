@@ -5,6 +5,7 @@ import { useCallback, useEffect, useReducer } from 'react';
 import type { BlogLike, BlogLikeTargetType } from '@/entities/blog';
 
 import { checkBlogLiked, toggleBlogLike } from '../infrastructure/likes-api';
+import { useMutationError } from '../lib/use-mutation-error';
 
 type UseLikeOptions = {
   readonly targetType: BlogLikeTargetType;
@@ -29,7 +30,6 @@ type State = {
   like: BlogLike | null;
   isLoading: boolean;
   error: string | null;
-  mutationError: string | null;
 };
 
 type Action =
@@ -37,15 +37,13 @@ type Action =
   | { type: 'CHECK_SUCCESS'; payload: boolean }
   | { type: 'TOGGLE_START' }
   | { type: 'TOGGLE_SUCCESS'; payload: { liked: boolean; like: BlogLike | null } }
-  | { type: 'FETCH_ERROR'; payload: string }
-  | { type: 'MUTATION_ERROR'; payload: string };
+  | { type: 'FETCH_ERROR'; payload: string };
 
 const initialState: State = {
   liked: false,
   like: null,
   isLoading: false,
   error: null,
-  mutationError: null,
 };
 
 function reducer(state: State, action: Action): State {
@@ -55,18 +53,15 @@ function reducer(state: State, action: Action): State {
     case 'CHECK_SUCCESS':
       return { ...state, liked: action.payload, isLoading: false };
     case 'TOGGLE_START':
-      return { ...state, isLoading: true, mutationError: null };
+      return { ...state, isLoading: true };
     case 'TOGGLE_SUCCESS':
       return {
         liked: action.payload.liked,
         like: action.payload.like,
         isLoading: false,
-        mutationError: null,
       };
     case 'FETCH_ERROR':
       return { ...state, isLoading: false, error: action.payload };
-    case 'MUTATION_ERROR':
-      return { ...state, isLoading: false, mutationError: action.payload };
     default:
       return state;
   }
@@ -77,6 +72,7 @@ export function useLike(options: UseLikeOptions): UseLikeResult {
   const enabled = targetId !== '';
 
   const [state, dispatch] = useReducer(reducer, initialState);
+  const { mutationError, clearMutationError, setMutationError } = useMutationError();
 
   const checkStatus = useCallback(async () => {
     if (!enabled) return;
@@ -98,22 +94,23 @@ export function useLike(options: UseLikeOptions): UseLikeResult {
 
   const toggle = useCallback(async () => {
     if (!enabled) return;
+    clearMutationError();
     dispatch({ type: 'TOGGLE_START' });
     try {
       const result = await toggleBlogLike({ targetType, targetId, fingerprint });
       dispatch({ type: 'TOGGLE_SUCCESS', payload: result });
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to toggle like';
-      dispatch({ type: 'MUTATION_ERROR', payload: message });
+      setMutationError(message);
     }
-  }, [enabled, targetType, targetId, fingerprint]);
+  }, [enabled, targetType, targetId, fingerprint, clearMutationError, setMutationError]);
 
   return {
     liked: state.liked,
     like: state.like,
     isLoading: state.isLoading,
     error: state.error,
-    mutationError: state.mutationError,
+    mutationError,
     toggle,
     checkStatus,
   };

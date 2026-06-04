@@ -12,8 +12,10 @@ import { AppLayout } from '@/app/layout';
 
 import AccountPage from '@/pages/account';
 import AuthPage from '@/pages/auth';
+import { BlogArchivePage } from '@/pages/blog-archive';
 import { BlogHomePage } from '@/pages/blog-home';
 import { BlogPostPage } from '@/pages/blog-post';
+import { BlogSearchPage } from '@/pages/blog-search';
 import { ErrorPreviewPage } from '@/pages/error-preview';
 import { HomePage } from '@/pages/home';
 import { ProjectStructurePage } from '@/pages/project-structure';
@@ -82,6 +84,16 @@ const router = createBrowserRouter([
       {
         element: <BlogHomePage />,
         path: 'blog',
+      },
+      // Static paths must be registered before dynamic params (e.g. blog/:slug)
+      // to avoid being swallowed by the wildcard segment
+      {
+        element: <BlogSearchPage />,
+        path: 'blog/search',
+      },
+      {
+        element: <BlogArchivePage />,
+        path: 'blog/archive',
       },
       {
         element: <BlogPostPage />,

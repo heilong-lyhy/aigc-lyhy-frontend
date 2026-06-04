@@ -188,6 +188,14 @@ src/sandbox/<prototype-name>/
 - `sandbox` mock 跟原型模块
 - 不把 mock 提升到 `shared`，除非它已经退化成跨域通用测试夹具
 
+## 测试夹具位置
+
+- 跨域通用测试夹具（如 GraphQL stub、Apollo Client mock）放在 `src/shared/test/stubs/`
+- 测试夹具属于 `shared` 的技术共享能力，不携带具体业务语义
+- 具体业务切片的 mock 数据仍跟随 `feature/infrastructure/`，不放进 `shared`
+- vitest setup 文件放在 `src/shared/test/setup.ts`
+- 不在 `src/test/` 目录放置测试文件（该目录不在 stable 区定义内）
+
 ## 快速规则
 
 1. 先找拥有者，再放 `infrastructure`

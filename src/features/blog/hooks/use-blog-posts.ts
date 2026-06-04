@@ -4,8 +4,9 @@ import { useCallback } from 'react';
 
 import type { BlogPost, BlogPostStatus, PaginatedResult, PaginationInput } from '@/entities/blog';
 
+import { useAsyncQuery } from '@/shared/hooks/use-async-query';
+
 import { fetchBlogPosts } from '../infrastructure/posts-api';
-import { useAsyncQuery } from '../lib/use-async-query';
 
 type UseBlogPostsOptions = {
   readonly pagination: PaginationInput;

@@ -8,7 +8,7 @@ import { CategorySidebar } from './category-sidebar';
 import { TagCloud } from './tag-cloud';
 
 type BlogSidebarProps = {
-  readonly profile: BlogProfile | null;
+  readonly profile?: BlogProfile | null;
   readonly categories: readonly BlogCategory[];
   readonly tags: readonly BlogTag[];
   readonly selectedCategoryId?: string;
@@ -37,7 +37,7 @@ export function BlogSidebar({
         <Card>
           <div className="flex flex-col items-center gap-3">
             <Avatar size={64} src={profile.avatar}>
-              {profile.nickname[0]}
+              {profile.nickname.charAt(0) || 'U'}
             </Avatar>
             <Title level={5} style={{ margin: 0 }}>
               {profile.nickname}

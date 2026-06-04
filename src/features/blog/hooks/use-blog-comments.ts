@@ -9,8 +9,9 @@ import type {
   PaginationInput,
 } from '@/entities/blog';
 
+import { useAsyncQuery } from '@/shared/hooks/use-async-query';
+
 import { fetchBlogComments } from '../infrastructure/comments-api';
-import { useAsyncQuery } from '../lib/use-async-query';
 
 type UseBlogCommentsOptions = {
   readonly postId: string;

@@ -1,11 +1,12 @@
 // src/pages/blog-post/index.tsx
 
 import { useCallback, useState } from 'react';
-import { Typography } from 'antd';
 import { useParams } from 'react-router';
 
 import type { TocItem } from '@/features/blog';
 import {
+  CommentForm,
+  CommentList,
   ErrorState,
   LoadingSkeleton,
   MarkdownRenderer,
@@ -13,6 +14,7 @@ import {
   PostDetailHeader,
   PostDetailToc,
   PostErrorBoundary,
+  ReplyForm,
   useBlogCategories,
   useBlogComments,
   useBlogPostDetail,
@@ -21,18 +23,14 @@ import {
 } from '@/features/blog';
 import { Error404 } from '@/features/error-feedback';
 
-import type { PaginationInput } from '@/entities/blog';
-import { formatRelativeDate } from '@/entities/blog';
+import type { BlogComment, PaginationInput } from '@/entities/blog';
 
 const COMMENTS_PAGINATION: PaginationInput = { offset: 0, limit: 20 };
-const LABEL_COMMENTS_TITLE = '评论';
-const LABEL_NO_COMMENTS = '暂无评论';
-
-const { Title } = Typography;
 
 export function BlogPostPage() {
   const { slug } = useParams<{ slug: string }>();
   const [tocItems, setTocItems] = useState<readonly TocItem[]>([]);
+  const [replyTarget, setReplyTarget] = useState<BlogComment | null>(null);
 
   const {
     data: post,
@@ -50,7 +48,7 @@ export function BlogPostPage() {
     autoCheck: !!post?.id,
   });
 
-  const { data: commentsData } = useBlogComments({
+  const { data: commentsData, refetch: refetchComments } = useBlogComments({
     postId: post?.id ?? '',
     pagination: COMMENTS_PAGINATION,
     status: 'approved',
@@ -60,6 +58,23 @@ export function BlogPostPage() {
   const handleTocReady = useCallback((items: readonly TocItem[]) => {
     setTocItems(items);
   }, []);
+
+  const handleCommentSuccess = useCallback(() => {
+    void refetchComments();
+  }, [refetchComments]);
+
+  const handleReply = useCallback((comment: BlogComment) => {
+    setReplyTarget(comment);
+  }, []);
+
+  const handleReplyCancel = useCallback(() => {
+    setReplyTarget(null);
+  }, []);
+
+  const handleReplySuccess = useCallback(() => {
+    setReplyTarget(null);
+    void refetchComments();
+  }, [refetchComments]);
 
   if (isLoading) {
     return <LoadingSkeleton />;
@@ -90,30 +105,22 @@ export function BlogPostPage() {
               onToggleLike={likeHook.toggle}
             />
 
-            <section aria-label={LABEL_COMMENTS_TITLE}>
-              <Title level={3}>{LABEL_COMMENTS_TITLE}</Title>
-              {comments.length === 0 ? (
-                <p className="text-text-tertiary">{LABEL_NO_COMMENTS}</p>
-              ) : (
-                <div className="flex flex-col gap-4">
-                  {comments.map((comment) => (
-                    <div key={comment.id} className="surface-panel">
-                      <div className="flex items-center gap-2">
-                        <strong>{comment.authorName}</strong>
-                        <time className="text-text-tertiary" dateTime={comment.createdAt}>
-                          {formatRelativeDate(comment.createdAt)}
-                        </time>
-                      </div>
-                      <p style={{ margin: '8px 0 0' }}>{comment.content}</p>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </section>
+            <CommentList comments={comments} onReply={handleReply} />
+
+            {replyTarget && (
+              <ReplyForm
+                onCancel={handleReplyCancel}
+                onSuccess={handleReplySuccess}
+                parentComment={replyTarget}
+                postId={post.id}
+              />
+            )}
+
+            <CommentForm onSuccess={handleCommentSuccess} postId={post.id} />
           </main>
 
           <aside className="hidden lg:block">
-            <div style={{ position: 'sticky', top: 80 }}>
+            <div className="sticky top-20">
               <PostDetailToc items={tocItems} />
             </div>
           </aside>

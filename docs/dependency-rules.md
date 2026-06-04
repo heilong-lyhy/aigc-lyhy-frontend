@@ -12,6 +12,14 @@
 - `entities -> shared`
 - `shared -> 不依赖业务层`
 
+## feature 内部目录别名
+
+- `lib/` 是 `application/` 的别名，二者等价
+- 新建 feature 优先使用 `application/` 目录命名
+- 已有 `lib/` 目录的 feature 可保留，不需要强制重命名
+- 依赖规则中 `lib/` 与 `application/` 视为同层，享有相同的依赖方向约束
+- 详细规则见 [stable-clean/architecture.md](./stable-clean/architecture.md)
+
 ## 补充规则
 
 - `labs` 只允许依赖 `shared`，必要时可依赖 `entities` 的公开内容

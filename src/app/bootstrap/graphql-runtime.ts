@@ -1,10 +1,10 @@
-import { getStoredAuthData } from '@/features/auth';
+import { getAccessToken } from '@/features/auth';
 
 import { configureGraphQLRuntime } from '@/shared/graphql';
 
 export function bootstrapGraphQLRuntime() {
   configureGraphQLRuntime({
-    getAccessToken: () => getStoredAuthData().accessToken,
+    getAccessToken,
     onAuthFailure: () => {
       window.location.href = '/auth';
     },

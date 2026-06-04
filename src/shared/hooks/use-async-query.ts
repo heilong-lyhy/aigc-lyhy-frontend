@@ -1,4 +1,4 @@
-// src/features/blog/lib/use-async-query.ts
+// src/shared/hooks/use-async-query.ts
 
 import { useCallback, useEffect, useReducer } from 'react';
 

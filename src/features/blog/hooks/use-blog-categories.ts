@@ -4,8 +4,9 @@ import { useCallback } from 'react';
 
 import type { BlogCategory } from '@/entities/blog';
 
+import { useAsyncQuery } from '@/shared/hooks/use-async-query';
+
 import { fetchBlogCategories } from '../infrastructure/categories-api';
-import { useAsyncQuery } from '../lib/use-async-query';
 
 type UseBlogCategoriesOptions = {
   readonly autoLoad?: boolean;

@@ -1,8 +1,10 @@
 // src/features/blog/hooks/use-admin-posts.ts
 
-import { useCallback, useReducer } from 'react';
+import { useCallback } from 'react';
 
 import type { BlogPost, BlogPostStatus, PaginatedResult, PaginationInput } from '@/entities/blog';
+
+import { useAsyncQuery } from '@/shared/hooks/use-async-query';
 
 import {
   createBlogPost,
@@ -10,32 +12,12 @@ import {
   fetchBlogPosts,
   updateBlogPost,
 } from '../infrastructure/posts-api';
-import { useAsyncQuery } from '../lib/use-async-query';
+import { useMutationError } from '../lib/use-mutation-error';
 
 type UseAdminPostsOptions = {
   readonly pagination: PaginationInput;
   readonly status?: BlogPostStatus;
   readonly autoLoad?: boolean;
-};
-
-type MutationErrorState = {
-  mutationError: string | null;
-};
-
-type MutationErrorAction =
-  | { type: 'CLEAR_MUTATION_ERROR' }
-  | { type: 'MUTATION_ERROR'; payload: string };
-
-const mutationErrorReducer = (
-  _state: MutationErrorState,
-  action: MutationErrorAction,
-): MutationErrorState => {
-  switch (action.type) {
-    case 'CLEAR_MUTATION_ERROR':
-      return { mutationError: null };
-    case 'MUTATION_ERROR':
-      return { mutationError: action.payload };
-  }
 };
 
 type UseAdminPostsResult = {
@@ -88,9 +70,7 @@ export function useAdminPosts(options: UseAdminPostsOptions): UseAdminPostsResul
     autoLoad,
   });
 
-  const [mutationState, dispatchMutation] = useReducer(mutationErrorReducer, {
-    mutationError: null,
-  });
+  const { mutationError, clearMutationError, setMutationError } = useMutationError();
 
   const create = useCallback(
     async (
@@ -105,16 +85,16 @@ export function useAdminPosts(options: UseAdminPostsOptions): UseAdminPostsResul
         status: BlogPostStatus;
       }>,
     ): Promise<BlogPost | null> => {
-      dispatchMutation({ type: 'CLEAR_MUTATION_ERROR' });
+      clearMutationError();
       try {
         return await createBlogPost(input);
       } catch (err) {
         const message = err instanceof Error ? err.message : 'Failed to create post';
-        dispatchMutation({ type: 'MUTATION_ERROR', payload: message });
+        setMutationError(message);
         return null;
       }
     },
-    [],
+    [clearMutationError, setMutationError],
   );
 
   const update = useCallback(
@@ -134,35 +114,35 @@ export function useAdminPosts(options: UseAdminPostsOptions): UseAdminPostsResul
         }>
       >,
     ): Promise<BlogPost | null> => {
-      dispatchMutation({ type: 'CLEAR_MUTATION_ERROR' });
+      clearMutationError();
       try {
         return await updateBlogPost(id, input);
       } catch (err) {
         const message = err instanceof Error ? err.message : 'Failed to update post';
-        dispatchMutation({ type: 'MUTATION_ERROR', payload: message });
+        setMutationError(message);
         return null;
       }
     },
-    [],
+    [clearMutationError, setMutationError],
   );
 
   const remove = useCallback(async (id: string): Promise<boolean> => {
-    dispatchMutation({ type: 'CLEAR_MUTATION_ERROR' });
+    clearMutationError();
     try {
       return await deleteBlogPost(id);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to delete post';
-      dispatchMutation({ type: 'MUTATION_ERROR', payload: message });
+      setMutationError(message);
       return false;
     }
-  }, []);
+  }, [clearMutationError, setMutationError]);
 
   return {
     data,
     isLoading,
     isEmpty: data !== null && data.items.length === 0 && !isLoading && !error,
     error,
-    mutationError: mutationState.mutationError,
+    mutationError,
     refetch,
     create,
     update,

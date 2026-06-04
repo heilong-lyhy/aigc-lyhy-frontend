@@ -3,18 +3,13 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Image, Modal, Typography } from 'antd';
 import DOMPurify from 'dompurify';
-import GithubSlugger from 'github-slugger';
 import ReactMarkdown from 'react-markdown';
 import rehypeHighlight from 'rehype-highlight';
 import rehypeSlug from 'rehype-slug';
 import remarkGfm from 'remark-gfm';
 
-/** 从 Markdown 内容中提取标题列表，用于目录 */
-export type TocItem = {
-  readonly id: string;
-  readonly text: string;
-  readonly level: number;
-};
+import { extractToc } from '../lib/extract-toc';
+import type { TocItem } from '../lib/types';
 
 type MarkdownRendererProps = {
   readonly content: string;
@@ -22,23 +17,6 @@ type MarkdownRendererProps = {
 };
 
 const { Text } = Typography;
-
-/** 从 Markdown 文本中提取标题信息，使用 github-slugger 与 rehype-slug 保持一致的 id 生成 */
-function extractToc(content: string): TocItem[] {
-  const headingRegex = /^(#{1,6})\s+(.+)$/gm;
-  const items: TocItem[] = [];
-  const slugger = new GithubSlugger();
-  let match: RegExpExecArray | null;
-
-  while ((match = headingRegex.exec(content)) !== null) {
-    const level = match[1].length;
-    const text = match[2].trim();
-    const id = slugger.slug(text);
-    items.push({ id, text, level });
-  }
-
-  return items;
-}
 
 export function MarkdownRenderer({ content, onTocReady }: MarkdownRendererProps) {
   const [previewSrc, setPreviewSrc] = useState<string | null>(null);

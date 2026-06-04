@@ -4,8 +4,9 @@ import { useCallback } from 'react';
 
 import type { BlogDashboard } from '@/entities/blog';
 
+import { useAsyncQuery } from '@/shared/hooks/use-async-query';
+
 import { fetchBlogDashboard } from '../infrastructure/dashboard-api';
-import { useAsyncQuery } from '../lib/use-async-query';
 
 type UseBlogDashboardOptions = {
   readonly autoLoad?: boolean;

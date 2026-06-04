@@ -28,6 +28,7 @@ type UseBlogSearchResult = {
   readonly searchHistory: readonly string[];
   readonly setFilters: (filters: Partial<UseBlogSearchFilters>) => void;
   readonly clearFilters: () => void;
+  readonly resetSearchSession: () => void;
   readonly refetch: () => Promise<void>;
 };
 
@@ -68,6 +69,15 @@ function reducer(state: State, action: Action): State {
       return { ...state, filters: action.payload };
     case 'CLEAR_FILTERS':
       return { ...state, data: null, error: null, filters: DEFAULT_FILTERS };
+    default:
+      return state;
+  }
+}
+
+function clearDebounceTimer(timerRef: React.MutableRefObject<ReturnType<typeof setTimeout> | null>) {
+  if (timerRef.current !== null) {
+    clearTimeout(timerRef.current);
+    timerRef.current = null;
   }
 }
 
@@ -79,6 +89,7 @@ export function useBlogSearch(options: UseBlogSearchOptions): UseBlogSearchResul
     () => blogStorage.getSearchHistory(),
   );
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const mountedRef = useRef(true);
   // 使用 ref 追踪最新 filters，供防抖回调使用
   const filtersRef = useRef<UseBlogSearchFilters>(state.filters);
 
@@ -113,11 +124,11 @@ export function useBlogSearch(options: UseBlogSearchOptions): UseBlogSearchResul
       dispatch({ type: 'SET_FILTERS', payload: next });
 
       if (partial.keyword !== undefined && partial.keyword !== prev.keyword) {
-        if (debounceTimerRef.current !== null) {
-          clearTimeout(debounceTimerRef.current);
-        }
+        clearDebounceTimer(debounceTimerRef);
         debounceTimerRef.current = setTimeout(() => {
-          void fetchData(next);
+          if (mountedRef.current) {
+            void fetchData(next);
+          }
         }, debounceMs);
       } else {
         void fetchData(next);
@@ -127,6 +138,15 @@ export function useBlogSearch(options: UseBlogSearchOptions): UseBlogSearchResul
   );
 
   const clearFilters = useCallback(() => {
+    clearDebounceTimer(debounceTimerRef);
+    filtersRef.current = DEFAULT_FILTERS;
+    dispatch({ type: 'CLEAR_FILTERS' });
+  }, []);
+
+  const resetSearchSession = useCallback(() => {
+    clearDebounceTimer(debounceTimerRef);
+    blogStorage.clearSearchHistory();
+    setSearchHistory([]);
     filtersRef.current = DEFAULT_FILTERS;
     dispatch({ type: 'CLEAR_FILTERS' });
   }, []);
@@ -135,11 +155,12 @@ export function useBlogSearch(options: UseBlogSearchOptions): UseBlogSearchResul
     await fetchData(filtersRef.current);
   }, [fetchData]);
 
+  // 卸载时清理 debounce timer 并标记已卸载，防止异步回调更新已卸载组件
   useEffect(() => {
+    mountedRef.current = true;
     return () => {
-      if (debounceTimerRef.current !== null) {
-        clearTimeout(debounceTimerRef.current);
-      }
+      mountedRef.current = false;
+      clearDebounceTimer(debounceTimerRef);
     };
   }, []);
 
@@ -152,6 +173,7 @@ export function useBlogSearch(options: UseBlogSearchOptions): UseBlogSearchResul
     searchHistory,
     setFilters,
     clearFilters,
+    resetSearchSession,
     refetch,
   };
 }

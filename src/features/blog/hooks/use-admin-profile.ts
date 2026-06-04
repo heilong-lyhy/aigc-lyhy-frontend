@@ -1,11 +1,13 @@
 // src/features/blog/hooks/use-admin-profile.ts
 
-import { useCallback, useReducer } from 'react';
+import { useCallback } from 'react';
 
 import type { BlogProfile, BlogSocialLink } from '@/entities/blog';
 
+import { useAsyncQuery } from '@/shared/hooks/use-async-query';
+
 import { fetchBlogProfile, updateBlogProfile } from '../infrastructure/profile-api';
-import { useAsyncQuery } from '../lib/use-async-query';
+import { useMutationError } from '../lib/use-mutation-error';
 
 type UseAdminProfileResult = {
   readonly data: BlogProfile | null;
@@ -25,26 +27,6 @@ type UseAdminProfileResult = {
   ) => Promise<BlogProfile | null>;
 };
 
-type MutationErrorState = {
-  mutationError: string | null;
-};
-
-type MutationErrorAction =
-  | { type: 'CLEAR_MUTATION_ERROR' }
-  | { type: 'MUTATION_ERROR'; payload: string };
-
-const mutationErrorReducer = (
-  _state: MutationErrorState,
-  action: MutationErrorAction,
-): MutationErrorState => {
-  switch (action.type) {
-    case 'CLEAR_MUTATION_ERROR':
-      return { mutationError: null };
-    case 'MUTATION_ERROR':
-      return { mutationError: action.payload };
-  }
-};
-
 export function useAdminProfile(): UseAdminProfileResult {
   const fetcher = useCallback(async (): Promise<BlogProfile> => {
     return await fetchBlogProfile();
@@ -55,9 +37,7 @@ export function useAdminProfile(): UseAdminProfileResult {
     autoLoad: false,
   });
 
-  const [mutationState, dispatchMutation] = useReducer(mutationErrorReducer, {
-    mutationError: null,
-  });
+  const { mutationError, clearMutationError, setMutationError } = useMutationError();
 
   const load = useCallback(async () => {
     await refetch();
@@ -74,23 +54,23 @@ export function useAdminProfile(): UseAdminProfileResult {
         }>
       >,
     ): Promise<BlogProfile | null> => {
-      dispatchMutation({ type: 'CLEAR_MUTATION_ERROR' });
+      clearMutationError();
       try {
         return await updateBlogProfile(input);
       } catch (err) {
         const message = err instanceof Error ? err.message : 'Failed to update profile';
-        dispatchMutation({ type: 'MUTATION_ERROR', payload: message });
+        setMutationError(message);
         return null;
       }
     },
-    [],
+    [clearMutationError, setMutationError],
   );
 
   return {
     data,
     isLoading,
     error,
-    mutationError: mutationState.mutationError,
+    mutationError,
     load,
     update,
   };

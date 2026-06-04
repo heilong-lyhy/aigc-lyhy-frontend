@@ -1,6 +1,5 @@
 export { AuthProvider } from './context';
-export { fetchBasicUserInfo, fetchFullUserInfo } from './infrastructure/auth-api';
-export { getStoredAuthData } from './infrastructure/auth-storage';
+export { getAccessToken } from './get-access-token';
 export type {
   AccountStatus,
   AudienceType,
@@ -18,3 +17,4 @@ export type {
   UserState,
 } from './types';
 export { useAuth } from './use-auth';
+export { useFullUserInfo } from './use-full-user-info';

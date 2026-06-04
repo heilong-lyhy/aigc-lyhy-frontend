@@ -22,8 +22,12 @@ export { useAdminProfile } from './hooks/use-admin-profile';
 // ── UI 组件 ──
 export { BlogSidebar } from './ui/blog-sidebar';
 export { CategorySidebar } from './ui/category-sidebar';
+export { CommentForm } from './ui/comment-form';
+export { CommentItem } from './ui/comment-item';
+export { CommentList } from './ui/comment-list';
 export { EmptyState } from './ui/empty-state';
 export { ErrorState } from './ui/error-state';
+export { LikeButton } from './ui/like-button';
 export { LoadingSkeleton } from './ui/loading-skeleton';
 export { MarkdownRenderer } from './ui/markdown-renderer';
 export { Pagination } from './ui/pagination';
@@ -33,7 +37,9 @@ export { PostDetailHeader } from './ui/post-detail-header';
 export { PostDetailToc } from './ui/post-detail-toc';
 export { PostErrorBoundary } from './ui/post-error-boundary';
 export { PostList } from './ui/post-list';
+export { ReplyForm } from './ui/reply-form';
+export { SearchBar } from './ui/search-bar';
 export { TagCloud } from './ui/tag-cloud';
 
 // ── UI 类型 ──
-export type { TocItem } from './ui/markdown-renderer';
+export type { TocItem } from './lib/types';

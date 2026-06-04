@@ -1,68 +1,15 @@
-import { useEffect, useReducer } from 'react';
+import { useEffect } from 'react';
 import { LogoutOutlined, UserOutlined } from '@ant-design/icons';
 import { Alert, Avatar, Button, Card, Descriptions, Spin } from 'antd';
 
-import type { FullUserInfo } from '@/features/auth';
-import { fetchFullUserInfo, useAuth } from '@/features/auth';
+import { useAuth, useFullUserInfo } from '@/features/auth';
 
-import { isGraphQLIngressError } from '@/shared/graphql';
 import { PageHeader } from '@/shared/ui/page-header';
-
-type AccountState =
-  | { kind: 'idle' }
-  | { kind: 'loading' }
-  | { kind: 'loaded'; data: FullUserInfo }
-  | { kind: 'error'; message: string };
-
-type AccountAction =
-  | { kind: 'start-loading' }
-  | { kind: 'load-success'; data: FullUserInfo }
-  | { kind: 'load-failure'; message: string };
-
-function accountReducer(_state: AccountState, action: AccountAction): AccountState {
-  switch (action.kind) {
-    case 'start-loading':
-      return { kind: 'loading' };
-    case 'load-success':
-      return { kind: 'loaded', data: action.data };
-    case 'load-failure':
-      return { kind: 'error', message: action.message };
-  }
-}
 
 export default function AccountPage() {
   const { accountId, logout, userInfo, refreshUserInfo } = useAuth();
-  const [accountState, dispatch] = useReducer(accountReducer, { kind: 'idle' });
 
-  useEffect(() => {
-    if (!accountId) {
-      return;
-    }
-
-    let cancelled = false;
-    dispatch({ kind: 'start-loading' });
-
-    fetchFullUserInfo(accountId)
-      .then((data) => {
-        if (!cancelled) {
-          dispatch({ kind: 'load-success', data });
-        }
-      })
-      .catch((err: unknown) => {
-        if (!cancelled) {
-          const message = isGraphQLIngressError(err)
-            ? err.userMessage
-            : err instanceof Error
-              ? err.message
-              : '加载账户信息失败';
-          dispatch({ kind: 'load-failure', message });
-        }
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [accountId]);
+  const { data: profile, isLoading, error } = useFullUserInfo(accountId);
 
   useEffect(() => {
     if (accountId && !userInfo) {
@@ -83,7 +30,7 @@ export default function AccountPage() {
     );
   }
 
-  if (accountState.kind === 'loading') {
+  if (isLoading) {
     return (
       <div className="page-stack">
         <PageHeader description="查看您的账户信息" title="账户" />
@@ -94,14 +41,14 @@ export default function AccountPage() {
     );
   }
 
-  if (accountState.kind === 'error') {
+  if (error || !profile) {
     return (
       <div className="page-stack">
         <PageHeader description="查看您的账户信息" title="账户" />
         <div className="surface-panel">
           <Card>
             <Alert
-              message={accountState.message}
+              message={error ?? '加载账户信息失败'}
               showIcon
               type="error"
             />
@@ -110,8 +57,6 @@ export default function AccountPage() {
       </div>
     );
   }
-
-  const profile = accountState.data;
 
   return (
     <div className="page-stack">

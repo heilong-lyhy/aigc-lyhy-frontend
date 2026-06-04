@@ -202,6 +202,7 @@ src/features/<feature>/
 ```
 
 - `application` 放 use case、workflow、query、command
+- 本仓库中 `lib/` 是 `application/` 的别名，二者等价；新建 feature 优先使用 `application/`，已有 `lib/` 可保留
 - `infrastructure` 放所有外部技术边界与适配实现，例如 API client、storage、URL search params 读写、SDK 初始化与封装、mapper、repository adapter
 - `ui` 放该 feature 自己的交互入口和展示适配
 

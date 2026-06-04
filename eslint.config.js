@@ -382,6 +382,7 @@ export default defineConfig([
       'local/no-design-system-classname': 'error',
       'local/no-tailwind-magic-colors': 'error',
       'local/no-inline-zindex': 'error',
+      'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
     },
   },
 ]);

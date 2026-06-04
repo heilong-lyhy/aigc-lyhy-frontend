@@ -4,8 +4,9 @@ import { useCallback } from 'react';
 
 import type { BlogProfile } from '@/entities/blog';
 
+import { useAsyncQuery } from '@/shared/hooks/use-async-query';
+
 import { fetchBlogProfile } from '../infrastructure/profile-api';
-import { useAsyncQuery } from '../lib/use-async-query';
 
 type UseBlogProfileOptions = {
   readonly autoLoad?: boolean;

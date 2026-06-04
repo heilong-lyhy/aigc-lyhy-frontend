@@ -4,8 +4,9 @@ import { useCallback } from 'react';
 
 import type { BlogPost } from '@/entities/blog';
 
+import { useAsyncQuery } from '@/shared/hooks/use-async-query';
+
 import { fetchBlogPostBySlug } from '../infrastructure/posts-api';
-import { useAsyncQuery } from '../lib/use-async-query';
 
 type UseBlogPostDetailResult = {
   readonly data: BlogPost | null;

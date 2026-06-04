@@ -1,6 +1,6 @@
 // src/features/blog/hooks/use-admin-comments.ts
 
-import { useCallback, useReducer } from 'react';
+import { useCallback } from 'react';
 
 import type {
   BlogComment,
@@ -9,38 +9,20 @@ import type {
   PaginationInput,
 } from '@/entities/blog';
 
+import { useAsyncQuery } from '@/shared/hooks/use-async-query';
+
 import {
   deleteBlogComment,
   fetchBlogComments,
   updateBlogCommentStatus,
 } from '../infrastructure/comments-api';
-import { useAsyncQuery } from '../lib/use-async-query';
+import { useMutationError } from '../lib/use-mutation-error';
 
 type UseAdminCommentsOptions = {
   readonly postId?: string;
   readonly pagination: PaginationInput;
   readonly status?: BlogCommentStatus;
   readonly autoLoad?: boolean;
-};
-
-type MutationErrorState = {
-  mutationError: string | null;
-};
-
-type MutationErrorAction =
-  | { type: 'CLEAR_MUTATION_ERROR' }
-  | { type: 'MUTATION_ERROR'; payload: string };
-
-const mutationErrorReducer = (
-  _state: MutationErrorState,
-  action: MutationErrorAction,
-): MutationErrorState => {
-  switch (action.type) {
-    case 'CLEAR_MUTATION_ERROR':
-      return { mutationError: null };
-    case 'MUTATION_ERROR':
-      return { mutationError: action.payload };
-  }
 };
 
 type UseAdminCommentsResult = {
@@ -72,70 +54,68 @@ export function useAdminComments(options: UseAdminCommentsOptions): UseAdminComm
     autoLoad: autoLoad && !!postId,
   });
 
-  const [mutationState, dispatchMutation] = useReducer(mutationErrorReducer, {
-    mutationError: null,
-  });
+  const { mutationError, clearMutationError, setMutationError } = useMutationError();
 
   const updateStatus = useCallback(
     async (id: string, newStatus: BlogCommentStatus): Promise<BlogComment | null> => {
-      dispatchMutation({ type: 'CLEAR_MUTATION_ERROR' });
+      clearMutationError();
       try {
         return await updateBlogCommentStatus(id, newStatus);
       } catch (err) {
         const message = err instanceof Error ? err.message : 'Failed to update comment status';
-        dispatchMutation({ type: 'MUTATION_ERROR', payload: message });
+        setMutationError(message);
         return null;
       }
     },
-    [],
+    [clearMutationError, setMutationError],
   );
 
   const remove = useCallback(async (id: string): Promise<boolean> => {
-    dispatchMutation({ type: 'CLEAR_MUTATION_ERROR' });
+    clearMutationError();
     try {
       return await deleteBlogComment(id);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to delete comment';
-      dispatchMutation({ type: 'MUTATION_ERROR', payload: message });
+      setMutationError(message);
       return false;
     }
-  }, []);
+  }, [clearMutationError, setMutationError]);
 
   const batchUpdateStatus = useCallback(
     async (
       ids: readonly string[],
       newStatus: BlogCommentStatus,
     ): Promise<readonly BlogComment[]> => {
-      dispatchMutation({ type: 'CLEAR_MUTATION_ERROR' });
+      clearMutationError();
       try {
         const results = await Promise.all(ids.map((id) => updateBlogCommentStatus(id, newStatus)));
         return results;
       } catch (err) {
         const message = err instanceof Error ? err.message : 'Failed to batch update comment status';
-        dispatchMutation({ type: 'MUTATION_ERROR', payload: message });
+        setMutationError(message);
         return [];
       }
     },
-    [],
+    [clearMutationError, setMutationError],
   );
 
   const batchRemove = useCallback(async (ids: readonly string[]): Promise<readonly boolean[]> => {
-    dispatchMutation({ type: 'CLEAR_MUTATION_ERROR' });
+    clearMutationError();
     try {
       return Promise.all(ids.map((id) => deleteBlogComment(id)));
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to batch delete comments';
-      dispatchMutation({ type: 'MUTATION_ERROR', payload: message });
+      setMutationError(message);
       return [];
     }
-  }, []);
+  }, [clearMutationError, setMutationError]);
 
   return {
     data,
     isLoading,
     isEmpty: data !== null && data.items.length === 0 && !isLoading && !error,
     error,
-    mutationError: mutationState.mutationError,
+    mutationError,
     refetch,
     updateStatus,
     remove,
