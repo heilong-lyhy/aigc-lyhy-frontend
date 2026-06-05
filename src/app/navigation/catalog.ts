@@ -31,16 +31,23 @@ const STABLE_NAVIGATION_ITEMS: NavigationItem[] = [
   },
 ];
 
-const LAB_NAVIGATION_ITEMS: NavigationItem[] = [
-  {
-    description: '受控开放的 2048 交互实验。',
-    id: 'game-2048-lab',
-    kind: 'labs',
-    label: 'Lab',
-    path: '/labs/game-2048',
-    tags: ['lab', '2048', 'game', 'experiment', '游戏', '实验'],
-  },
-];
+const BLOG_ADMIN_LAB_ITEM: NavigationItem = {
+  description: '博客管理端：仪表盘、文章管理、评论管理等。',
+  id: 'blog-admin-lab',
+  kind: 'labs',
+  label: 'Admin',
+  path: '/admin',
+  tags: ['admin', 'dashboard', 'manage', '管理', '仪表盘'],
+};
+
+const GAME_2048_LAB_ITEM: NavigationItem = {
+  description: '受控开放的 2048 交互实验。',
+  id: 'game-2048-lab',
+  kind: 'labs',
+  label: 'Lab',
+  path: '/labs/game-2048',
+  tags: ['lab', '2048', 'game', 'experiment', '游戏', '实验'],
+};
 
 const SANDBOX_NAVIGATION_ITEMS: NavigationItem[] = [
   {
@@ -64,18 +71,34 @@ const SUPPORT_NAVIGATION_ITEMS: NavigationItem[] = [
   },
 ];
 
-function canExposeLabs(env: AppEnv) {
-  return env === 'dev' || env === 'test';
-}
+// Each lab has its own env allowlist.
+// IMPORTANT: These must be kept in sync with the corresponding access.ts in each lab module.
+// When adding a new lab, add its env check here AND in its access.ts.
+const BLOG_ADMIN_ALLOWED_ENVS: readonly AppEnv[] = ['dev', 'prod']; // sync with labs/blog-admin/access.ts
+const GAME_2048_ALLOWED_ENVS: readonly AppEnv[] = ['dev', 'test']; // sync with labs/game-2048/access.ts
 
 function canExposeSandbox(env: AppEnv) {
   return env === 'dev' || env === 'test';
 }
 
+function getLabNavigationItems(env: AppEnv): NavigationItem[] {
+  const items: NavigationItem[] = [];
+
+  if (BLOG_ADMIN_ALLOWED_ENVS.includes(env)) {
+    items.push(BLOG_ADMIN_LAB_ITEM);
+  }
+
+  if (GAME_2048_ALLOWED_ENVS.includes(env)) {
+    items.push(GAME_2048_LAB_ITEM);
+  }
+
+  return items;
+}
+
 export function getNavigationItems(env = getAppEnv()): NavigationItem[] {
   return [
     ...STABLE_NAVIGATION_ITEMS,
-    ...(canExposeLabs(env) ? LAB_NAVIGATION_ITEMS : []),
+    ...getLabNavigationItems(env),
     ...(canExposeSandbox(env) ? SANDBOX_NAVIGATION_ITEMS : []),
     ...SUPPORT_NAVIGATION_ITEMS,
   ];

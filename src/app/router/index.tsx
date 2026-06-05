@@ -9,9 +9,11 @@ import {
 } from 'react-router';
 
 import { AppLayout } from '@/app/layout';
+import { AdminGuard } from '@/app/lib';
 
 import AccountPage from '@/pages/account';
 import AuthPage from '@/pages/auth';
+import { BlogAboutPage } from '@/pages/blog-about';
 import { BlogArchivePage } from '@/pages/blog-archive';
 import { BlogHomePage } from '@/pages/blog-home';
 import { BlogPostPage } from '@/pages/blog-post';
@@ -19,12 +21,38 @@ import { BlogSearchPage } from '@/pages/blog-search';
 import { ErrorPreviewPage } from '@/pages/error-preview';
 import { HomePage } from '@/pages/home';
 import { ProjectStructurePage } from '@/pages/project-structure';
+import { useBlogDashboard, useBlogTags } from '@/features/blog';
 import { Error403, Error404, Error500, ErrorRouteCrash } from '@/features/error-feedback';
 
 import { getAppEnv } from '@/shared/env';
 
+import { AdminLayout, canAccessBlogAdminLab, DashboardPage } from '@/labs/blog-admin';
 import { canAccessGame2048Lab, Game2048LabPage } from '@/labs/game-2048';
 import { canAccessSandboxPlayground, SandboxPlaygroundPage } from '@/sandbox/playground';
+
+/** 后端未就绪时使用 mock 数据兜底，待后端就绪后移除此标记 */
+const USE_MOCK_FALLBACK = true;
+
+function AdminDashboardPage() {
+  const { data, isLoading, error } = useBlogDashboard({
+    autoLoad: true,
+    useMockFallback: USE_MOCK_FALLBACK,
+  });
+  const { data: tags, isLoading: isTagsLoading } = useBlogTags({
+    autoLoad: true,
+    useMockFallback: USE_MOCK_FALLBACK,
+  });
+
+  if (isLoading || isTagsLoading) {
+    return null;
+  }
+
+  if (error || !data) {
+    return null;
+  }
+
+  return <DashboardPage data={data} tagCount={tags.length} />;
+}
 
 function RouteErrorPage() {
   const error = useRouteError();
@@ -56,6 +84,14 @@ function RouteErrorBoundary() {
 
 function game2048LabLoader() {
   if (!canAccessGame2048Lab(getAppEnv())) {
+    throw redirect('/');
+  }
+
+  return null;
+}
+
+function blogAdminLoader() {
+  if (!canAccessBlogAdminLab(getAppEnv())) {
     throw redirect('/');
   }
 
@@ -96,6 +132,10 @@ const router = createBrowserRouter([
         path: 'blog/archive',
       },
       {
+        element: <BlogAboutPage />,
+        path: 'blog/about',
+      },
+      {
         element: <BlogPostPage />,
         path: 'blog/:slug',
       },
@@ -115,6 +155,21 @@ const router = createBrowserRouter([
         element: <Game2048LabPage />,
         loader: game2048LabLoader,
         path: 'labs/game-2048',
+      },
+      {
+        children: [
+          {
+            element: <AdminDashboardPage />,
+            index: true,
+          },
+        ],
+        element: (
+          <AdminGuard>
+            <AdminLayout />
+          </AdminGuard>
+        ),
+        loader: blogAdminLoader,
+        path: 'admin',
       },
       {
         element: <SandboxPlaygroundPage />,

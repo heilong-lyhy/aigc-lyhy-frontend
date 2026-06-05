@@ -10,9 +10,11 @@
   --color-text: var(--ant-color-text);
   --color-text-secondary: var(--ant-color-text-secondary);
   --color-text-tertiary: var(--ant-color-text-tertiary);
+  --color-text-inverse: var(--ant-color-text-light-solid);
   --color-border: var(--ant-color-border);
   --color-bg-layout: var(--ant-color-bg-layout);
   --color-bg-container: var(--ant-color-bg-container);
+  --color-bg-spotlight: var(--ant-color-fill-secondary);
   --color-fill-secondary: var(--ant-color-fill-secondary);
   --color-fill-tertiary: var(--ant-color-fill-tertiary);
   --radius-block: var(--ant-border-radius-lg);
