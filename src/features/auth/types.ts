@@ -54,6 +54,11 @@ export interface ResetPasswordResult {
   readonly success: boolean;
 }
 
+export interface ChangePasswordResult {
+  readonly success: boolean;
+  readonly message: string | null;
+}
+
 export interface AuthCredentials {
   readonly loginName: string;
   readonly loginPassword: string;

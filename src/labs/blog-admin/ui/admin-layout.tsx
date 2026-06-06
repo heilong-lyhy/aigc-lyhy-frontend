@@ -3,6 +3,8 @@
 import {
   DashboardOutlined,
   FileOutlined,
+  FolderOutlined,
+  SettingOutlined,
 } from '@ant-design/icons';
 import { Layout, Menu } from 'antd';
 import { Outlet, useLocation, useNavigate } from 'react-router';
@@ -21,6 +23,8 @@ type AdminNavItem = {
 const ADMIN_NAV_ITEMS: readonly AdminNavItem[] = [
   { icon: <DashboardOutlined />, key: 'dashboard', label: '仪表盘', path: '/admin' },
   { icon: <FileOutlined />, key: 'posts', label: '文章管理', path: '/admin/posts' },
+  { icon: <FolderOutlined />, key: 'files', label: '文件管理', path: '/admin/files' },
+  { icon: <SettingOutlined />, key: 'profile', label: '个人设置', path: '/admin/profile' },
 ];
 
 export function AdminLayout() {

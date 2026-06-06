@@ -1,10 +1,12 @@
 export { AuthProvider } from './context';
 export { getAccessToken } from './get-access-token';
+export { changePassword } from './infrastructure/auth-api';
 export type {
   AccountStatus,
   AudienceType,
   AuthCredentials,
   BasicUserInfo,
+  ChangePasswordResult,
   FullUserInfo,
   Gender,
   IdentityType,

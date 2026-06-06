@@ -23,8 +23,11 @@ import { BlogSearchPage } from '@/pages/blog-search';
 import { ErrorPreviewPage } from '@/pages/error-preview';
 import { HomePage } from '@/pages/home';
 import { ProjectStructurePage } from '@/pages/project-structure';
+import { changePassword } from '@/features/auth';
 import {
+  useAdminFiles,
   useAdminPosts,
+  useAdminProfile,
   useAutoSave,
   useBlogCategories,
   useBlogDashboard,
@@ -42,8 +45,10 @@ import {
   AdminLayout,
   canAccessBlogAdminLab,
   DashboardPage,
+  FileManager,
   PostEditor,
   PostList,
+  ProfileSettings,
 } from '@/labs/blog-admin';
 import { canAccessGame2048Lab, Game2048LabPage } from '@/labs/game-2048';
 import { canAccessSandboxPlayground, SandboxPlaygroundPage } from '@/sandbox/playground';
@@ -288,6 +293,54 @@ function AdminPostEditorPage() {
   );
 }
 
+function AdminFileManagerPage() {
+  const { isUploading, isDeleting, error, upload, remove } = useAdminFiles();
+
+  // TODO(backend): 后端实现文件列表查询后替换为真实数据
+  const files = [] as const;
+
+  return (
+    <FileManager
+      error={error}
+      files={files}
+      isDeleting={isDeleting}
+      isUploading={isUploading}
+      onDelete={remove}
+      onUpload={upload}
+    />
+  );
+}
+
+function AdminProfileSettingsPage() {
+  const { data, isLoading, mutationError, load, update } = useAdminProfile();
+
+  useEffect(() => {
+    void load();
+  }, [load]);
+
+  const handleChangePassword = useCallback(
+    async (currentPassword: string, newPassword: string) => {
+      try {
+        const result = await changePassword(currentPassword, newPassword);
+        return { ok: result.success, message: result.message ?? undefined };
+      } catch {
+        return { ok: false, message: '密码修改失败' };
+      }
+    },
+    [],
+  );
+
+  return (
+    <ProfileSettings
+      isLoading={isLoading}
+      mutationError={mutationError}
+      profile={data}
+      onChangePassword={handleChangePassword}
+      onUpdateProfile={update}
+    />
+  );
+}
+
 function RouteErrorPage() {
   const error = useRouteError();
 
@@ -407,6 +460,14 @@ const router = createBrowserRouter([
           {
             element: <AdminPostEditorPage />,
             path: 'posts/:id',
+          },
+          {
+            element: <AdminFileManagerPage />,
+            path: 'files',
+          },
+          {
+            element: <AdminProfileSettingsPage />,
+            path: 'profile',
           },
         ],
         element: (

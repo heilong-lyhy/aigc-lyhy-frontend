@@ -19,7 +19,7 @@ import {
   UserInfoDocument,
 } from '@/shared/graphql';
 
-import type { AuthCredentials, BasicUserInfo, FullUserInfo, LoginResult, RegisterInput, RegisterResult, ResetPasswordResult } from '../types';
+import type { AuthCredentials, BasicUserInfo, ChangePasswordResult, FullUserInfo, LoginResult, RegisterInput, RegisterResult, ResetPasswordResult } from '../types';
 
 function mapLoginResult(raw: LoginMutation['login']): LoginResult {
   return {
@@ -141,4 +141,37 @@ export async function fetchFullUserInfo(accountId: number): Promise<FullUserInfo
   );
 
   return mapFullUserInfo(data.userInfo);
+}
+
+// ── ChangePassword ──
+// TODO(backend): 后端加入 changePassword mutation 后，迁移至 codegen document 并移除此内联定义
+
+const CHANGE_PASSWORD_MUTATION = `
+  mutation ChangePassword($input: ChangePasswordInput!) {
+    changePassword(input: $input) {
+      success
+      message
+    }
+  }
+`;
+
+type ChangePasswordDTO = {
+  readonly success: boolean;
+  readonly message: string | null;
+};
+
+export async function changePassword(
+  currentPassword: string,
+  newPassword: string,
+): Promise<ChangePasswordResult> {
+  const data = await executeGraphQL<
+    { changePassword: ChangePasswordDTO },
+    Record<string, unknown>
+  >(
+    CHANGE_PASSWORD_MUTATION,
+    { input: { currentPassword, newPassword } },
+    { authMode: 'required' },
+  );
+
+  return data.changePassword;
 }
