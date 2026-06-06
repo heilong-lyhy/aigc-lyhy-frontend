@@ -14,7 +14,7 @@ import {
 
 import type { PaginationInput } from '@/entities/blog';
 
-import { PageHeader } from '@/shared/ui/page-header';
+import { PageHeader } from '@/shared/ui';
 
 const PAGE_TITLE = '博客';
 const PAGE_DESCRIPTION = '技术文章与生活随笔';

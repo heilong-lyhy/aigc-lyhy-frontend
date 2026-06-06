@@ -21,7 +21,7 @@ interface UploadBlogFileResultDTO {
 
 // ── Mapper：防腐层，DTO → 前端实体类型 ──
 
-function mapBlogFile(raw: BlogFileDTO): BlogFile {
+export function mapBlogFile(raw: BlogFileDTO): BlogFile {
   return {
     id: raw.id,
     name: raw.name,

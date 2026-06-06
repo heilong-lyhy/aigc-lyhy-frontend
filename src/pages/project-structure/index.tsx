@@ -2,7 +2,7 @@
 
 import { Card, Timeline } from 'antd';
 
-import { PageHeader } from '@/shared/ui/page-header';
+import { PageHeader } from '@/shared/ui';
 
 const layerItems = [
   {

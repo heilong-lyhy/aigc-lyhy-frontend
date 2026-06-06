@@ -17,7 +17,7 @@ import {
 
 import type { PaginationInput } from '@/entities/blog';
 
-import { PageHeader } from '@/shared/ui/page-header';
+import { PageHeader } from '@/shared/ui';
 
 const PAGE_TITLE = '搜索';
 const DEFAULT_PAGINATION: PaginationInput = { offset: 0, limit: 6 };

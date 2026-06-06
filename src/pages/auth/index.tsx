@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router';
 import type { AudienceType } from '@/features/auth';
 import { useAuth } from '@/features/auth';
 
-import { PageHeader } from '@/shared/ui/page-header';
+import { PageHeader } from '@/shared/ui';
 
 type LoginFormValues = {
   loginName: string;

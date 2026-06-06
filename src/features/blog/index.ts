@@ -1,24 +1,24 @@
 // src/features/blog/index.ts
 
 // ── 核心 Hooks ──
-export { useAutoSave } from './hooks/use-auto-save';
-export { useBlogCategories } from './hooks/use-blog-categories';
-export { useBlogComments } from './hooks/use-blog-comments';
-export { useBlogDashboard } from './hooks/use-blog-dashboard';
-export { useBlogPostDetail } from './hooks/use-blog-post-detail';
-export { useBlogPosts } from './hooks/use-blog-posts';
-export { useBlogProfile } from './hooks/use-blog-profile';
-export { useBlogSearch } from './hooks/use-blog-search';
-export { useBlogTags } from './hooks/use-blog-tags';
-export { useComment } from './hooks/use-comment';
-export { useLike } from './hooks/use-like';
+export { useAutoSave } from './application/use-auto-save';
+export { useBlogCategories } from './application/use-blog-categories';
+export { useBlogComments } from './application/use-blog-comments';
+export { useBlogDashboard } from './application/use-blog-dashboard';
+export { useBlogPostDetail } from './application/use-blog-post-detail';
+export { useBlogPosts } from './application/use-blog-posts';
+export { useBlogProfile } from './application/use-blog-profile';
+export { useBlogSearch } from './application/use-blog-search';
+export { useBlogTags } from './application/use-blog-tags';
+export { useComment } from './application/use-comment';
+export { useLike } from './application/use-like';
 
 // ── 管理端 Hooks ──
-export { useAdminComments } from './hooks/use-admin-comments';
-export { useAdminFiles } from './hooks/use-admin-files';
-export { useAdminPosts } from './hooks/use-admin-posts';
-export { useAdminProfile } from './hooks/use-admin-profile';
-export { usePostEditor } from './hooks/use-post-editor';
+export { useAdminComments } from './application/use-admin-comments';
+export { useAdminFiles } from './application/use-admin-files';
+export { useAdminPosts } from './application/use-admin-posts';
+export { useAdminProfile } from './application/use-admin-profile';
+export { usePostEditor } from './application/use-post-editor';
 
 // ── 管理端类型（重导出自 entities） ──
 export type { PostEditorForm } from '@/entities/blog';

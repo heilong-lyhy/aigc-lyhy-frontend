@@ -4,7 +4,7 @@ import { Avatar, Card, Typography } from 'antd';
 
 import { ErrorState, LoadingSkeleton, useBlogProfile } from '@/features/blog';
 
-import { PageHeader } from '@/shared/ui/page-header';
+import { PageHeader } from '@/shared/ui';
 
 import { BlogLayout } from './blog-layout';
 

@@ -10,7 +10,7 @@ import {
 } from '@ant-design/icons';
 import { Alert, Button, Card, Space, Statistic, Tag } from 'antd';
 
-import { PageHeader } from '@/shared/ui/page-header';
+import { PageHeader } from '@/shared/ui';
 
 import { game2048LabMeta } from './meta';
 

@@ -24,7 +24,7 @@ interface BlogProfileDTO {
 
 // ── Mapper：防腐层，DTO → 前端实体类型 ──
 
-function mapSocialLink(raw: BlogSocialLinkDTO): BlogSocialLink {
+export function mapSocialLink(raw: BlogSocialLinkDTO): BlogSocialLink {
   return {
     platform: raw.platform,
     url: raw.url,
@@ -32,7 +32,7 @@ function mapSocialLink(raw: BlogSocialLinkDTO): BlogSocialLink {
   };
 }
 
-function mapBlogProfile(raw: BlogProfileDTO): BlogProfile {
+export function mapBlogProfile(raw: BlogProfileDTO): BlogProfile {
   return {
     id: raw.id,
     nickname: raw.nickname,

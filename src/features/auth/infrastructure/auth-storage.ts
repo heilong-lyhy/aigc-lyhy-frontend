@@ -2,7 +2,18 @@ const STORAGE_KEY_ACCESS_TOKEN = 'auth_access_token';
 const STORAGE_KEY_REFRESH_TOKEN = 'auth_refresh_token';
 const STORAGE_KEY_ACCOUNT_ID = 'auth_account_id';
 
+function canUseStorage(): boolean {
+  try {
+    return typeof window !== 'undefined' && typeof window.localStorage !== 'undefined';
+  } catch {
+    return false;
+  }
+}
+
 export function getStoredAuthData() {
+  if (!canUseStorage()) {
+    return { accessToken: null, refreshToken: null, accountId: null };
+  }
   const accessToken = localStorage.getItem(STORAGE_KEY_ACCESS_TOKEN);
   const refreshToken = localStorage.getItem(STORAGE_KEY_REFRESH_TOKEN);
   const accountIdStr = localStorage.getItem(STORAGE_KEY_ACCOUNT_ID);
@@ -12,12 +23,14 @@ export function getStoredAuthData() {
 }
 
 export function storeAuthData(accessToken: string, refreshToken: string, accountId: number) {
+  if (!canUseStorage()) return;
   localStorage.setItem(STORAGE_KEY_ACCESS_TOKEN, accessToken);
   localStorage.setItem(STORAGE_KEY_REFRESH_TOKEN, refreshToken);
   localStorage.setItem(STORAGE_KEY_ACCOUNT_ID, accountId.toString());
 }
 
 export function clearStoredAuthData() {
+  if (!canUseStorage()) return;
   localStorage.removeItem(STORAGE_KEY_ACCESS_TOKEN);
   localStorage.removeItem(STORAGE_KEY_REFRESH_TOKEN);
   localStorage.removeItem(STORAGE_KEY_ACCOUNT_ID);

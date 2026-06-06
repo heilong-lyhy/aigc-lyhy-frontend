@@ -4,7 +4,7 @@ import { useCallback } from 'react';
 
 import type { BlogProfile, BlogSocialLink } from '@/entities/blog';
 
-import { useAsyncQuery } from '@/shared/hooks/use-async-query';
+import { useAsyncQuery } from '@/shared/hooks';
 
 import { fetchBlogProfile, updateBlogProfile } from '../infrastructure/profile-api';
 import { useMutationError } from '../lib/use-mutation-error';

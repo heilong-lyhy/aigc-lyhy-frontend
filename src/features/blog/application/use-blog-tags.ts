@@ -4,7 +4,7 @@ import { useCallback } from 'react';
 
 import type { BlogTag } from '@/entities/blog';
 
-import { useAsyncQuery } from '@/shared/hooks/use-async-query';
+import { useAsyncQuery } from '@/shared/hooks';
 
 import { fetchBlogTags } from '../infrastructure/tags-api';
 

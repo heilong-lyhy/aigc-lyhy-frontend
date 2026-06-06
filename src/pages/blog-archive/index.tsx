@@ -17,7 +17,7 @@ import {
 import type { PaginationInput } from '@/entities/blog';
 import { formatAbsoluteDate, groupByYearMonth } from '@/entities/blog';
 
-import { PageHeader } from '@/shared/ui/page-header';
+import { PageHeader } from '@/shared/ui';
 
 const PAGE_TITLE = '归档';
 const PAGE_DESCRIPTION = '按日期归档浏览文章';

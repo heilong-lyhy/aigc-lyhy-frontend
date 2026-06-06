@@ -10,11 +10,11 @@ vi.mock('../infrastructure/comments-api', () => ({
 }));
 
 // Mock the shared layer to prevent full dependency chain and OOM
-vi.mock('@/shared/hooks/use-async-query', () => ({
+vi.mock('@/shared/hooks', () => ({
   useAsyncQuery: vi.fn(),
 }));
 
-import { useAsyncQuery } from '@/shared/hooks/use-async-query';
+import { useAsyncQuery } from '@/shared/hooks';
 
 import { useBlogComments } from './use-blog-comments';
 

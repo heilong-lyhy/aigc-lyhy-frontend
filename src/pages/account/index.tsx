@@ -4,7 +4,7 @@ import { Alert, Avatar, Button, Card, Descriptions, Spin } from 'antd';
 
 import { useAuth, useFullUserInfo } from '@/features/auth';
 
-import { PageHeader } from '@/shared/ui/page-header';
+import { PageHeader } from '@/shared/ui';
 
 export default function AccountPage() {
   const { accountId, logout, userInfo, refreshUserInfo } = useAuth();

@@ -2,7 +2,7 @@
 
 import { Alert, Card, Tag } from 'antd';
 
-import { PageHeader } from '@/shared/ui/page-header';
+import { PageHeader } from '@/shared/ui';
 
 import './page.css';
 

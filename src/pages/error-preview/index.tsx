@@ -5,7 +5,7 @@ import { Tag } from 'antd';
 
 import { Error403, Error404, Error500, ErrorRouteCrash } from '@/features/error-feedback';
 
-import { PageHeader } from '@/shared/ui/page-header';
+import { PageHeader } from '@/shared/ui';
 
 const errorPreviewItems = [
   {

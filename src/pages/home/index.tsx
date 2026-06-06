@@ -4,7 +4,7 @@ import { Button, Card, Descriptions, Tag } from 'antd';
 import { useNavigate } from 'react-router';
 
 import { getAppEnv, getGraphQLEndpoint, getHealthEndpoint } from '@/shared/env';
-import { PageHeader } from '@/shared/ui/page-header';
+import { PageHeader } from '@/shared/ui';
 
 const workflowCards = [
   {

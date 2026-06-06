@@ -5,7 +5,7 @@ import { useCallback } from 'react';
 import type { BlogPost, BlogPostStatus, PaginatedResult, PaginationInput } from '@/entities/blog';
 import { isEmptyPage } from '@/entities/blog';
 
-import { useAsyncQuery } from '@/shared/hooks/use-async-query';
+import { useAsyncQuery } from '@/shared/hooks';
 
 import { fetchBlogPosts } from '../infrastructure/posts-api';
 
