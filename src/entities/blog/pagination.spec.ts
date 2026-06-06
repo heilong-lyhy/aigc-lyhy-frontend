@@ -2,7 +2,7 @@
 
 import { describe, expect, it } from 'vitest';
 
-import { toCurrentPage, toEffectiveTotal, toPaginationInput } from './pagination';
+import { isEmptyPage, toCurrentPage, toEffectiveTotal, toPaginationInput } from './pagination';
 
 describe('toCurrentPage', () => {
   it('returns 1 for offset 0', () => {
@@ -35,5 +35,30 @@ describe('toEffectiveTotal', () => {
 
   it('returns total + 1 when hasMore is true', () => {
     expect(toEffectiveTotal(42, true)).toBe(43);
+  });
+});
+
+describe('isEmptyPage', () => {
+  const emptyData = { items: [] as readonly unknown[], total: 0, offset: 0, limit: 10, hasMore: false };
+  const nonEmptyData = { items: [{ id: '1' }], total: 1, offset: 0, limit: 10, hasMore: false };
+
+  it('returns true when data has no items and not loading', () => {
+    expect(isEmptyPage(emptyData, false, null)).toBe(true);
+  });
+
+  it('returns false when data has items', () => {
+    expect(isEmptyPage(nonEmptyData, false, null)).toBe(false);
+  });
+
+  it('returns false when data is null', () => {
+    expect(isEmptyPage(null, false, null)).toBe(false);
+  });
+
+  it('returns false when loading', () => {
+    expect(isEmptyPage(emptyData, true, null)).toBe(false);
+  });
+
+  it('returns false when there is an error', () => {
+    expect(isEmptyPage(emptyData, false, 'Error')).toBe(false);
   });
 });
