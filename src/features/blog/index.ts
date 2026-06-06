@@ -18,6 +18,10 @@ export { useAdminComments } from './hooks/use-admin-comments';
 export { useAdminFiles } from './hooks/use-admin-files';
 export { useAdminPosts } from './hooks/use-admin-posts';
 export { useAdminProfile } from './hooks/use-admin-profile';
+export { usePostEditor } from './hooks/use-post-editor';
+
+// ── 管理端类型（重导出自 entities） ──
+export type { PostEditorForm } from '@/entities/blog';
 
 // ── UI 组件 ──
 export { BlogSidebar } from './ui/blog-sidebar';

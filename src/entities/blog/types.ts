@@ -31,6 +31,7 @@ export interface BlogCategory {
   readonly slug: string;
   readonly description: string;
   readonly parentId: string | null;
+  readonly children: readonly BlogCategory[];
   readonly sortOrder: number;
   readonly postCount: number;
   readonly createdAt: string;
@@ -112,4 +113,16 @@ export interface BlogDashboard {
   readonly totalViews: number;
   readonly recentPosts: readonly BlogPost[];
   readonly recentComments: readonly BlogComment[];
+}
+
+/** 文章编辑器表单状态 */
+export interface PostEditorForm {
+  readonly title: string;
+  readonly slug: string;
+  readonly excerpt: string;
+  readonly content: string;
+  readonly coverImage: string;
+  readonly categoryId: string;
+  readonly tags: readonly string[];
+  readonly status: BlogPostStatus;
 }

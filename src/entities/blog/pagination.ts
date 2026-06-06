@@ -34,3 +34,8 @@ export function toPaginationInput(page: number, pageSize: number): PaginationInp
 export function toEffectiveTotal(total: number, hasMore: boolean): number {
   return hasMore ? total + 1 : total;
 }
+
+/** 判断分页结果是否为空（数据已加载、无错误、列表为空） */
+export function isEmptyPage<T>(data: PaginatedResult<T> | null, isLoading: boolean, error: string | null): boolean {
+  return data !== null && data.items.length === 0 && !isLoading && !error;
+}

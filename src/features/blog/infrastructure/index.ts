@@ -19,6 +19,7 @@ export { checkBlogLiked, toggleBlogLike } from './likes-api';
 export {
   createBlogPost,
   deleteBlogPost,
+  fetchBlogPostById,
   fetchBlogPostBySlug,
   fetchBlogPosts,
   updateBlogPost,

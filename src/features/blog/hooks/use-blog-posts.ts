@@ -3,6 +3,7 @@
 import { useCallback } from 'react';
 
 import type { BlogPost, BlogPostStatus, PaginatedResult, PaginationInput } from '@/entities/blog';
+import { isEmptyPage } from '@/entities/blog';
 
 import { useAsyncQuery } from '@/shared/hooks/use-async-query';
 
@@ -60,7 +61,7 @@ export function useBlogPosts(options: UseBlogPostsOptions): UseBlogPostsResult {
   return {
     data,
     isLoading,
-    isEmpty: data !== null && data.items.length === 0 && !isLoading && !error,
+    isEmpty: isEmptyPage(data, isLoading, error),
     error,
     refetch,
   };

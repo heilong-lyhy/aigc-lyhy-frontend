@@ -99,6 +99,13 @@ const FETCH_POSTS_QUERY = `
   ${POST_FRAGMENT}
 `;
 
+const FETCH_POST_BY_ID_QUERY = `
+  query FetchBlogPostById($id: ID!) {
+    blogPost(id: $id) { ...PostFields }
+  }
+  ${POST_FRAGMENT}
+`;
+
 const FETCH_POST_BY_SLUG_QUERY = `
   query FetchBlogPostBySlug($slug: String!) {
     blogPostBySlug(slug: $slug) { ...PostFields }
@@ -151,6 +158,16 @@ export async function fetchBlogPosts(
   );
 
   return mapBlogPostList(data.blogPosts);
+}
+
+export async function fetchBlogPostById(id: string): Promise<BlogPost> {
+  const data = await executeGraphQL<{ blogPost: BlogPostDTO }, { id: string }>(
+    FETCH_POST_BY_ID_QUERY,
+    { id },
+    { authMode: 'required' },
+  );
+
+  return mapBlogPost(data.blogPost);
 }
 
 export async function fetchBlogPostBySlug(slug: string): Promise<BlogPost> {

@@ -2,6 +2,7 @@
 
 import {
   DashboardOutlined,
+  FileOutlined,
 } from '@ant-design/icons';
 import { Layout, Menu } from 'antd';
 import { Outlet, useLocation, useNavigate } from 'react-router';
@@ -16,16 +17,17 @@ type AdminNavItem = {
 };
 
 // Only include items whose routes are registered in src/app/router/index.tsx.
-// Add items here when sub-routes (posts, categories, etc.) are implemented.
+// Add items here when sub-routes (categories, tags, etc.) are implemented.
 const ADMIN_NAV_ITEMS: readonly AdminNavItem[] = [
   { icon: <DashboardOutlined />, key: 'dashboard', label: '仪表盘', path: '/admin' },
+  { icon: <FileOutlined />, key: 'posts', label: '文章管理', path: '/admin/posts' },
 ];
 
 export function AdminLayout() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const selectedKey = ADMIN_NAV_ITEMS.find((item) => location.pathname === item.path)?.key ?? 'dashboard';
+  const selectedKey = ADMIN_NAV_ITEMS.find((item) => location.pathname === item.path || location.pathname.startsWith(item.path + '/'))?.key ?? 'dashboard';
 
   return (
     <div className="min-h-screen">
@@ -55,7 +57,7 @@ export function AdminLayout() {
           />
         </Sider>
         <Layout>
-          <Header style={{ background: 'transparent', padding: 0 }}>
+          <Header style={{ padding: 0 }}>
             <div className="flex h-full items-center border-b border-border bg-bg-container px-6">
               <span className="text-text-secondary text-sm">管理端</span>
             </div>

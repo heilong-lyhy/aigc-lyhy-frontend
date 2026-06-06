@@ -12,6 +12,7 @@ interface BlogCategoryDTO {
   readonly slug: string;
   readonly description: string;
   readonly parentId: string | null;
+  readonly children: readonly BlogCategoryDTO[];
   readonly sortOrder: number;
   readonly postCount: number;
   readonly createdAt: string;
@@ -26,6 +27,7 @@ function mapBlogCategory(raw: BlogCategoryDTO): BlogCategory {
     slug: raw.slug,
     description: raw.description,
     parentId: raw.parentId ?? null,
+    children: raw.children.map(mapBlogCategory),
     sortOrder: raw.sortOrder,
     postCount: raw.postCount,
     createdAt: raw.createdAt,
@@ -34,22 +36,36 @@ function mapBlogCategory(raw: BlogCategoryDTO): BlogCategory {
 
 // ── GraphQL Documents ──
 
+const BLOG_CATEGORY_FRAGMENT = `
+  fragment BlogCategoryFields on BlogCategory {
+    id name slug description parentId sortOrder postCount createdAt
+    children { id name slug description parentId sortOrder postCount createdAt
+      children { id name slug description parentId sortOrder postCount createdAt
+        children { id }
+      }
+    }
+  }
+`;
+
 const FETCH_CATEGORIES_QUERY = `
   query FetchBlogCategories {
-    blogCategories { id name slug description parentId sortOrder postCount createdAt }
+    blogCategories { ...BlogCategoryFields }
   }
+  ${BLOG_CATEGORY_FRAGMENT}
 `;
 
 const CREATE_CATEGORY_MUTATION = `
   mutation CreateBlogCategory($input: CreateBlogCategoryInput!) {
-    createBlogCategory(input: $input) { id name slug description parentId sortOrder postCount createdAt }
+    createBlogCategory(input: $input) { ...BlogCategoryFields }
   }
+  ${BLOG_CATEGORY_FRAGMENT}
 `;
 
 const UPDATE_CATEGORY_MUTATION = `
   mutation UpdateBlogCategory($id: ID!, $input: UpdateBlogCategoryInput!) {
-    updateBlogCategory(id: $id, input: $input) { id name slug description parentId sortOrder postCount createdAt }
+    updateBlogCategory(id: $id, input: $input) { ...BlogCategoryFields }
   }
+  ${BLOG_CATEGORY_FRAGMENT}
 `;
 
 const DELETE_CATEGORY_MUTATION = `

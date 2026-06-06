@@ -3,12 +3,14 @@
 import { useCallback } from 'react';
 
 import type { BlogPost, BlogPostStatus, PaginatedResult, PaginationInput } from '@/entities/blog';
+import { isEmptyPage } from '@/entities/blog';
 
 import { useAsyncQuery } from '@/shared/hooks/use-async-query';
 
 import {
   createBlogPost,
   deleteBlogPost,
+  fetchBlogPostById,
   fetchBlogPosts,
   updateBlogPost,
 } from '../infrastructure/posts-api';
@@ -27,6 +29,7 @@ type UseAdminPostsResult = {
   readonly error: string | null;
   readonly mutationError: string | null;
   readonly refetch: () => Promise<void>;
+  readonly loadById: (id: string) => Promise<BlogPost | null>;
   readonly create: (
     input: Readonly<{
       title: string;
@@ -126,6 +129,17 @@ export function useAdminPosts(options: UseAdminPostsOptions): UseAdminPostsResul
     [clearMutationError, setMutationError],
   );
 
+  const loadById = useCallback(async (id: string): Promise<BlogPost | null> => {
+    clearMutationError();
+    try {
+      return await fetchBlogPostById(id);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to load post';
+      setMutationError(message);
+      return null;
+    }
+  }, [clearMutationError, setMutationError]);
+
   const remove = useCallback(async (id: string): Promise<boolean> => {
     clearMutationError();
     try {
@@ -140,10 +154,11 @@ export function useAdminPosts(options: UseAdminPostsOptions): UseAdminPostsResul
   return {
     data,
     isLoading,
-    isEmpty: data !== null && data.items.length === 0 && !isLoading && !error,
+    isEmpty: isEmptyPage(data, isLoading, error),
     error,
     mutationError,
     refetch,
+    loadById,
     create,
     update,
     remove,

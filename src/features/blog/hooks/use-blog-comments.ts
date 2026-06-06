@@ -8,6 +8,7 @@ import type {
   PaginatedResult,
   PaginationInput,
 } from '@/entities/blog';
+import { isEmptyPage } from '@/entities/blog';
 
 import { useAsyncQuery } from '@/shared/hooks/use-async-query';
 
@@ -44,7 +45,7 @@ export function useBlogComments(options: UseBlogCommentsOptions): UseBlogComment
   return {
     data,
     isLoading,
-    isEmpty: data !== null && data.items.length === 0 && !isLoading && !error,
+    isEmpty: isEmptyPage(data, isLoading, error),
     error,
     refetch,
   };
