@@ -107,4 +107,73 @@ test.describe('Blog Admin', () => {
     await page.getByText('个人设置').click();
     await expect(page).toHaveURL('/admin/profile');
   });
+
+  // ── 密码修改表单 ──
+
+  test('shows password change form with required fields', async ({ page }) => {
+    await authenticate(page);
+
+    await page.goto('/admin/profile');
+
+    await expect(page.getByText('修改密码')).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByPlaceholder('当前密码')).toBeVisible();
+    await expect(page.getByPlaceholder('新密码')).toBeVisible();
+    await expect(page.getByPlaceholder('确认新密码')).toBeVisible();
+  });
+
+  test('shows validation errors when submitting empty password form', async ({ page }) => {
+    await authenticate(page);
+
+    await page.goto('/admin/profile');
+
+    // Click the 修改密码 button inside the password card
+    const passwordCard = page.locator('.ant-card', { hasText: '修改密码' });
+    await passwordCard.getByRole('button', { name: '修改密码' }).click();
+
+    // Ant Design should show validation messages
+    await expect(page.getByText('请输入当前密码')).toBeVisible({ timeout: 5_000 });
+  });
+
+  // ── 文件上传按钮 ──
+
+  test('shows upload button on file manager page', async ({ page }) => {
+    await authenticate(page);
+
+    await page.goto('/admin/files');
+
+    await expect(page.getByRole('button', { name: '上传文件' })).toBeVisible({
+      timeout: 10_000,
+    });
+  });
+
+  // ── 仪表盘 ──
+
+  test('shows dashboard page when navigating to admin root', async ({ page }) => {
+    await authenticate(page);
+
+    await page.goto('/admin');
+
+    await expect(page.getByText('Blog Admin')).toBeVisible({ timeout: 10_000 });
+  });
+
+  // ── 文章编辑器 ──
+
+  test('shows post editor with title input for new post', async ({ page }) => {
+    await authenticate(page);
+
+    await page.goto('/admin/posts/new');
+
+    await expect(page.getByPlaceholder('请输入文章标题')).toBeVisible({ timeout: 10_000 });
+  });
+
+  test('shows 404 for non-existent admin route', async ({ page }) => {
+    await authenticate(page);
+
+    await page.goto('/admin/nonexistent-route');
+
+    // Should show 404 or redirect
+    await expect(page.getByText('404').or(page.getByText('页面未找到'))).toBeVisible({
+      timeout: 10_000,
+    });
+  });
 });

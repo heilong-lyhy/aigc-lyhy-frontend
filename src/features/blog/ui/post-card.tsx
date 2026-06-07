@@ -12,6 +12,9 @@ type PostCardProps = {
   readonly onClick?: (slug: string) => void;
 };
 
+const LABEL_VIEWS = '阅读';
+const LABEL_PINNED = '置顶';
+
 const { Text } = Typography;
 
 export function PostCard({ post, categories, tags, onClick }: PostCardProps) {
@@ -24,15 +27,14 @@ export function PostCard({ post, categories, tags, onClick }: PostCardProps) {
         post.coverImage ? (
           <img
             alt={post.title}
+            className="aspect-[2/1] object-cover"
             src={post.coverImage}
-            style={{ aspectRatio: '2 / 1', objectFit: 'cover' }}
           />
         ) : undefined
       }
       hoverable
       role="article"
       onClick={onClick ? () => onClick(post.slug) : undefined}
-      style={onClick ? { cursor: 'pointer' } : undefined}
     >
       <Card.Meta
         description={
@@ -50,13 +52,13 @@ export function PostCard({ post, categories, tags, onClick }: PostCardProps) {
               {post.publishedAt && (
                 <time dateTime={post.publishedAt}>{formatRelativeDate(post.publishedAt)}</time>
               )}
-              <span>{post.viewCount} 阅读</span>
+              <span>{post.viewCount} {LABEL_VIEWS}</span>
             </div>
           </div>
         }
         title={
           <div className="flex items-center gap-2">
-            {post.isPinned && <Tag color="blue">置顶</Tag>}
+            {post.isPinned && <Tag color="blue">{LABEL_PINNED}</Tag>}
             <span>{post.title}</span>
           </div>
         }

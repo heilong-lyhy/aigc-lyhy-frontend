@@ -11,6 +11,13 @@ import { Outlet, useLocation, useNavigate } from 'react-router';
 
 const { Content, Header, Sider } = Layout;
 
+const LABEL_ADMIN = '管理端';
+const LABEL_DASHBOARD = '仪表盘';
+const LABEL_POSTS = '文章管理';
+const LABEL_FILES = '文件管理';
+const LABEL_PROFILE = '个人设置';
+const LABEL_BRAND = 'Blog Admin';
+
 type AdminNavItem = {
   readonly icon: React.ReactNode;
   readonly key: string;
@@ -21,10 +28,10 @@ type AdminNavItem = {
 // Only include items whose routes are registered in src/app/router/index.tsx.
 // Add items here when sub-routes (categories, tags, etc.) are implemented.
 const ADMIN_NAV_ITEMS: readonly AdminNavItem[] = [
-  { icon: <DashboardOutlined />, key: 'dashboard', label: '仪表盘', path: '/admin' },
-  { icon: <FileOutlined />, key: 'posts', label: '文章管理', path: '/admin/posts' },
-  { icon: <FolderOutlined />, key: 'files', label: '文件管理', path: '/admin/files' },
-  { icon: <SettingOutlined />, key: 'profile', label: '个人设置', path: '/admin/profile' },
+  { icon: <DashboardOutlined />, key: 'dashboard', label: LABEL_DASHBOARD, path: '/admin' },
+  { icon: <FileOutlined />, key: 'posts', label: LABEL_POSTS, path: '/admin/posts' },
+  { icon: <FolderOutlined />, key: 'files', label: LABEL_FILES, path: '/admin/files' },
+  { icon: <SettingOutlined />, key: 'profile', label: LABEL_PROFILE, path: '/admin/profile' },
 ];
 
 export function AdminLayout() {
@@ -42,7 +49,7 @@ export function AdminLayout() {
           theme="light"
         >
           <div className="flex h-16 items-center justify-center border-b border-border">
-            <span className="text-lg font-semibold">Blog Admin</span>
+            <span className="text-lg font-semibold">{LABEL_BRAND}</span>
           </div>
           <Menu
             items={ADMIN_NAV_ITEMS.map((item) => ({
@@ -61,9 +68,9 @@ export function AdminLayout() {
           />
         </Sider>
         <Layout>
-          <Header style={{ padding: 0 }}>
+          <Header className="blog-header-no-padding">
             <div className="flex h-full items-center border-b border-border bg-bg-container px-6">
-              <span className="text-text-secondary text-sm">管理端</span>
+              <span className="text-text-secondary text-sm">{LABEL_ADMIN}</span>
             </div>
           </Header>
           <Content>

@@ -26,9 +26,11 @@ export function PostDetailHeader({ post, categories, tags }: PostDetailHeaderPro
     <header className="flex flex-col gap-3">
       <div className="flex items-center gap-2">
         {post.isPinned && <Tag color="blue">{LABEL_PINNED}</Tag>}
-        <Title level={2} style={{ margin: 0 }}>
-          {post.title}
-        </Title>
+        <div className="blog-typography-no-margin">
+          <Title level={2}>
+            {post.title}
+          </Title>
+        </div>
       </div>
 
       <div className="flex flex-wrap items-center gap-3 text-text-tertiary">
@@ -52,9 +54,11 @@ export function PostDetailHeader({ post, categories, tags }: PostDetailHeaderPro
       </div>
 
       {post.excerpt && (
-        <Text type="secondary" style={{ fontSize: 15, lineHeight: 1.7 }}>
-          {post.excerpt}
-        </Text>
+        <div className="blog-typography-lead">
+          <Text type="secondary">
+            {post.excerpt}
+          </Text>
+        </div>
       )}
     </header>
   );

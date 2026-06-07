@@ -22,7 +22,6 @@ export function TagCloud({ tags, selectedTagId, onSelect }: TagCloudProps) {
           color={tag.id === selectedTagId ? 'blue' : undefined}
           key={tag.id}
           role="listitem"
-          style={{ cursor: 'pointer' }}
           onClick={() => onSelect?.(tag.id === selectedTagId ? undefined : tag.id)}
         >
           {tag.name} ({tag.postCount})

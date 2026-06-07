@@ -12,7 +12,6 @@ type CommentListProps = {
 };
 
 const MAX_NESTING_LEVEL = 5;
-const INDENT_PER_LEVEL = 24;
 
 const { Title } = Typography;
 const LABEL_COMMENTS = '评论';
@@ -70,7 +69,7 @@ export function CommentList({ comments, onReply }: CommentListProps) {
         {flat.map((comment) => {
           const indentLevel = Math.min(comment.nestingLevel, MAX_NESTING_LEVEL);
           return (
-            <div key={comment.id} style={{ paddingLeft: indentLevel * INDENT_PER_LEVEL }}>
+            <div key={comment.id} className="blog-comment-indent" style={{ '--blog-indent-level': indentLevel } as React.CSSProperties}>
               <CommentItem comment={comment} onReply={onReply} />
             </div>
           );

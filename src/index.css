@@ -938,3 +938,28 @@ body {
     right: 20px;
   }
 }
+
+/* ── Blog utility classes ── */
+
+.blog-typography-no-margin {
+  margin: 0;
+}
+
+.blog-typography-lead {
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+.blog-comment-indent {
+  --blog-indent-per-level: 24px;
+  padding-left: calc(var(--blog-indent-level, 0) * var(--blog-indent-per-level));
+}
+
+.blog-card-grid-quarter {
+  width: 25%;
+  padding: 0;
+}
+
+.blog-header-no-padding {
+  padding: 0;
+}

@@ -89,8 +89,7 @@ export function useAdminComments(options: UseAdminCommentsOptions): UseAdminComm
     ): Promise<readonly BlogComment[]> => {
       clearMutationError();
       try {
-        const results = await Promise.all(ids.map((id) => updateBlogCommentStatus(id, newStatus)));
-        return results;
+        return await Promise.all(ids.map((id) => updateBlogCommentStatus(id, newStatus)));
       } catch (err) {
         const message = err instanceof Error ? err.message : 'Failed to batch update comment status';
         setMutationError(message);
@@ -103,7 +102,7 @@ export function useAdminComments(options: UseAdminCommentsOptions): UseAdminComm
   const batchRemove = useCallback(async (ids: readonly string[]): Promise<readonly boolean[]> => {
     clearMutationError();
     try {
-      return Promise.all(ids.map((id) => deleteBlogComment(id)));
+      return await Promise.all(ids.map((id) => deleteBlogComment(id)));
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to batch delete comments';
       setMutationError(message);

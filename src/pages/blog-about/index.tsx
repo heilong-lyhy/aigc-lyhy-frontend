@@ -12,8 +12,7 @@ const { Text, Title, Paragraph } = Typography;
 
 const PAGE_TITLE = '关于';
 const PAGE_DESCRIPTION = '了解更多关于博主的信息';
-/** 后端未就绪时使用 mock 数据兜底，待后端就绪后移除此标记 */
-const USE_MOCK_FALLBACK = true;
+const USE_MOCK_FALLBACK = false;
 const SOCIAL_LINKS_TITLE = '社交链接';
 const NO_SOCIAL_LINKS = '暂无社交链接';
 
@@ -40,9 +39,11 @@ export function BlogAboutPage() {
                   {profile.nickname.charAt(0) || 'U'}
                 </Avatar>
                 <div className="flex flex-col gap-2 text-center sm:text-left">
-                  <Title level={3} style={{ margin: 0 }}>
-                    {profile.nickname}
-                  </Title>
+                  <div className="blog-typography-no-margin">
+                    <Title level={3}>
+                      {profile.nickname}
+                    </Title>
+                  </div>
                   <Paragraph type="secondary">{profile.bio}</Paragraph>
                 </div>
               </div>

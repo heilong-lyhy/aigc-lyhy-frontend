@@ -23,6 +23,18 @@ import type { BlogCategory } from '@/entities/blog';
 
 const { Title } = Typography;
 
+const LABEL_PAGE_TITLE = '分类管理';
+const LABEL_CREATE = '新建分类';
+const LABEL_POSTS_COUNT = '篇';
+const LABEL_SUB_CATEGORY = '子分类';
+const LABEL_CONFIRM_DELETE = '确定删除该分类？';
+const LABEL_EDIT_CATEGORY = '编辑分类';
+const LABEL_NEW_CATEGORY = '新建分类';
+const LABEL_CATEGORY_NAME = '分类名称';
+const LABEL_CATEGORY_NAME_REQUIRED = '请输入分类名称';
+const LABEL_SLUG_REQUIRED = '请输入 Slug';
+const LABEL_SLUG_PLACEHOLDER = 'url-slug';
+
 type CategoryManagerProps = {
   readonly categories: readonly BlogCategory[];
   readonly isLoading: boolean;
@@ -142,11 +154,13 @@ export function CategoryManager({
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
-        <Title level={3} style={{ margin: 0 }}>
-          分类管理
-        </Title>
+        <div className="blog-typography-no-margin">
+          <Title level={3}>
+            {LABEL_PAGE_TITLE}
+          </Title>
+        </div>
         <Button icon={<PlusOutlined />} type="primary" onClick={() => openCreateModal()}>
-          新建分类
+          {LABEL_CREATE}
         </Button>
       </div>
 
@@ -163,7 +177,7 @@ export function CategoryManager({
                 <span className="flex items-center gap-2">
                   <span>{node?.name ?? String(nodeData.title ?? '')}</span>
                   <span className="text-text-tertiary text-xs">
-                    {node?.postCount ?? 0} 篇
+                    {node?.postCount ?? 0} {LABEL_POSTS_COUNT}
                   </span>
                 </span>
                 <Space size={4} onClick={stopPropagation}>
@@ -173,7 +187,7 @@ export function CategoryManager({
                     type="link"
                     onClick={() => openCreateModal(String(nodeData.key))}
                   >
-                    子分类
+                    {LABEL_SUB_CATEGORY}
                   </Button>
                   <Button
                     icon={<EditOutlined />}
@@ -182,7 +196,7 @@ export function CategoryManager({
                     onClick={() => openEditModal(String(nodeData.key))}
                   />
                   <Popconfirm
-                    title="确定删除该分类？"
+                    title={LABEL_CONFIRM_DELETE}
                     onConfirm={() => onDelete(String(nodeData.key))}
                   >
                     <Button
@@ -203,24 +217,24 @@ export function CategoryManager({
       <Modal
         destroyOnClose
         open={modalOpen}
-        title={editingId ? '编辑分类' : '新建分类'}
+        title={editingId ? LABEL_EDIT_CATEGORY : LABEL_NEW_CATEGORY}
         onCancel={() => setModalOpen(false)}
         onOk={handleModalOk}
       >
         <Form form={form} layout="vertical">
           <Form.Item
-            label="分类名称"
+            label={LABEL_CATEGORY_NAME}
             name="name"
-            rules={[{ required: true, message: '请输入分类名称' }]}
+            rules={[{ required: true, message: LABEL_CATEGORY_NAME_REQUIRED }]}
           >
-            <Input placeholder="分类名称" />
+            <Input placeholder={LABEL_CATEGORY_NAME} />
           </Form.Item>
           <Form.Item
             label="Slug"
             name="slug"
-            rules={[{ required: true, message: '请输入 Slug' }]}
+            rules={[{ required: true, message: LABEL_SLUG_REQUIRED }]}
           >
-            <Input placeholder="url-slug" />
+            <Input placeholder={LABEL_SLUG_PLACEHOLDER} />
           </Form.Item>
         </Form>
       </Modal>

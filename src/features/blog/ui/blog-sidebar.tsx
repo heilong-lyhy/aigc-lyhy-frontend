@@ -39,9 +39,11 @@ export function BlogSidebar({
             <Avatar size={64} src={profile.avatar}>
               {profile.nickname.charAt(0) || 'U'}
             </Avatar>
-            <Title level={5} style={{ margin: 0 }}>
-              {profile.nickname}
-            </Title>
+            <div className="blog-typography-no-margin">
+              <Title level={5}>
+                {profile.nickname}
+              </Title>
+            </div>
             <Text type="secondary">{profile.bio}</Text>
           </div>
         </Card>

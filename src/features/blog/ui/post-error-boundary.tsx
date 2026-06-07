@@ -37,9 +37,11 @@ export class PostErrorBoundary extends Component<
       return (
         <Alert
           description={
-            <Typography.Paragraph style={{ margin: 0 }}>
-              {this.state.error?.message ?? LABEL_TITLE}
-            </Typography.Paragraph>
+            <div className="blog-typography-no-margin">
+              <Typography.Paragraph>
+                {this.state.error?.message ?? LABEL_TITLE}
+              </Typography.Paragraph>
+            </div>
           }
           message={LABEL_TITLE}
           showIcon

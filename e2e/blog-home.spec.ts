@@ -35,4 +35,28 @@ test.describe('Blog Home Page', () => {
       timeout: 10_000,
     });
   });
+
+  // ── 搜索功能 ──
+
+  test('shows search input on blog page', async ({ page }) => {
+    await page.goto('/blog');
+
+    await expect(page.getByPlaceholder(/搜索/)).toBeVisible({ timeout: 10_000 });
+  });
+
+  // ── 归档页 ──
+
+  test('navigates to archive page', async ({ page }) => {
+    await page.goto('/blog/archive');
+
+    await expect(page.getByText(/归档/)).toBeVisible({ timeout: 10_000 });
+  });
+
+  // ── 关于页 ──
+
+  test('navigates to about page', async ({ page }) => {
+    await page.goto('/blog/about');
+
+    await expect(page.getByText(/关于/)).toBeVisible({ timeout: 10_000 });
+  });
 });

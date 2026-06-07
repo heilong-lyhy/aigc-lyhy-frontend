@@ -10,6 +10,27 @@ import { STATUS_OPTIONS } from '../lib/status-options';
 const { Title } = Typography;
 const { TextArea } = Input;
 
+const LABEL_BACK = '← 返回列表';
+const LABEL_LAST_SAVED = '上次保存:';
+const LABEL_SAVE = '保存';
+const LABEL_EDIT_POST = '编辑文章';
+const LABEL_NEW_POST = '新建文章';
+const LABEL_TITLE = '标题';
+const LABEL_TITLE_PLACEHOLDER = '文章标题';
+const LABEL_SLUG = 'Slug';
+const LABEL_SLUG_PLACEHOLDER = 'url-slug';
+const LABEL_EXCERPT = '摘要';
+const LABEL_EXCERPT_PLACEHOLDER = '文章摘要';
+const LABEL_CONTENT = '正文（Markdown）';
+const LABEL_CONTENT_PLACEHOLDER = 'Markdown content';
+const LABEL_STATUS = '状态';
+const LABEL_CATEGORY = '分类';
+const LABEL_CATEGORY_PLACEHOLDER = '选择分类';
+const LABEL_TAGS = '标签';
+const LABEL_TAGS_PLACEHOLDER = '选择标签';
+const LABEL_COVER_IMAGE = '封面图 URL';
+const LABEL_COVER_IMAGE_PLACEHOLDER = 'https://...';
+
 type PostEditorProps = {
   readonly form: PostEditorForm;
   readonly isDirty: boolean;
@@ -53,12 +74,12 @@ export function PostEditor({
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
         <Button onClick={onBack} type="link">
-          &larr; 返回列表
+          {LABEL_BACK}
         </Button>
         <Space>
           {lastSavedAt && (
             <span className="text-text-tertiary text-xs">
-              上次保存: {lastSavedAt}
+              {LABEL_LAST_SAVED} {lastSavedAt}
             </span>
           )}
           <Button
@@ -68,14 +89,16 @@ export function PostEditor({
             type="primary"
             onClick={onSave}
           >
-            保存
+            {LABEL_SAVE}
           </Button>
         </Space>
       </div>
 
-      <Title level={3} style={{ margin: 0 }}>
-        {form.slug ? '编辑文章' : '新建文章'}
-      </Title>
+      <div className="blog-typography-no-margin">
+        <Title level={3}>
+          {form.slug ? LABEL_EDIT_POST : LABEL_NEW_POST}
+        </Title>
+      </div>
 
       {isLoading ? (
         <div className="flex justify-center py-12">
@@ -85,35 +108,39 @@ export function PostEditor({
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         <div className="flex flex-col gap-4 lg:col-span-2">
           <div>
-            <label className="mb-1 block text-text-secondary text-sm">标题</label>
+            <label className="mb-1 block text-text-secondary text-sm" htmlFor="post-title">{LABEL_TITLE}</label>
             <Input
-              placeholder="文章标题"
+              id="post-title"
+              placeholder={LABEL_TITLE_PLACEHOLDER}
               value={form.title}
               onChange={(e) => onTitleChange(e.target.value)}
             />
           </div>
           <div>
-            <label className="mb-1 block text-text-secondary text-sm">Slug</label>
+            <label className="mb-1 block text-text-secondary text-sm" htmlFor="post-slug">{LABEL_SLUG}</label>
             <Input
-              placeholder="url-slug"
+              id="post-slug"
+              placeholder={LABEL_SLUG_PLACEHOLDER}
               value={form.slug}
               onChange={(e) => onSlugChange(e.target.value)}
             />
           </div>
           <div>
-            <label className="mb-1 block text-text-secondary text-sm">摘要</label>
+            <label className="mb-1 block text-text-secondary text-sm" htmlFor="post-excerpt">{LABEL_EXCERPT}</label>
             <TextArea
+              id="post-excerpt"
               autoSize={{ minRows: 2, maxRows: 4 }}
-              placeholder="文章摘要"
+              placeholder={LABEL_EXCERPT_PLACEHOLDER}
               value={form.excerpt}
               onChange={(e) => onExcerptChange(e.target.value)}
             />
           </div>
           <div>
-            <label className="mb-1 block text-text-secondary text-sm">正文（Markdown）</label>
+            <label className="mb-1 block text-text-secondary text-sm" htmlFor="post-content">{LABEL_CONTENT}</label>
             <TextArea
+              id="post-content"
               autoSize={{ minRows: 12, maxRows: 30 }}
-              placeholder="Markdown content"
+              placeholder={LABEL_CONTENT_PLACEHOLDER}
               value={form.content}
               onChange={(e) => onContentChange(e.target.value)}
             />
@@ -122,41 +149,48 @@ export function PostEditor({
 
         <div className="flex flex-col gap-4">
           <div>
-            <label className="mb-1 block text-text-secondary text-sm">状态</label>
-            <Select
-              style={{ width: '100%' }}
-              value={form.status}
-              onChange={onStatusChange}
-              options={STATUS_OPTIONS.map((o) => ({ label: o.label, value: o.value }))}
-            />
+            <label className="mb-1 block text-text-secondary text-sm" htmlFor="post-status">{LABEL_STATUS}</label>
+            <div className="w-full">
+              <Select
+                id="post-status"
+                value={form.status}
+                onChange={onStatusChange}
+                options={STATUS_OPTIONS.map((o) => ({ label: o.label, value: o.value }))}
+              />
+            </div>
           </div>
           <div>
-            <label className="mb-1 block text-text-secondary text-sm">分类</label>
-            <Select
-              allowClear
-              placeholder="选择分类"
-              style={{ width: '100%' }}
-              value={form.categoryId || undefined}
-              onChange={(value) => onCategoryIdChange(value ?? '')}
-              options={categories.map((c) => ({ label: c.name, value: c.id }))}
-            />
+            <label className="mb-1 block text-text-secondary text-sm" htmlFor="post-category">{LABEL_CATEGORY}</label>
+            <div className="w-full">
+              <Select
+                id="post-category"
+                allowClear
+                placeholder={LABEL_CATEGORY_PLACEHOLDER}
+                value={form.categoryId || undefined}
+                onChange={(value) => onCategoryIdChange(value ?? '')}
+                options={categories.map((c) => ({ label: c.name, value: c.id }))}
+              />
+            </div>
           </div>
           <div>
-            <label className="mb-1 block text-text-secondary text-sm">标签</label>
-            <Select
-              allowClear
-              mode="multiple"
-              placeholder="选择标签"
-              style={{ width: '100%' }}
-              value={[...form.tags]}
-              onChange={(values) => onTagsChange(values)}
-              options={tags.map((t) => ({ label: t.name, value: t.id }))}
-            />
+            <label className="mb-1 block text-text-secondary text-sm" htmlFor="post-tags">{LABEL_TAGS}</label>
+            <div className="w-full">
+              <Select
+                id="post-tags"
+                allowClear
+                mode="multiple"
+                placeholder={LABEL_TAGS_PLACEHOLDER}
+                value={[...form.tags]}
+                onChange={(values) => onTagsChange(values)}
+                options={tags.map((t) => ({ label: t.name, value: t.id }))}
+              />
+            </div>
           </div>
           <div>
-            <label className="mb-1 block text-text-secondary text-sm">封面图 URL</label>
+            <label className="mb-1 block text-text-secondary text-sm" htmlFor="post-cover-image">{LABEL_COVER_IMAGE}</label>
             <Input
-              placeholder="https://..."
+              id="post-cover-image"
+              placeholder={LABEL_COVER_IMAGE_PLACEHOLDER}
               value={form.coverImage}
               onChange={(e) => onCoverImageChange(e.target.value)}
             />

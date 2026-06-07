@@ -3,7 +3,7 @@
 import { useCallback } from 'react';
 import { Button, Form, Typography } from 'antd';
 
-import { useComment } from '../hooks/use-comment';
+import { useComment } from '../application/use-comment';
 import { stripHtml } from '../lib/strip-html';
 
 import { CommentFields } from './comment-fields';

@@ -54,7 +54,6 @@ export function MarkdownRenderer({ content, onTocReady }: MarkdownRendererProps)
                   preview={false}
                   src={src}
                   onClick={() => handleImageClick(src)}
-                  style={{ cursor: 'pointer' }}
                 />
               );
             },
@@ -89,7 +88,7 @@ export function MarkdownRenderer({ content, onTocReady }: MarkdownRendererProps)
       </div>
 
       <Modal footer={null} open={previewSrc !== null} title={null} onCancel={handlePreviewClose}>
-        {previewSrc && <img alt="preview" src={previewSrc} style={{ width: '100%' }} />}
+        {previewSrc && <img alt="preview" className="w-full" src={previewSrc} />}
       </Modal>
     </>
   );

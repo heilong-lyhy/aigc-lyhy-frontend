@@ -21,8 +21,12 @@ import { PageHeader } from '@/shared/ui';
 
 const PAGE_TITLE = '归档';
 const PAGE_DESCRIPTION = '按日期归档浏览文章';
+const LABEL_NO_ARCHIVES = '暂无归档文章';
+const LABEL_YEAR_SUFFIX = ' 年';
+const LABEL_MONTH_SUFFIX = ' 月';
+const LABEL_PINNED = '置顶';
 const DEFAULT_PAGINATION: PaginationInput = { offset: 0, limit: 100 };
-const USE_MOCK_FALLBACK = true;
+const USE_MOCK_FALLBACK = false;
 
 const { Text } = Typography;
 
@@ -70,7 +74,7 @@ export function BlogArchivePage() {
           {error && <ErrorState error={error} onRetry={refetch} />}
 
           {!isLoading && !error && groups.length === 0 && (
-            <EmptyState description="暂无归档文章" />
+            <EmptyState description={LABEL_NO_ARCHIVES} />
           )}
 
           {!isLoading && !error && groups.length > 0 && (
@@ -78,13 +82,13 @@ export function BlogArchivePage() {
               defaultActiveKey={groups.map((g) => g.year)}
               items={groups.map((group) => ({
                 key: group.year,
-                label: `${group.year} 年`,
+                label: `${group.year}${LABEL_YEAR_SUFFIX}`,
                 children: (
                   <div className="flex flex-col gap-4">
                     {group.months.map((monthGroup) => (
                       <div key={monthGroup.month}>
                         <div className="mb-2">
-                          <Text strong>{monthGroup.month} 月</Text>
+                          <Text strong>{monthGroup.month}{LABEL_MONTH_SUFFIX}</Text>
                         </div>
                         <ul className="list-none space-y-2 pl-0">
                           {monthGroup.posts.map((post) => (
@@ -100,7 +104,7 @@ export function BlogArchivePage() {
                                   </Text>
                                 </span>
                                 <span className="text-sm font-medium">{post.title}</span>
-                                {post.isPinned && <Tag color="blue">置顶</Tag>}
+                                {post.isPinned && <Tag color="blue">{LABEL_PINNED}</Tag>}
                               </button>
                             </li>
                           ))}

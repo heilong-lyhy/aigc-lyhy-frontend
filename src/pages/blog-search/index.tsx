@@ -20,8 +20,9 @@ import type { PaginationInput } from '@/entities/blog';
 import { PageHeader } from '@/shared/ui';
 
 const PAGE_TITLE = '搜索';
+const LABEL_NO_RESULTS = '未找到匹配的文章';
 const DEFAULT_PAGINATION: PaginationInput = { offset: 0, limit: 6 };
-const USE_MOCK_FALLBACK = true;
+const USE_MOCK_FALLBACK = false;
 
 export function BlogSearchPage() {
   const navigate = useNavigate();
@@ -124,7 +125,7 @@ export function BlogSearchPage() {
           {error && <ErrorState error={error} onRetry={refetch} />}
 
           {!isLoading && !error && isEmpty && (
-            <EmptyState description="未找到匹配的文章" />
+            <EmptyState description={LABEL_NO_RESULTS} />
           )}
 
           {!isLoading && !error && posts.length > 0 && (

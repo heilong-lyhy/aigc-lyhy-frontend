@@ -5,7 +5,7 @@ import { Button, Tooltip } from 'antd';
 
 import type { BlogLikeTargetType } from '@/entities/blog';
 
-import { useLike } from '../hooks/use-like';
+import { useLike } from '../application/use-like';
 
 type LikeButtonProps = {
   readonly targetType: BlogLikeTargetType;

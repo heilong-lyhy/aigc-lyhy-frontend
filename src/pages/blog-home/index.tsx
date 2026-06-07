@@ -19,8 +19,7 @@ import { PageHeader } from '@/shared/ui';
 const PAGE_TITLE = '博客';
 const PAGE_DESCRIPTION = '技术文章与生活随笔';
 const DEFAULT_PAGINATION: PaginationInput = { offset: 0, limit: 6 };
-/** 后端未就绪时使用 mock 数据兜底，待后端就绪后移除此标记 */
-const USE_MOCK_FALLBACK = true;
+const USE_MOCK_FALLBACK = false;
 
 export function BlogHomePage() {
   const navigate = useNavigate();

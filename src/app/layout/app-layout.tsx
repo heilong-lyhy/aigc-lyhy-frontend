@@ -1,7 +1,7 @@
 // src/app/layout/app-layout.tsx
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { MoonOutlined, SunOutlined } from '@ant-design/icons';
+import { LogoutOutlined, MoonOutlined, SunOutlined, UserOutlined } from '@ant-design/icons';
 import { Button, Segmented, Tabs, Tooltip } from 'antd';
 import type { ReactNode } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router';
@@ -11,6 +11,7 @@ import { FONT_SCALE_OPTIONS, useTheme } from '@/app/providers';
 import { APP_THEME_CSS_VAR_KEY } from '@/app/theme';
 
 import { AigcSidecar } from '@/widgets/aigc-sidecar';
+import { useAuth } from '@/features/auth';
 
 import type { AssistantRouteCandidate } from '@/entities/assistant-session';
 
@@ -51,6 +52,7 @@ export function AppLayout({ children }: AppLayoutProps = {}) {
   const { fontScale, isDark, setFontScale, setIsDark } = useTheme();
   const location = useLocation();
   const navigate = useNavigate();
+  const { isAuthenticated, logout } = useAuth();
   const navigationItems = useMemo(() => getNavigationItems(), []);
   const activeNavigationPath = resolveActiveNavigationPath(location.pathname, navigationItems);
   const navigationTabs = useMemo(
@@ -145,6 +147,28 @@ export function AppLayout({ children }: AppLayoutProps = {}) {
               </span>
             </Tooltip>
           </div>
+          {isAuthenticated ? (
+            <Tooltip title="登出">
+              <Button
+                icon={<LogoutOutlined />}
+                shape="circle"
+                type="text"
+                onClick={() => {
+                  logout();
+                  navigate('/');
+                }}
+              />
+            </Tooltip>
+          ) : (
+            <Tooltip title="登录">
+              <Button
+                icon={<UserOutlined />}
+                shape="circle"
+                type="text"
+                onClick={() => navigate('/auth')}
+              />
+            </Tooltip>
+          )}
         </div>
       </header>
 

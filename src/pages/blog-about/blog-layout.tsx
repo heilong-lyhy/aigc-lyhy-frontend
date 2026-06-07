@@ -26,11 +26,16 @@ const { Text } = Typography;
 // issue (AppLayout global tabs + BlogLayout sub-nav). When other blog pages
 // adopt this layout, extract /blog/* into a nested route group with BlogLayout
 // as the layout element, and remove AppLayout wrapping for blog routes.
+const LABEL_POSTS = '文章';
+const LABEL_ARCHIVE = '归档';
+const LABEL_SEARCH = '搜索';
+const LABEL_ABOUT = '关于';
+
 const BLOG_NAV_ITEMS: readonly BlogNavItem[] = [
-  { label: '文章', path: '/blog' },
-  { label: '归档', path: '/blog/archive' },
-  { label: '搜索', path: '/blog/search' },
-  { label: '关于', path: '/blog/about' },
+  { label: LABEL_POSTS, path: '/blog' },
+  { label: LABEL_ARCHIVE, path: '/blog/archive' },
+  { label: LABEL_SEARCH, path: '/blog/search' },
+  { label: LABEL_ABOUT, path: '/blog/about' },
 ];
 
 const FOOTER_TEXT = `© ${new Date().getFullYear()} Blog. All rights reserved.`;

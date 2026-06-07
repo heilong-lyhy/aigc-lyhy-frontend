@@ -25,6 +25,19 @@ import { formatAbsoluteDate } from '@/entities/blog';
 
 const { Title, Text } = Typography;
 
+const LABEL_PAGE_TITLE = '文件管理';
+const LABEL_UPLOAD = '上传文件';
+const LABEL_NO_FILES = '暂无文件';
+const LABEL_UPLOAD_FIRST = '上传第一个文件';
+const LABEL_COPY = '复制';
+const LABEL_DELETE = '删除';
+const LABEL_CONFIRM_DELETE = '确定删除该文件？';
+const MSG_UNSUPPORTED_TYPE = '不支持的文件类型';
+const MSG_IMAGE_ONLY = '仅支持图片文件';
+const MSG_FILE_SIZE_EXCEEDED = '文件大小超过限制';
+const MSG_COPIED = '已复制 URL';
+const MSG_COPY_FAILED = '复制失败';
+
 // ── 上传校验常量 ──
 
 const ALLOWED_MIME_TYPES: readonly string[] = [
@@ -70,11 +83,11 @@ export function FileManager({
 
   const handleBeforeUpload = useCallback((file: File) => {
     if (!ALLOWED_MIME_TYPES.includes(file.type)) {
-      message.error(`不支持的文件类型：${file.type}，仅支持图片文件`);
+      message.error(`${MSG_UNSUPPORTED_TYPE}：${file.type}，${MSG_IMAGE_ONLY}`);
       return Upload.LIST_IGNORE;
     }
     if (file.size > MAX_FILE_SIZE_BYTES) {
-      message.error(`文件大小超过 ${MAX_FILE_SIZE_MB}MB 限制`);
+      message.error(`${MSG_FILE_SIZE_EXCEEDED}（${MAX_FILE_SIZE_MB}MB）`);
       return Upload.LIST_IGNORE;
     }
     return false; // prevent auto upload, we handle it manually
@@ -90,9 +103,9 @@ export function FileManager({
   const handleCopyUrl = useCallback(async (url: string) => {
     try {
       await navigator.clipboard.writeText(url);
-      message.success('已复制 URL');
+      message.success(MSG_COPIED);
     } catch {
-      message.error('复制失败');
+      message.error(MSG_COPY_FAILED);
     }
   }, []);
 
@@ -104,41 +117,43 @@ export function FileManager({
   const gridItems = useMemo(
     () =>
       files.map((file) => (
-        <Card.Grid key={file.id} style={{ width: '25%', padding: 0 }}>
-          <div className="flex flex-col">
-            <div
-              className="flex h-32 cursor-pointer items-center justify-center bg-bg-layout"
-              onClick={() => isImageFile(file.mimeType) && handlePreview(file.url)}
-            >
-              {isImageFile(file.mimeType) ? (
-                <Image
-                  alt={file.name}
-                  height={120}
-                  preview={false}
-                  src={file.url}
-                  style={{ objectFit: 'contain' }}
-                />
-              ) : (
-                <FileImageOutlined style={{ fontSize: 32 }} />
-              )}
-            </div>
-            <div className="flex flex-col gap-1 p-3">
-              <Text ellipsis style={{ maxWidth: '100%' }}>
-                {file.name}
-              </Text>
-              <Text type="secondary">{formatFileSize(file.size)}</Text>
-              <Text type="secondary">{formatAbsoluteDate(file.createdAt)}</Text>
-              <div className="flex gap-2">
-                <Button
-                  icon={<CopyOutlined />}
-                  size="small"
-                  type="link"
-                  onClick={() => handleCopyUrl(file.url)}
+        <div key={file.id} className="blog-card-grid-quarter">
+          <Card.Grid>
+            <div className="flex flex-col">
+              <div
+                className="flex h-32 cursor-pointer items-center justify-center bg-bg-layout"
+                onClick={() => isImageFile(file.mimeType) && handlePreview(file.url)}
+              >
+                {isImageFile(file.mimeType) ? (
+                  <Image
+                    alt={file.name}
+                    height={120}
+                    preview={false}
+                    src={file.url}
+                  />
+                ) : (
+                  <FileImageOutlined className="text-3xl" />
+                )}
+              </div>
+              <div className="flex flex-col gap-1 p-3">
+                <div className="max-w-full">
+                  <Text ellipsis>
+                    {file.name}
+                  </Text>
+                </div>
+                <Text type="secondary">{formatFileSize(file.size)}</Text>
+                <Text type="secondary">{formatAbsoluteDate(file.createdAt)}</Text>
+                <div className="flex gap-2">
+                  <Button
+                    icon={<CopyOutlined />}
+                    size="small"
+                    type="link"
+                    onClick={() => handleCopyUrl(file.url)}
                 >
-                  复制
+                  {LABEL_COPY}
                 </Button>
                 <Popconfirm
-                  title="确定删除该文件？"
+                  title={LABEL_CONFIRM_DELETE}
                   onConfirm={() => onDelete(file.id)}
                 >
                   <Button
@@ -149,13 +164,14 @@ export function FileManager({
                     size="small"
                     type="link"
                   >
-                    删除
-                  </Button>
-                </Popconfirm>
+                    {LABEL_DELETE}
+                    </Button>
+                  </Popconfirm>
+                </div>
               </div>
             </div>
-          </div>
-        </Card.Grid>
+          </Card.Grid>
+        </div>
       )),
     [files, isDeleting, onDelete, handleCopyUrl, handlePreview],
   );
@@ -163,9 +179,11 @@ export function FileManager({
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
-        <Title level={3} style={{ margin: 0 }}>
-          文件管理
-        </Title>
+        <div className="blog-typography-no-margin">
+          <Title level={3}>
+            {LABEL_PAGE_TITLE}
+          </Title>
+        </div>
         <Upload
           accept={ALLOWED_MIME_TYPES.join(',')}
           beforeUpload={handleBeforeUpload}
@@ -175,7 +193,7 @@ export function FileManager({
           showUploadList={false}
         >
           <Button icon={<PlusOutlined />} loading={isUploading} type="primary">
-            上传文件
+            {LABEL_UPLOAD}
           </Button>
         </Upload>
       </div>
@@ -184,7 +202,7 @@ export function FileManager({
 
       {files.length === 0 ? (
         <Empty
-          description="暂无文件"
+          description={LABEL_NO_FILES}
           image={Empty.PRESENTED_IMAGE_SIMPLE}
         >
           <Upload
@@ -195,7 +213,7 @@ export function FileManager({
             }}
             showUploadList={false}
           >
-            <Button icon={<InboxOutlined />} loading={isUploading}>上传第一个文件</Button>
+            <Button icon={<InboxOutlined />} loading={isUploading}>{LABEL_UPLOAD_FIRST}</Button>
           </Upload>
         </Empty>
       ) : (

@@ -10,6 +10,20 @@ import { formatAbsoluteDate, toCurrentPage, toEffectiveTotal, toPaginationInput 
 
 const { Title } = Typography;
 
+const LABEL_PAGE_TITLE = '标签管理';
+const LABEL_CREATE = '新建标签';
+const LABEL_COL_NAME = '标签名';
+const LABEL_COL_POST_COUNT = '文章数';
+const LABEL_COL_CREATED = '创建时间';
+const LABEL_COL_ACTIONS = '操作';
+const LABEL_DELETE = '删除';
+const LABEL_CONFIRM_DELETE = '确定删除该标签？';
+const LABEL_MODAL_TITLE = '新建标签';
+const LABEL_NAME = '标签名称';
+const LABEL_NAME_REQUIRED = '请输入标签名称';
+const LABEL_SLUG_REQUIRED = '请输入 Slug';
+const LABEL_SLUG_PLACEHOLDER = 'url-slug';
+
 type TagManagerProps = {
   readonly data: PaginatedResult<BlogTag> | null;
   readonly isLoading: boolean;
@@ -41,7 +55,7 @@ export function TagManager({
 
   const columns: ColumnsType<BlogTag> = useMemo(() => [
     {
-      title: '标签名',
+      title: LABEL_COL_NAME,
       dataIndex: 'name',
       key: 'name',
     },
@@ -51,25 +65,25 @@ export function TagManager({
       key: 'slug',
     },
     {
-      title: '文章数',
+      title: LABEL_COL_POST_COUNT,
       dataIndex: 'postCount',
       key: 'postCount',
       width: 100,
     },
     {
-      title: '创建时间',
+      title: LABEL_COL_CREATED,
       dataIndex: 'createdAt',
       key: 'createdAt',
       width: 140,
       render: (date: string) => formatAbsoluteDate(date),
     },
     {
-      title: '操作',
+      title: LABEL_COL_ACTIONS,
       key: 'actions',
       width: 100,
       render: (_, record) => (
         <Popconfirm
-          title="确定删除该标签？"
+          title={LABEL_CONFIRM_DELETE}
           onConfirm={() => onDelete(record.id)}
         >
           <Button
@@ -78,7 +92,7 @@ export function TagManager({
             size="small"
             type="link"
           >
-            删除
+            {LABEL_DELETE}
           </Button>
         </Popconfirm>
       ),
@@ -95,9 +109,9 @@ export function TagManager({
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
-        <Title level={3} style={{ margin: 0 }}>
-          标签管理
-        </Title>
+        <div className="blog-typography-no-margin">
+          <Title level={3}>{LABEL_PAGE_TITLE}</Title>
+        </div>
         <Button
           icon={<PlusOutlined />}
           type="primary"
@@ -106,7 +120,7 @@ export function TagManager({
             setModalOpen(true);
           }}
         >
-          新建标签
+          {LABEL_CREATE}
         </Button>
       </div>
 
@@ -127,24 +141,24 @@ export function TagManager({
       <Modal
         destroyOnClose
         open={modalOpen}
-        title="新建标签"
+        title={LABEL_MODAL_TITLE}
         onCancel={() => setModalOpen(false)}
         onOk={handleModalOk}
       >
         <Form form={form} layout="vertical">
           <Form.Item
-            label="标签名称"
+            label={LABEL_NAME}
             name="name"
-            rules={[{ required: true, message: '请输入标签名称' }]}
+            rules={[{ required: true, message: LABEL_NAME_REQUIRED }]}
           >
-            <Input placeholder="标签名称" />
+            <Input placeholder={LABEL_NAME} />
           </Form.Item>
           <Form.Item
             label="Slug"
             name="slug"
-            rules={[{ required: true, message: '请输入 Slug' }]}
+            rules={[{ required: true, message: LABEL_SLUG_REQUIRED }]}
           >
-            <Input placeholder="url-slug" />
+            <Input placeholder={LABEL_SLUG_PLACEHOLDER} />
           </Form.Item>
         </Form>
       </Modal>

@@ -14,10 +14,28 @@ import { formatAbsoluteDate, toCurrentPage, toEffectiveTotal, toPaginationInput 
 
 const { Title } = Typography;
 
+const LABEL_PAGE_TITLE = '评论管理';
+const LABEL_COL_AUTHOR = '作者';
+const LABEL_COL_CONTENT = '内容';
+const LABEL_COL_STATUS = '状态';
+const LABEL_COL_TIME = '时间';
+const LABEL_COL_ACTIONS = '操作';
+const LABEL_APPROVE = '通过';
+const LABEL_REJECT = '驳回';
+const LABEL_SPAM = '垃圾';
+const LABEL_CONFIRM_SPAM = '标记为垃圾评论？';
+const LABEL_SELECTED = '已选';
+const LABEL_ITEMS = '项';
+const LABEL_BATCH_APPROVE = '批量通过';
+const LABEL_BATCH_REJECT = '批量驳回';
+const LABEL_STATUS_PENDING = '待审核';
+const LABEL_STATUS_APPROVED = '已通过';
+const LABEL_STATUS_REJECTED = '已驳回';
+
 const COMMENT_STATUS_OPTIONS: readonly { readonly label: string; readonly value: BlogCommentStatus; readonly color: string }[] = [
-  { label: '待审核', value: 'pending', color: 'gold' },
-  { label: '已通过', value: 'approved', color: 'green' },
-  { label: '已驳回', value: 'rejected', color: 'red' },
+  { label: LABEL_STATUS_PENDING, value: 'pending', color: 'gold' },
+  { label: LABEL_STATUS_APPROVED, value: 'approved', color: 'green' },
+  { label: LABEL_STATUS_REJECTED, value: 'rejected', color: 'red' },
 ];
 
 type CommentManagerProps = {
@@ -56,33 +74,33 @@ export function CommentManager({
 
   const columns: ColumnsType<BlogComment> = useMemo(() => [
     {
-      title: '作者',
+      title: LABEL_COL_AUTHOR,
       dataIndex: 'authorName',
       key: 'authorName',
       width: 120,
     },
     {
-      title: '内容',
+      title: LABEL_COL_CONTENT,
       dataIndex: 'content',
       key: 'content',
       ellipsis: true,
     },
     {
-      title: '状态',
+      title: LABEL_COL_STATUS,
       dataIndex: 'status',
       key: 'status',
       width: 100,
       render: (status: BlogCommentStatus) => renderStatusTag(status),
     },
     {
-      title: '时间',
+      title: LABEL_COL_TIME,
       dataIndex: 'createdAt',
       key: 'createdAt',
       width: 140,
       render: (date: string) => formatAbsoluteDate(date),
     },
     {
-      title: '操作',
+      title: LABEL_COL_ACTIONS,
       key: 'actions',
       width: 200,
       render: (_, record) => (
@@ -94,7 +112,7 @@ export function CommentManager({
               type="link"
               onClick={() => onApprove(record.id)}
             >
-              通过
+              {LABEL_APPROVE}
             </Button>
           )}
           {record.status !== 'rejected' && (
@@ -104,11 +122,11 @@ export function CommentManager({
               type="link"
               onClick={() => onReject(record.id)}
             >
-              驳回
+              {LABEL_REJECT}
             </Button>
           )}
           <Popconfirm
-            title="标记为垃圾评论？"
+            title={LABEL_CONFIRM_SPAM}
             onConfirm={() => onMarkSpam(record.id)}
           >
             <Button
@@ -117,7 +135,7 @@ export function CommentManager({
               size="small"
               type="link"
             >
-              垃圾
+              {LABEL_SPAM}
             </Button>
           </Popconfirm>
         </Space>
@@ -140,13 +158,15 @@ export function CommentManager({
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
-        <Title level={3} style={{ margin: 0 }}>
-          评论管理
-        </Title>
+        <div className="blog-typography-no-margin">
+          <Title level={3}>
+            {LABEL_PAGE_TITLE}
+          </Title>
+        </div>
         {selectedRowKeys.length > 0 && (
           <Space>
             <span className="text-text-secondary text-sm">
-              已选 {selectedRowKeys.length} 项
+              {LABEL_SELECTED} {selectedRowKeys.length} {LABEL_ITEMS}
             </span>
             <Button
               icon={<CheckOutlined />}
@@ -154,7 +174,7 @@ export function CommentManager({
               type="primary"
               onClick={handleBatchApprove}
             >
-              批量通过
+              {LABEL_BATCH_APPROVE}
             </Button>
             <Button
               danger
@@ -162,7 +182,7 @@ export function CommentManager({
               size="small"
               onClick={handleBatchReject}
             >
-              批量驳回
+              {LABEL_BATCH_REJECT}
             </Button>
           </Space>
         )}

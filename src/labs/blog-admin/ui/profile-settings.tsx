@@ -22,6 +22,35 @@ import type { BlogProfile, BlogSocialLink } from '@/entities/blog';
 
 const { Title } = Typography;
 
+const LABEL_PAGE_TITLE = '个人设置';
+const LABEL_PROFILE_INFO = '博主信息';
+const LABEL_NICKNAME = '昵称';
+const LABEL_NICKNAME_REQUIRED = '请输入昵称';
+const LABEL_NICKNAME_PLACEHOLDER = '博主昵称';
+const LABEL_AVATAR_URL = '头像 URL';
+const LABEL_AVATAR_URL_PLACEHOLDER = 'https://example.com/avatar.jpg';
+const LABEL_BIO = '简介';
+const LABEL_BIO_PLACEHOLDER = '写一段简介...';
+const LABEL_SOCIAL_LINKS = '社交链接';
+const LABEL_PLATFORM = '平台';
+const LABEL_PLATFORM_PLACEHOLDER = 'github / twitter / wechat';
+const LABEL_LINK = '链接';
+const LABEL_LINK_PLACEHOLDER = 'https://...';
+const LABEL_ADD_SOCIAL_LINK = '添加社交链接';
+const LABEL_SAVE = '保存信息';
+const LABEL_CHANGE_PASSWORD = '修改密码';
+const LABEL_CURRENT_PASSWORD = '当前密码';
+const LABEL_CURRENT_PASSWORD_REQUIRED = '请输入当前密码';
+const LABEL_NEW_PASSWORD = '新密码';
+const LABEL_NEW_PASSWORD_REQUIRED = '请输入新密码';
+const LABEL_PASSWORD_MIN_LENGTH = '密码至少 8 个字符';
+const LABEL_CONFIRM_PASSWORD = '确认新密码';
+const LABEL_CONFIRM_PASSWORD_REQUIRED = '请确认新密码';
+const LABEL_SUBMIT_PASSWORD = '修改密码';
+const LABEL_RESET = '重置';
+const MSG_PASSWORD_MISMATCH = '两次输入的密码不一致';
+const MSG_PASSWORD_CHANGE_FAILED = '密码修改失败';
+
 // ── 类型 ──
 
 type ProfileFormValues = {
@@ -126,7 +155,7 @@ export function ProfileSettings({
   const handleChangePassword = useCallback(async () => {
     const values = await passwordForm.validateFields();
     if (values.newPassword !== values.confirmPassword) {
-      setPasswordError('两次输入的密码不一致');
+      setPasswordError(MSG_PASSWORD_MISMATCH);
       return;
     }
     setPasswordError(null);
@@ -134,7 +163,7 @@ export function ProfileSettings({
     try {
       const result = await onChangePassword(values.currentPassword, values.newPassword);
       if (!result.ok) {
-        setPasswordError(result.message ?? '密码修改失败');
+        setPasswordError(result.message ?? MSG_PASSWORD_CHANGE_FAILED);
       } else {
         passwordForm.resetFields();
       }
@@ -162,52 +191,54 @@ export function ProfileSettings({
 
   return (
     <div className="flex flex-col gap-6">
-      <Title level={3} style={{ margin: 0 }}>
-        个人设置
-      </Title>
+      <div className="blog-typography-no-margin">
+        <Title level={3}>
+          {LABEL_PAGE_TITLE}
+        </Title>
+      </div>
 
       {mutationError && <Alert message={mutationError} showIcon type="error" />}
 
       {/* 博主信息 */}
-      <Card loading={isLoading} title="博主信息">
+      <Card loading={isLoading} title={LABEL_PROFILE_INFO}>
         <Form form={profileForm} layout="vertical">
           <Row gutter={16}>
             <Col span={12}>
               <Form.Item
-                label="昵称"
+                label={LABEL_NICKNAME}
                 name="nickname"
-                rules={[{ required: true, message: '请输入昵称' }]}
+                rules={[{ required: true, message: LABEL_NICKNAME_REQUIRED }]}
               >
-                <Input placeholder="博主昵称" />
+                <Input placeholder={LABEL_NICKNAME_PLACEHOLDER} />
               </Form.Item>
             </Col>
             <Col span={12}>
-              <Form.Item label="头像 URL" name="avatar">
-                <Input placeholder="https://example.com/avatar.jpg" />
+              <Form.Item label={LABEL_AVATAR_URL} name="avatar">
+                <Input placeholder={LABEL_AVATAR_URL_PLACEHOLDER} />
               </Form.Item>
             </Col>
           </Row>
-          <Form.Item label="简介" name="bio">
-            <Input.TextArea placeholder="写一段简介..." rows={3} />
+          <Form.Item label={LABEL_BIO} name="bio">
+            <Input.TextArea placeholder={LABEL_BIO_PLACEHOLDER} rows={3} />
           </Form.Item>
 
-          <Divider>社交链接</Divider>
+          <Divider>{LABEL_SOCIAL_LINKS}</Divider>
 
           {socialLinks.map((link, index) => (
             <Row gutter={16} key={index}>
               <Col span={8}>
-                <Form.Item label={index === 0 ? '平台' : ' '}>
+                <Form.Item label={index === 0 ? LABEL_PLATFORM : ' '}>
                   <Input
-                    placeholder="github / twitter / wechat"
+                    placeholder={LABEL_PLATFORM_PLACEHOLDER}
                     value={link.platform}
                     onChange={(e) => handleSocialLinkChange(index, 'platform', e.target.value)}
                   />
                 </Form.Item>
               </Col>
               <Col span={14}>
-                <Form.Item label={index === 0 ? '链接' : ' '}>
+                <Form.Item label={index === 0 ? LABEL_LINK : ' '}>
                   <Input
-                    placeholder="https://..."
+                    placeholder={LABEL_LINK_PLACEHOLDER}
                     value={link.url}
                     onChange={(e) => handleSocialLinkChange(index, 'url', e.target.value)}
                   />
@@ -225,74 +256,82 @@ export function ProfileSettings({
             </Row>
           ))}
 
-          <Button
-            icon={<PlusOutlined />}
-            onClick={handleAddSocialLink}
-            style={{ width: '100%' }}
-            variant="dashed"
-          >
-            添加社交链接
-          </Button>
-
-          <Form.Item style={{ marginBottom: 0, marginTop: 24 }}>
+          <div className="w-full">
             <Button
-              loading={isSavingProfile}
-              type="primary"
-              onClick={handleSaveProfile}
+              icon={<PlusOutlined />}
+              onClick={handleAddSocialLink}
+              variant="dashed"
             >
-              保存信息
+              {LABEL_ADD_SOCIAL_LINK}
             </Button>
-          </Form.Item>
+          </div>
+
+          <div className="mt-6">
+            <div className="blog-typography-no-margin">
+              <Form.Item>
+                <Button
+                  loading={isSavingProfile}
+                  type="primary"
+                  onClick={handleSaveProfile}
+                >
+                  {LABEL_SAVE}
+                </Button>
+              </Form.Item>
+            </div>
+          </div>
         </Form>
       </Card>
 
       {/* 密码修改 */}
-      <Card title="修改密码">
+      <Card title={LABEL_CHANGE_PASSWORD}>
         {passwordError && (
-          <Alert
-            message={passwordError}
-            showIcon
-            style={{ marginBottom: 16 }}
-            type="error"
-          />
+          <div className="mb-4">
+            <Alert
+              message={passwordError}
+              showIcon
+              type="error"
+            />
+          </div>
         )}
         <Form form={passwordForm} layout="vertical">
           <Form.Item
-            label="当前密码"
+            label={LABEL_CURRENT_PASSWORD}
             name="currentPassword"
-            rules={[{ required: true, message: '请输入当前密码' }]}
+            rules={[{ required: true, message: LABEL_CURRENT_PASSWORD_REQUIRED }]}
           >
-            <Input.Password placeholder="当前密码" />
+            <Input.Password placeholder={LABEL_CURRENT_PASSWORD} />
           </Form.Item>
           <Form.Item
-            label="新密码"
+            label={LABEL_NEW_PASSWORD}
             name="newPassword"
             rules={[
-              { required: true, message: '请输入新密码' },
-              { min: 8, message: '密码至少 8 个字符' },
+              { required: true, message: LABEL_NEW_PASSWORD_REQUIRED },
+              { min: 8, message: LABEL_PASSWORD_MIN_LENGTH },
             ]}
           >
-            <Input.Password placeholder="新密码" />
+            <Input.Password placeholder={LABEL_NEW_PASSWORD} />
           </Form.Item>
           <Form.Item
-            label="确认新密码"
+            label={LABEL_CONFIRM_PASSWORD}
             name="confirmPassword"
-            rules={[{ required: true, message: '请确认新密码' }]}
+            rules={[{ required: true, message: LABEL_CONFIRM_PASSWORD_REQUIRED }]}
           >
-            <Input.Password placeholder="确认新密码" />
+            <Input.Password placeholder={LABEL_CONFIRM_PASSWORD} />
           </Form.Item>
-          <Form.Item style={{ marginBottom: 0 }}>
-            <Space>
-              <Button
-                loading={isChangingPassword}
-                type="primary"
-                onClick={handleChangePassword}
-              >
-                修改密码
-              </Button>
-              <Button onClick={() => passwordForm.resetFields()}>重置</Button>
-            </Space>
-          </Form.Item>
+          <div className="blog-typography-no-margin">
+            <Form.Item>
+              <Space>
+                <Button
+                  loading={isChangingPassword}
+                  type="primary"
+                  onClick={handleChangePassword}
+                >
+                  {LABEL_SUBMIT_PASSWORD}
+                </Button>
+                <Button onClick={() => passwordForm.resetFields()}>{LABEL_RESET}</Button>
+              </Space>
+            </Form.Item>
+          </div>
         </Form>
       </Card>
     </div>

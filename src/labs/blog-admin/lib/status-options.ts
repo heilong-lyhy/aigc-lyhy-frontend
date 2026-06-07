@@ -2,8 +2,12 @@
 
 import type { BlogPostStatus } from '@/entities/blog';
 
+const LABEL_DRAFT = '草稿';
+const LABEL_PUBLISHED = '已发布';
+const LABEL_ARCHIVED = '已归档';
+
 export const STATUS_OPTIONS: readonly { readonly label: string; readonly value: BlogPostStatus }[] = [
-  { label: '草稿', value: 'draft' },
-  { label: '已发布', value: 'published' },
-  { label: '已归档', value: 'archived' },
+  { label: LABEL_DRAFT, value: 'draft' },
+  { label: LABEL_PUBLISHED, value: 'published' },
+  { label: LABEL_ARCHIVED, value: 'archived' },
 ];

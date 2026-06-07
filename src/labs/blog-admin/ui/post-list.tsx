@@ -12,6 +12,21 @@ import { STATUS_OPTIONS } from '../lib/status-options';
 
 const { Title } = Typography;
 
+const LABEL_PAGE_TITLE = '文章管理';
+const LABEL_CREATE = '新建文章';
+const LABEL_COL_TITLE = '标题';
+const LABEL_COL_STATUS = '状态';
+const LABEL_COL_CATEGORY = '分类';
+const LABEL_COL_DATE = '日期';
+const LABEL_COL_ACTIONS = '操作';
+const LABEL_EDIT = '编辑';
+const LABEL_UNPUBLISH = '取消发布';
+const LABEL_PUBLISH = '发布';
+const LABEL_DELETE = '删除';
+const LABEL_CONFIRM_DELETE = '确定删除这篇文章？';
+const LABEL_FILTER_STATUS = '按状态筛选';
+const LABEL_FILTER_CATEGORY = '按分类筛选';
+
 type PostListProps = {
   readonly data: PaginatedResult<BlogPost> | null;
   readonly isLoading: boolean;
@@ -58,20 +73,20 @@ export function PostList({
 
   const columns: ColumnsType<BlogPost> = useMemo(() => [
     {
-      title: '标题',
+      title: LABEL_COL_TITLE,
       dataIndex: 'title',
       key: 'title',
       ellipsis: true,
     },
     {
-      title: '状态',
+      title: LABEL_COL_STATUS,
       dataIndex: 'status',
       key: 'status',
       width: 100,
       render: (status: BlogPostStatus) => renderStatusTag(status),
     },
     {
-      title: '分类',
+      title: LABEL_COL_CATEGORY,
       dataIndex: 'categoryId',
       key: 'categoryId',
       width: 120,
@@ -81,14 +96,14 @@ export function PostList({
       },
     },
     {
-      title: '日期',
+      title: LABEL_COL_DATE,
       dataIndex: 'createdAt',
       key: 'createdAt',
       width: 120,
       render: (date: string) => formatAbsoluteDate(date),
     },
     {
-      title: '操作',
+      title: LABEL_COL_ACTIONS,
       key: 'actions',
       width: 200,
       render: (_, record) => (
@@ -99,7 +114,7 @@ export function PostList({
             type="link"
             onClick={() => onEdit(record.id)}
           >
-            编辑
+            {LABEL_EDIT}
           </Button>
           {record.status === 'published' ? (
             <Button
@@ -107,7 +122,7 @@ export function PostList({
               type="link"
               onClick={() => onTogglePublish(record.id, 'draft')}
             >
-              取消发布
+              {LABEL_UNPUBLISH}
             </Button>
           ) : (
             <Button
@@ -115,11 +130,11 @@ export function PostList({
               type="link"
               onClick={() => onTogglePublish(record.id, 'published')}
             >
-              发布
+              {LABEL_PUBLISH}
             </Button>
           )}
           <Popconfirm
-            title="确定删除这篇文章？"
+            title={LABEL_CONFIRM_DELETE}
             onConfirm={() => onDelete(record.id)}
           >
             <Button
@@ -128,7 +143,7 @@ export function PostList({
               size="small"
               type="link"
             >
-              删除
+              {LABEL_DELETE}
             </Button>
           </Popconfirm>
         </Space>
@@ -139,31 +154,35 @@ export function PostList({
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
-        <Title level={3} style={{ margin: 0 }}>
-          文章管理
-        </Title>
+        <div className="blog-typography-no-margin">
+          <Title level={3}>
+            {LABEL_PAGE_TITLE}
+          </Title>
+        </div>
         <Button type="primary" onClick={() => onEdit('new')}>
-          新建文章
+          {LABEL_CREATE}
         </Button>
       </div>
 
       <div className="flex gap-3">
-        <Select
-          allowClear
-          placeholder="按状态筛选"
-          style={{ width: 140 }}
-          value={filterStatus}
-          onChange={(value) => onFilterStatusChange(value ?? undefined)}
-          options={STATUS_OPTIONS.map((o) => ({ label: o.label, value: o.value }))}
-        />
-        <Select
-          allowClear
-          placeholder="按分类筛选"
-          style={{ width: 160 }}
-          value={filterCategoryId}
-          onChange={(value) => onFilterCategoryChange(value ?? undefined)}
-          options={categories.map((c) => ({ label: c.name, value: c.id }))}
-        />
+        <div className="w-35">
+          <Select
+            allowClear
+            placeholder={LABEL_FILTER_STATUS}
+            value={filterStatus}
+            onChange={(value) => onFilterStatusChange(value ?? undefined)}
+            options={STATUS_OPTIONS.map((o) => ({ label: o.label, value: o.value }))}
+          />
+        </div>
+        <div className="w-40">
+          <Select
+            allowClear
+            placeholder={LABEL_FILTER_CATEGORY}
+            value={filterCategoryId}
+            onChange={(value) => onFilterCategoryChange(value ?? undefined)}
+            options={categories.map((c) => ({ label: c.name, value: c.id }))}
+          />
+        </div>
       </div>
 
       <Table<BlogPost>
