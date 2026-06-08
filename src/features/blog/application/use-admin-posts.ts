@@ -2,7 +2,7 @@
 
 import { useCallback } from 'react';
 
-import type { BlogPost, BlogPostStatus, PaginatedResult, PaginationInput } from '@/entities/blog';
+import type { BlogPost, BlogPostDetail, BlogPostStatus, PaginatedResult, PaginationInput } from '@/entities/blog';
 import { isEmptyPage } from '@/entities/blog';
 
 import { useAsyncQuery } from '@/shared/hooks';
@@ -29,36 +29,36 @@ type UseAdminPostsResult = {
   readonly error: string | null;
   readonly mutationError: string | null;
   readonly refetch: () => Promise<void>;
-  readonly loadById: (id: string) => Promise<BlogPost | null>;
+  readonly loadById: (id: number) => Promise<BlogPostDetail | null>;
   readonly create: (
     input: Readonly<{
       title: string;
       slug: string;
-      excerpt: string;
       content: string;
+      excerpt?: string;
       coverImage?: string | null;
-      categoryId: string;
-      tags: readonly string[];
-      status: BlogPostStatus;
+      categoryId?: number;
+      tags?: readonly string[];
+      status?: BlogPostStatus;
     }>,
-  ) => Promise<BlogPost | null>;
+  ) => Promise<BlogPostDetail | null>;
   readonly update: (
-    id: string,
     input: Readonly<
       Partial<{
+        id: number;
         title: string;
         slug: string;
         excerpt: string;
         content: string;
         coverImage: string | null;
-        categoryId: string;
+        categoryId: number;
         tags: readonly string[];
         status: BlogPostStatus;
         isPinned: boolean;
-      }>
+      }> & { id: number }
     >,
-  ) => Promise<BlogPost | null>;
-  readonly remove: (id: string) => Promise<boolean>;
+  ) => Promise<BlogPostDetail | null>;
+  readonly remove: (id: number) => Promise<boolean>;
 };
 
 export function useAdminPosts(options: UseAdminPostsOptions): UseAdminPostsResult {
@@ -80,14 +80,14 @@ export function useAdminPosts(options: UseAdminPostsOptions): UseAdminPostsResul
       input: Readonly<{
         title: string;
         slug: string;
-        excerpt: string;
         content: string;
+        excerpt?: string;
         coverImage?: string | null;
-        categoryId: string;
-        tags: readonly string[];
-        status: BlogPostStatus;
+        categoryId?: number;
+        tags?: readonly string[];
+        status?: BlogPostStatus;
       }>,
-    ): Promise<BlogPost | null> => {
+    ): Promise<BlogPostDetail | null> => {
       clearMutationError();
       try {
         return await createBlogPost(input);
@@ -102,7 +102,6 @@ export function useAdminPosts(options: UseAdminPostsOptions): UseAdminPostsResul
 
   const update = useCallback(
     async (
-      id: string,
       input: Readonly<
         Partial<{
           title: string;
@@ -110,16 +109,16 @@ export function useAdminPosts(options: UseAdminPostsOptions): UseAdminPostsResul
           excerpt: string;
           content: string;
           coverImage: string | null;
-          categoryId: string;
+          categoryId: number;
           tags: readonly string[];
           status: BlogPostStatus;
           isPinned: boolean;
-        }>
+        }> & { id: number }
       >,
-    ): Promise<BlogPost | null> => {
+    ): Promise<BlogPostDetail | null> => {
       clearMutationError();
       try {
-        return await updateBlogPost(id, input);
+        return await updateBlogPost(input);
       } catch (err) {
         const message = err instanceof Error ? err.message : 'Failed to update post';
         setMutationError(message);
@@ -129,7 +128,7 @@ export function useAdminPosts(options: UseAdminPostsOptions): UseAdminPostsResul
     [clearMutationError, setMutationError],
   );
 
-  const loadById = useCallback(async (id: string): Promise<BlogPost | null> => {
+  const loadById = useCallback(async (id: number): Promise<BlogPostDetail | null> => {
     clearMutationError();
     try {
       return await fetchBlogPostById(id);
@@ -140,7 +139,7 @@ export function useAdminPosts(options: UseAdminPostsOptions): UseAdminPostsResul
     }
   }, [clearMutationError, setMutationError]);
 
-  const remove = useCallback(async (id: string): Promise<boolean> => {
+  const remove = useCallback(async (id: number): Promise<boolean> => {
     clearMutationError();
     try {
       return await deleteBlogPost(id);

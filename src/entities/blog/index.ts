@@ -12,11 +12,10 @@ export type {
   BlogDashboard,
   BlogFile,
   BlogLike,
-  BlogLikeTargetType,
   BlogPost,
+  BlogPostDetail,
   BlogPostStatus,
   BlogProfile,
-  BlogSocialLink,
   BlogTag,
   PostEditorForm,
 } from './types';

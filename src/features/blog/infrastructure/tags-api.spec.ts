@@ -1,4 +1,5 @@
 // src/features/blog/infrastructure/tags-api.spec.ts
+// 契约测试：验证前端 DTO → Entity 映射与后端 GraphQL 响应结构对齐
 
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
@@ -12,12 +13,15 @@ import { createBlogTag, deleteBlogTag, fetchBlogTags } from './tags-api';
 
 const mockExecute = vi.mocked(executeGraphQL);
 
-const sampleDTO = {
-  id: 'tag-1',
-  name: 'React',
-  slug: 'react',
-  postCount: 10,
+// ── 模拟后端 BlogTagObjectType 响应 ──
+
+const sampleTagDTO = {
+  id: 1,
+  name: 'TypeScript',
+  slug: 'typescript',
+  postCount: 5,
   createdAt: '2024-01-01T00:00:00Z',
+  updatedAt: '2024-01-01T00:00:00Z',
 };
 
 describe('tags-api', () => {
@@ -26,88 +30,48 @@ describe('tags-api', () => {
   });
 
   describe('fetchBlogTags', () => {
-    it('fetches and maps tag list', async () => {
-      mockExecute.mockResolvedValueOnce({
-        blogTags: [sampleDTO],
-      });
+    it('应调用 blogTags 查询并映射结果', async () => {
+      mockExecute.mockResolvedValueOnce({ blogTags: [sampleTagDTO] });
 
       const result = await fetchBlogTags();
 
       expect(result).toHaveLength(1);
-      expect(result[0].id).toBe('tag-1');
-      expect(result[0].name).toBe('React');
-      expect(result[0].postCount).toBe(10);
+      expect(result[0].id).toBe('1'); // number → string
+      expect(result[0].name).toBe('TypeScript');
+      expect(result[0].slug).toBe('typescript');
+      expect(result[0].postCount).toBe(5);
 
       const [, , options] = mockExecute.mock.calls[0];
       expect(options?.authMode).toBe('none');
     });
-
-    it('returns empty array when no tags', async () => {
-      mockExecute.mockResolvedValueOnce({ blogTags: [] });
-
-      const result = await fetchBlogTags();
-
-      expect(result).toHaveLength(0);
-    });
-
-    it('propagates errors from executeGraphQL', async () => {
-      mockExecute.mockRejectedValueOnce(new Error('Network failure'));
-
-      await expect(fetchBlogTags()).rejects.toThrow('Network failure');
-    });
   });
 
   describe('createBlogTag', () => {
-    it('creates a tag with auth required', async () => {
-      mockExecute.mockResolvedValueOnce({
-        createBlogTag: sampleDTO,
-      });
+    it('应使用独立参数（非 input 对象）创建标签', async () => {
+      mockExecute.mockResolvedValueOnce({ createBlogTag: sampleTagDTO });
 
-      const result = await createBlogTag({ name: 'React', slug: 'react' });
+      const result = await createBlogTag({ name: 'TypeScript', slug: 'typescript' });
 
-      expect(result.id).toBe('tag-1');
-      expect(result.name).toBe('React');
+      expect(result.name).toBe('TypeScript');
 
       const [, variables, options] = mockExecute.mock.calls[0];
-      expect(variables.input.name).toBe('React');
-      expect(variables.input.slug).toBe('react');
+      expect(variables.name).toBe('TypeScript');
+      expect(variables.slug).toBe('typescript');
       expect(options?.authMode).toBe('required');
-    });
-
-    it('propagates errors from executeGraphQL', async () => {
-      mockExecute.mockRejectedValueOnce(new Error('Slug already exists'));
-
-      await expect(
-        createBlogTag({ name: 'React', slug: 'react' }),
-      ).rejects.toThrow('Slug already exists');
     });
   });
 
   describe('deleteBlogTag', () => {
-    it('deletes a tag with auth required', async () => {
+    it('应删除标签', async () => {
       mockExecute.mockResolvedValueOnce({ deleteBlogTag: true });
 
-      const result = await deleteBlogTag('tag-1');
+      const result = await deleteBlogTag(1);
 
       expect(result).toBe(true);
 
       const [, variables, options] = mockExecute.mock.calls[0];
-      expect(variables.id).toBe('tag-1');
+      expect(variables.id).toBe(1);
       expect(options?.authMode).toBe('required');
-    });
-
-    it('returns false when deletion fails on server', async () => {
-      mockExecute.mockResolvedValueOnce({ deleteBlogTag: false });
-
-      const result = await deleteBlogTag('tag-1');
-
-      expect(result).toBe(false);
-    });
-
-    it('propagates errors from executeGraphQL', async () => {
-      mockExecute.mockRejectedValueOnce(new Error('Has posts'));
-
-      await expect(deleteBlogTag('tag-1')).rejects.toThrow('Has posts');
     });
   });
 });

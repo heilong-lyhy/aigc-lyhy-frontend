@@ -12,10 +12,10 @@ import { isEmptyPage } from '@/entities/blog';
 
 import { useAsyncQuery } from '@/shared/hooks';
 
-import { fetchBlogComments } from '../infrastructure/comments-api';
+import { fetchBlogCommentsByPost } from '../infrastructure/comments-api';
 
 type UseBlogCommentsOptions = {
-  readonly postId: string;
+  readonly postId: number;
   readonly pagination: PaginationInput;
   readonly status?: BlogCommentStatus;
   readonly autoLoad?: boolean;
@@ -34,7 +34,7 @@ export function useBlogComments(options: UseBlogCommentsOptions): UseBlogComment
 
   const fetcher = useCallback(async (): Promise<PaginatedResult<BlogComment>> => {
     if (!postId) throw new Error('postId is required');
-    return await fetchBlogComments(postId, pagination, { status });
+    return await fetchBlogCommentsByPost(postId, pagination);
   }, [postId, pagination, status]);
 
   const { data, isLoading, error, refetch } = useAsyncQuery<PaginatedResult<BlogComment>>({

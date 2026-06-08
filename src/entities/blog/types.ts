@@ -2,19 +2,16 @@
 
 export type BlogPostStatus = 'draft' | 'published' | 'archived';
 
-/** 博客文章 */
+/** 博客文章（列表项，与后端 BlogPostObjectType 对齐） */
 export interface BlogPost {
   readonly id: string;
   readonly title: string;
   readonly slug: string;
-  readonly excerpt: string;
-  readonly content: string;
+  readonly excerpt: string | null;
   readonly coverImage: string | null;
-  readonly categoryId: string;
-  /** 标签 ID 列表，与 BlogTag.id 对应 */
-  readonly tags: readonly string[];
-  readonly authorId: string;
   readonly status: BlogPostStatus;
+  readonly categoryId: number | null;
+  readonly categoryName: string | null;
   readonly isPinned: boolean;
   readonly viewCount: number;
   readonly likeCount: number;
@@ -24,95 +21,93 @@ export interface BlogPost {
   readonly updatedAt: string;
 }
 
-/** 博客分类 */
+/** 博客文章详情（与后端 BlogPostDetailObjectType 对齐，比列表多 content/tags/renderedContent） */
+export interface BlogPostDetail extends BlogPost {
+  readonly content: string;
+  readonly renderedContent: string | null;
+  readonly tags: readonly BlogTag[];
+}
+
+/** 博客分类（与后端 BlogCategoryObjectType 对齐） */
 export interface BlogCategory {
   readonly id: string;
   readonly name: string;
   readonly slug: string;
-  readonly description: string;
-  readonly parentId: string | null;
-  readonly children: readonly BlogCategory[];
+  readonly description: string | null;
+  readonly parentId: number | null;
   readonly sortOrder: number;
   readonly postCount: number;
   readonly createdAt: string;
+  readonly updatedAt: string;
 }
 
-/** 博客标签 */
+/** 博客标签（与后端 BlogTagObjectType 对齐） */
 export interface BlogTag {
   readonly id: string;
   readonly name: string;
   readonly slug: string;
   readonly postCount: number;
   readonly createdAt: string;
+  readonly updatedAt: string;
 }
 
 export type BlogCommentStatus = 'pending' | 'approved' | 'rejected';
 
-/** 博客评论 */
+/** 博客评论（与后端 BlogCommentObjectType 对齐） */
 export interface BlogComment {
   readonly id: string;
-  readonly postId: string;
+  readonly postId: number;
+  readonly parentId: number | null;
+  readonly replyToId: number | null;
   readonly authorName: string;
-  readonly authorEmail: string;
   readonly authorAvatar: string | null;
   readonly content: string;
   readonly status: BlogCommentStatus;
-  readonly parentId: string | null;
-  readonly replyToId: string | null;
   readonly nestingLevel: number;
   readonly createdAt: string;
   readonly updatedAt: string;
 }
 
-export type BlogLikeTargetType = 'post' | 'comment';
-
-/** 博客点赞 */
+/** 博客点赞（与后端 toggleBlogPostLike 返回对齐） */
 export interface BlogLike {
-  readonly id: string;
-  readonly targetType: BlogLikeTargetType;
-  readonly targetId: string;
-  readonly userId: string | null;
-  readonly fingerprint: string | null;
-  readonly createdAt: string;
+  readonly liked: boolean;
 }
 
-/** 博客文件 */
+/** 博客文件（与后端 BlogFileObjectType 对齐） */
 export interface BlogFile {
   readonly id: string;
-  readonly name: string;
-  readonly url: string;
+  readonly originalName: string;
+  readonly storedName: string;
   readonly mimeType: string;
-  readonly size: number;
-  readonly createdAt: string;
-}
-
-/** 社交链接 */
-export interface BlogSocialLink {
-  readonly platform: string;
-  readonly url: string;
-  /** 平台图标标识符，UI 组件按 platform 映射渲染 */
-  readonly icon: string | null;
-}
-
-/** 博主信息 */
-export interface BlogProfile {
-  readonly id: string;
-  readonly nickname: string;
-  readonly avatar: string | null;
-  readonly bio: string;
-  readonly socialLinks: readonly BlogSocialLink[];
+  readonly fileSize: number;
+  readonly storagePath: string;
+  readonly fileType: string;
   readonly createdAt: string;
   readonly updatedAt: string;
 }
 
-/** 博客仪表盘统计 */
+/** 博主信息（与后端 BlogProfileObjectType 对齐） */
+export interface BlogProfile {
+  readonly id: string;
+  readonly nickname: string;
+  readonly bio: string | null;
+  readonly avatarUrl: string | null;
+  readonly socialLinks: Record<string, string> | null;
+  readonly createdAt: string;
+  readonly updatedAt: string;
+}
+
+/** 博客仪表盘统计（与后端 BlogDashboardObjectType 对齐） */
 export interface BlogDashboard {
   readonly totalPosts: number;
+  readonly publishedPosts: number;
+  readonly draftPosts: number;
+  readonly totalCategories: number;
+  readonly totalTags: number;
   readonly totalComments: number;
+  readonly pendingComments: number;
   readonly totalLikes: number;
   readonly totalViews: number;
-  readonly recentPosts: readonly BlogPost[];
-  readonly recentComments: readonly BlogComment[];
 }
 
 /** 文章编辑器表单状态 */

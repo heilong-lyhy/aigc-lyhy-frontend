@@ -2,10 +2,10 @@
 
 import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
 
-import type { BlogPost, BlogPostStatus, PaginatedResult, PaginationInput } from '@/entities/blog';
+import type { BlogPost, PaginatedResult, PaginationInput } from '@/entities/blog';
 
 import { blogStorage } from '../infrastructure/blog-storage';
-import { fetchBlogPosts } from '../infrastructure/posts-api';
+import { fetchBlogPublishedPosts } from '../infrastructure/posts-api';
 
 type UseBlogSearchOptions = {
   readonly pagination: PaginationInput;
@@ -14,9 +14,8 @@ type UseBlogSearchOptions = {
 
 type UseBlogSearchFilters = {
   readonly keyword: string;
-  readonly status?: BlogPostStatus;
-  readonly categoryId?: string;
-  readonly tagId?: string;
+  readonly sortBy?: string;
+  readonly sortOrder?: string;
 };
 
 type UseBlogSearchResult = {
@@ -90,18 +89,15 @@ export function useBlogSearch(options: UseBlogSearchOptions): UseBlogSearchResul
   );
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const mountedRef = useRef(true);
-  // 使用 ref 追踪最新 filters，供防抖回调使用
   const filtersRef = useRef<UseBlogSearchFilters>(state.filters);
 
   const fetchData = useCallback(
     async (currentFilters: UseBlogSearchFilters) => {
       dispatch({ type: 'FETCH_START' });
       try {
-        const result = await fetchBlogPosts(pagination, {
-          keyword: currentFilters.keyword || undefined,
-          status: currentFilters.status,
-          categoryId: currentFilters.categoryId,
-          tagId: currentFilters.tagId,
+        const result = await fetchBlogPublishedPosts(pagination, {
+          sortBy: currentFilters.sortBy,
+          sortOrder: currentFilters.sortOrder,
         });
         dispatch({ type: 'FETCH_SUCCESS', payload: result });
         if (currentFilters.keyword) {
@@ -155,7 +151,6 @@ export function useBlogSearch(options: UseBlogSearchOptions): UseBlogSearchResul
     await fetchData(filtersRef.current);
   }, [fetchData]);
 
-  // 卸载时清理 debounce timer 并标记已卸载，防止异步回调更新已卸载组件
   useEffect(() => {
     mountedRef.current = true;
     return () => {

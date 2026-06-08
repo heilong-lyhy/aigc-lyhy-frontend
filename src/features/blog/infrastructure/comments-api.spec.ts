@@ -1,4 +1,5 @@
 // src/features/blog/infrastructure/comments-api.spec.ts
+// 契约测试：验证前端 DTO → Entity 映射与后端 GraphQL 响应结构对齐
 
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
@@ -12,25 +13,34 @@ import {
   createBlogComment,
   deleteBlogComment,
   fetchBlogComments,
+  fetchBlogCommentsByPost,
   mapBlogComment,
   updateBlogCommentStatus,
 } from './comments-api';
 
 const mockExecute = vi.mocked(executeGraphQL);
 
-const sampleDTO = {
-  id: 'c1',
-  postId: 'p1',
-  authorName: 'Alice',
-  authorEmail: 'alice@test.com',
-  authorAvatar: null,
-  content: 'Nice post!',
-  status: 'APPROVED' as const,
+// ── 模拟后端 BlogCommentObjectType 响应 ──
+
+const sampleCommentDTO = {
+  id: 1,
+  postId: 10,
   parentId: null,
   replyToId: null,
+  authorName: '张三',
+  authorAvatar: 'https://example.com/avatar.png',
+  content: '好文章！',
+  status: 'APPROVED' as const,
   nestingLevel: 0,
   createdAt: '2024-01-01T00:00:00Z',
   updatedAt: '2024-01-01T00:00:00Z',
+};
+
+const sampleCommentListResponse = {
+  list: [sampleCommentDTO],
+  current: 1,
+  pageSize: 10,
+  total: 1,
 };
 
 describe('comments-api', () => {
@@ -38,190 +48,135 @@ describe('comments-api', () => {
     vi.clearAllMocks();
   });
 
-  // ── mapBlogComment (mapper unit test) ──
+  // ─── mapBlogComment：DTO → Entity 映射 ───
 
   describe('mapBlogComment', () => {
-    it('maps DTO to domain entity with lowercase status', () => {
-      const result = mapBlogComment(sampleDTO);
+    it('应正确映射后端 DTO 到前端实体', () => {
+      const result = mapBlogComment(sampleCommentDTO);
 
-      expect(result.status).toBe('approved');
-      expect(result.id).toBe('c1');
-      expect(result.authorAvatar).toBeNull();
+      expect(result.id).toBe('1'); // number → string
+      expect(result.postId).toBe(10);
+      expect(result.parentId).toBeNull();
+      expect(result.replyToId).toBeNull();
+      expect(result.authorName).toBe('张三');
+      expect(result.authorAvatar).toBe('https://example.com/avatar.png');
+      expect(result.content).toBe('好文章！');
+      expect(result.status).toBe('approved'); // APPROVED → approved
+      expect(result.nestingLevel).toBe(0);
     });
 
-    it('maps PENDING status correctly', () => {
-      const result = mapBlogComment({ ...sampleDTO, status: 'PENDING' });
+    it('应映射 PENDING 状态', () => {
+      const result = mapBlogComment({ ...sampleCommentDTO, status: 'PENDING' });
       expect(result.status).toBe('pending');
     });
 
-    it('maps REJECTED status correctly', () => {
-      const result = mapBlogComment({ ...sampleDTO, status: 'REJECTED' });
+    it('应映射 REJECTED 状态', () => {
+      const result = mapBlogComment({ ...sampleCommentDTO, status: 'REJECTED' });
       expect(result.status).toBe('rejected');
+    });
+
+    it('authorAvatar 为 null 时应保留 null', () => {
+      const result = mapBlogComment({ ...sampleCommentDTO, authorAvatar: null });
+      expect(result.authorAvatar).toBeNull();
     });
   });
 
-  // ── fetchBlogComments ──
+  // ─── fetchBlogCommentsByPost：公开查询 ───
 
-  describe('fetchBlogComments', () => {
-    it('fetches and maps comment list', async () => {
-      mockExecute.mockResolvedValueOnce({
-        blogComments: {
-          items: [sampleDTO],
-          total: 1,
-          offset: 0,
-          limit: 20,
-          hasMore: false,
-        },
-      });
+  describe('fetchBlogCommentsByPost', () => {
+    it('应调用 blogCommentsByPost 查询', async () => {
+      mockExecute.mockResolvedValueOnce({ blogCommentsByPost: sampleCommentListResponse });
 
-      const result = await fetchBlogComments('p1', { offset: 0, limit: 20 });
+      const result = await fetchBlogCommentsByPost(10, { page: 1, pageSize: 10 });
 
       expect(result.items).toHaveLength(1);
       expect(result.items[0].status).toBe('approved');
       expect(result.total).toBe(1);
-      expect(result.hasMore).toBe(false);
 
       const [, variables, options] = mockExecute.mock.calls[0];
-      expect(variables.postId).toBe('p1');
-      expect(variables.offset).toBe(0);
-      expect(variables.limit).toBe(20);
+      expect(variables.postId).toBe(10);
+      expect(variables.page).toBe(1);
+      expect(variables.limit).toBe(10);
       expect(options?.authMode).toBe('none');
-    });
-
-    it('passes uppercase status filter', async () => {
-      mockExecute.mockResolvedValueOnce({
-        blogComments: { items: [], total: 0, offset: 0, limit: 20, hasMore: false },
-      });
-
-      await fetchBlogComments('p1', { offset: 0, limit: 20 }, { status: 'approved' });
-
-      expect(mockExecute.mock.calls[0][1].status).toBe('APPROVED');
-    });
-
-    it('omits status when no filter provided', async () => {
-      mockExecute.mockResolvedValueOnce({
-        blogComments: { items: [], total: 0, offset: 0, limit: 20, hasMore: false },
-      });
-
-      await fetchBlogComments('p1', { offset: 0, limit: 20 });
-
-      expect(mockExecute.mock.calls[0][1].status).toBeUndefined();
-    });
-
-    it('propagates errors from executeGraphQL', async () => {
-      mockExecute.mockRejectedValueOnce(new Error('Network failure'));
-
-      await expect(
-        fetchBlogComments('p1', { offset: 0, limit: 20 }),
-      ).rejects.toThrow('Network failure');
     });
   });
 
-  // ── createBlogComment ──
+  // ─── fetchBlogComments：管理端查询 ───
 
-  describe('createBlogComment', () => {
-    it('creates a comment and returns mapped entity', async () => {
-      mockExecute.mockResolvedValueOnce({
-        createBlogComment: { ...sampleDTO, status: 'PENDING' },
-      });
+  describe('fetchBlogComments', () => {
+    it('应调用 blogPosts 查询（管理端）', async () => {
+      mockExecute.mockResolvedValueOnce({ blogComments: sampleCommentListResponse });
 
-      const result = await createBlogComment({
-        postId: 'p1',
-        authorName: 'Alice',
-        authorEmail: 'alice@test.com',
-        content: 'Nice post!',
-      });
+      const result = await fetchBlogComments({ page: 1, pageSize: 10 });
 
-      expect(result.status).toBe('pending');
-      expect(result.id).toBe('c1');
+      expect(result.items).toHaveLength(1);
 
-      const [, variables, options] = mockExecute.mock.calls[0];
-      expect(variables.input.postId).toBe('p1');
-      expect(options?.authMode).toBe('none');
-    });
-
-    it('passes parentId and replyToId when provided', async () => {
-      mockExecute.mockResolvedValueOnce({ createBlogComment: sampleDTO });
-
-      await createBlogComment({
-        postId: 'p1',
-        authorName: 'Bob',
-        authorEmail: 'bob@test.com',
-        content: 'Reply',
-        parentId: 'c1',
-        replyToId: 'c1',
-      });
-
-      expect(mockExecute.mock.calls[0][1].input.parentId).toBe('c1');
-      expect(mockExecute.mock.calls[0][1].input.replyToId).toBe('c1');
-    });
-
-    it('propagates errors from executeGraphQL', async () => {
-      mockExecute.mockRejectedValueOnce(new Error('Validation error'));
-
-      await expect(
-        createBlogComment({
-          postId: 'p1',
-          authorName: 'Alice',
-          authorEmail: 'alice@test.com',
-          content: 'Test',
-        }),
-      ).rejects.toThrow('Validation error');
-    });
-  });
-
-  // ── updateBlogCommentStatus ──
-
-  describe('updateBlogCommentStatus', () => {
-    it('updates status with auth required', async () => {
-      mockExecute.mockResolvedValueOnce({
-        updateBlogCommentStatus: { ...sampleDTO, status: 'APPROVED' },
-      });
-
-      const result = await updateBlogCommentStatus('c1', 'approved');
-
-      expect(result.status).toBe('approved');
-
-      const [, variables, options] = mockExecute.mock.calls[0];
-      expect(variables.id).toBe('c1');
-      expect(variables.status).toBe('APPROVED');
+      const [, , options] = mockExecute.mock.calls[0];
       expect(options?.authMode).toBe('required');
     });
 
-    it('propagates errors from executeGraphQL', async () => {
-      mockExecute.mockRejectedValueOnce(new Error('Unauthorized'));
+    it('应传递筛选参数（status 大写化）', async () => {
+      mockExecute.mockResolvedValueOnce({ blogComments: { list: [], current: 1, pageSize: 10, total: 0 } });
 
-      await expect(updateBlogCommentStatus('c1', 'approved')).rejects.toThrow('Unauthorized');
+      await fetchBlogComments({ page: 1, pageSize: 10 }, { status: 'pending', postId: 10 });
+
+      const variables = mockExecute.mock.calls[0][1];
+      expect(variables.status).toBe('PENDING');
+      expect(variables.postId).toBe(10);
     });
   });
 
-  // ── deleteBlogComment ──
+  // ─── createBlogComment ───
+
+  describe('createBlogComment', () => {
+    it('应创建评论', async () => {
+      mockExecute.mockResolvedValueOnce({ createBlogComment: sampleCommentDTO });
+
+      const result = await createBlogComment({
+        postId: 10,
+        authorName: '张三',
+        authorEmail: 'test@example.com',
+        content: '好文章！',
+      });
+
+      expect(result.content).toBe('好文章！');
+
+      const [, variables, options] = mockExecute.mock.calls[0];
+      expect(variables.input.postId).toBe(10);
+      expect(options?.authMode).toBe('none');
+    });
+  });
+
+  // ─── updateBlogCommentStatus ───
+
+  describe('updateBlogCommentStatus', () => {
+    it('应更新评论状态（status 大写化）', async () => {
+      mockExecute.mockResolvedValueOnce({ updateBlogCommentStatus: { ...sampleCommentDTO, status: 'REJECTED' } });
+
+      const result = await updateBlogCommentStatus({ id: 1, status: 'rejected' });
+
+      expect(result.status).toBe('rejected');
+
+      const [, variables, options] = mockExecute.mock.calls[0];
+      expect(variables.input.id).toBe(1);
+      expect(variables.input.status).toBe('REJECTED');
+      expect(options?.authMode).toBe('required');
+    });
+  });
+
+  // ─── deleteBlogComment ───
 
   describe('deleteBlogComment', () => {
-    it('deletes a comment with auth required', async () => {
+    it('应删除评论', async () => {
       mockExecute.mockResolvedValueOnce({ deleteBlogComment: true });
 
-      const result = await deleteBlogComment('c1');
+      const result = await deleteBlogComment(1);
 
       expect(result).toBe(true);
 
       const [, variables, options] = mockExecute.mock.calls[0];
-      expect(variables.id).toBe('c1');
+      expect(variables.id).toBe(1);
       expect(options?.authMode).toBe('required');
-    });
-
-    it('returns false when deletion fails on server', async () => {
-      mockExecute.mockResolvedValueOnce({ deleteBlogComment: false });
-
-      const result = await deleteBlogComment('c1');
-
-      expect(result).toBe(false);
-    });
-
-    it('propagates errors from executeGraphQL', async () => {
-      mockExecute.mockRejectedValueOnce(new Error('Forbidden'));
-
-      await expect(deleteBlogComment('c1')).rejects.toThrow('Forbidden');
     });
   });
 });

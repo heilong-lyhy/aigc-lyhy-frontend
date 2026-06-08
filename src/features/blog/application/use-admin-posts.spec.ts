@@ -16,7 +16,7 @@ vi.mock('@/shared/hooks', () => ({
   useAsyncQuery: vi.fn(),
 }));
 
-import type { BlogPost, PaginatedResult } from '@/entities/blog';
+import type { BlogPost, BlogPostDetail, PaginatedResult } from '@/entities/blog';
 
 import { useAsyncQuery } from '@/shared/hooks';
 
@@ -40,11 +40,9 @@ const samplePost: BlogPost = {
   title: 'Test Post',
   slug: 'test-post',
   excerpt: 'excerpt',
-  content: 'content',
   coverImage: null,
-  categoryId: 'cat-1',
-  tags: [],
-  authorId: 'author-1',
+  categoryId: 1,
+  categoryName: 'Tech',
   status: 'published',
   isPinned: false,
   viewCount: 0,
@@ -55,12 +53,18 @@ const samplePost: BlogPost = {
   updatedAt: '2024-06-01T00:00:00Z',
 };
 
+const samplePostDetail: BlogPostDetail = {
+  ...samplePost,
+  content: 'Full content here',
+  renderedContent: '<p>Full content here</p>',
+  tags: [],
+};
+
 const samplePage: PaginatedResult<BlogPost> = {
   items: [samplePost],
   total: 1,
-  offset: 0,
-  limit: 10,
-  hasMore: false,
+  current: 1,
+  pageSize: 10,
 };
 
 function mockAsyncQueryReturn(overrides: Partial<ReturnType<typeof useAsyncQuery>> = {}) {
@@ -81,7 +85,7 @@ describe('useAdminPosts', () => {
   it('auto-loads by default', () => {
     mockUseAsyncQuery.mockReturnValue(mockAsyncQueryReturn());
 
-    renderHook(() => useAdminPosts({ pagination: { offset: 0, limit: 10 } }));
+    renderHook(() => useAdminPosts({ pagination: { page: 1, pageSize: 10 } }));
 
     const options = mockUseAsyncQuery.mock.calls[0][0];
     expect(options.autoLoad).toBe(true);
@@ -92,26 +96,26 @@ describe('useAdminPosts', () => {
   describe('create', () => {
     it('creates a post and returns mapped entity', async () => {
       mockUseAsyncQuery.mockReturnValue(mockAsyncQueryReturn());
-      mockCreateBlogPost.mockResolvedValueOnce(samplePost);
+      mockCreateBlogPost.mockResolvedValueOnce(samplePostDetail);
 
       const { result } = renderHook(() =>
-        useAdminPosts({ pagination: { offset: 0, limit: 10 } }),
+        useAdminPosts({ pagination: { page: 1, pageSize: 10 } }),
       );
 
-      let returned: BlogPost | null = null;
+      let returned: BlogPostDetail | null = null;
       await act(async () => {
         returned = await result.current.create({
           title: 'Test Post',
           slug: 'test-post',
           excerpt: 'excerpt',
-          content: 'content',
-          categoryId: 'cat-1',
+          content: 'Full content here',
+          categoryId: 1,
           tags: [],
           status: 'published',
         });
       });
 
-      expect(returned).toEqual(samplePost);
+      expect(returned).toEqual(samplePostDetail);
       expect(mockCreateBlogPost).toHaveBeenCalledTimes(1);
     });
 
@@ -120,18 +124,15 @@ describe('useAdminPosts', () => {
       mockCreateBlogPost.mockRejectedValueOnce(new Error('Validation error'));
 
       const { result } = renderHook(() =>
-        useAdminPosts({ pagination: { offset: 0, limit: 10 } }),
+        useAdminPosts({ pagination: { page: 1, pageSize: 10 } }),
       );
 
-      let returned: BlogPost | null = undefined as unknown as BlogPost | null;
+      let returned: BlogPostDetail | null = undefined as unknown as BlogPostDetail | null;
       await act(async () => {
         returned = await result.current.create({
           title: 'Test',
           slug: 'test',
-          excerpt: '',
           content: '',
-          categoryId: 'cat-1',
-          tags: [],
           status: 'draft',
         });
       });
@@ -145,17 +146,14 @@ describe('useAdminPosts', () => {
       mockCreateBlogPost.mockRejectedValueOnce('unknown');
 
       const { result } = renderHook(() =>
-        useAdminPosts({ pagination: { offset: 0, limit: 10 } }),
+        useAdminPosts({ pagination: { page: 1, pageSize: 10 } }),
       );
 
       await act(async () => {
         await result.current.create({
           title: 'Test',
           slug: 'test',
-          excerpt: '',
           content: '',
-          categoryId: 'cat-1',
-          tags: [],
           status: 'draft',
         });
       });
@@ -168,21 +166,21 @@ describe('useAdminPosts', () => {
 
   describe('update', () => {
     it('updates a post and returns mapped entity', async () => {
-      const updated = { ...samplePost, title: 'Updated' };
+      const updated = { ...samplePostDetail, title: 'Updated' };
       mockUseAsyncQuery.mockReturnValue(mockAsyncQueryReturn());
       mockUpdateBlogPost.mockResolvedValueOnce(updated);
 
       const { result } = renderHook(() =>
-        useAdminPosts({ pagination: { offset: 0, limit: 10 } }),
+        useAdminPosts({ pagination: { page: 1, pageSize: 10 } }),
       );
 
-      let returned: BlogPost | null = null;
+      let returned: BlogPostDetail | null = null;
       await act(async () => {
-        returned = await result.current.update('p1', { title: 'Updated' });
+        returned = await result.current.update({ id: 1, title: 'Updated' });
       });
 
       expect(returned).toEqual(updated);
-      expect(mockUpdateBlogPost).toHaveBeenCalledWith('p1', { title: 'Updated' });
+      expect(mockUpdateBlogPost).toHaveBeenCalledWith({ id: 1, title: 'Updated' });
     });
 
     it('captures update error and returns null', async () => {
@@ -190,12 +188,12 @@ describe('useAdminPosts', () => {
       mockUpdateBlogPost.mockRejectedValueOnce(new Error('Conflict'));
 
       const { result } = renderHook(() =>
-        useAdminPosts({ pagination: { offset: 0, limit: 10 } }),
+        useAdminPosts({ pagination: { page: 1, pageSize: 10 } }),
       );
 
-      let returned: BlogPost | null = undefined as unknown as BlogPost | null;
+      let returned: BlogPostDetail | null = undefined as unknown as BlogPostDetail | null;
       await act(async () => {
-        returned = await result.current.update('p1', { title: 'x' });
+        returned = await result.current.update({ id: 1, title: 'x' });
       });
 
       expect(returned).toBeNull();
@@ -207,11 +205,11 @@ describe('useAdminPosts', () => {
       mockUpdateBlogPost.mockRejectedValueOnce('unknown');
 
       const { result } = renderHook(() =>
-        useAdminPosts({ pagination: { offset: 0, limit: 10 } }),
+        useAdminPosts({ pagination: { page: 1, pageSize: 10 } }),
       );
 
       await act(async () => {
-        await result.current.update('p1', { title: 'x' });
+        await result.current.update({ id: 1, title: 'x' });
       });
 
       expect(result.current.mutationError).toBe('Failed to update post');
@@ -223,19 +221,19 @@ describe('useAdminPosts', () => {
   describe('loadById', () => {
     it('loads a post by id and returns mapped entity', async () => {
       mockUseAsyncQuery.mockReturnValue(mockAsyncQueryReturn());
-      mockFetchBlogPostById.mockResolvedValueOnce(samplePost);
+      mockFetchBlogPostById.mockResolvedValueOnce(samplePostDetail);
 
       const { result } = renderHook(() =>
-        useAdminPosts({ pagination: { offset: 0, limit: 10 } }),
+        useAdminPosts({ pagination: { page: 1, pageSize: 10 } }),
       );
 
-      let returned: BlogPost | null = null;
+      let returned: BlogPostDetail | null = null;
       await act(async () => {
-        returned = await result.current.loadById('p1');
+        returned = await result.current.loadById(1);
       });
 
-      expect(returned).toEqual(samplePost);
-      expect(mockFetchBlogPostById).toHaveBeenCalledWith('p1');
+      expect(returned).toEqual(samplePostDetail);
+      expect(mockFetchBlogPostById).toHaveBeenCalledWith(1);
     });
 
     it('captures loadById error and returns null', async () => {
@@ -243,12 +241,12 @@ describe('useAdminPosts', () => {
       mockFetchBlogPostById.mockRejectedValueOnce(new Error('Not found'));
 
       const { result } = renderHook(() =>
-        useAdminPosts({ pagination: { offset: 0, limit: 10 } }),
+        useAdminPosts({ pagination: { page: 1, pageSize: 10 } }),
       );
 
-      let returned: BlogPost | null = undefined as unknown as BlogPost | null;
+      let returned: BlogPostDetail | null = undefined as unknown as BlogPostDetail | null;
       await act(async () => {
-        returned = await result.current.loadById('nonexistent');
+        returned = await result.current.loadById(999);
       });
 
       expect(returned).toBeNull();
@@ -264,12 +262,12 @@ describe('useAdminPosts', () => {
       mockDeleteBlogPost.mockResolvedValueOnce(true);
 
       const { result } = renderHook(() =>
-        useAdminPosts({ pagination: { offset: 0, limit: 10 } }),
+        useAdminPosts({ pagination: { page: 1, pageSize: 10 } }),
       );
 
       let deleted = false;
       await act(async () => {
-        deleted = await result.current.remove('p1');
+        deleted = await result.current.remove(1);
       });
 
       expect(deleted).toBe(true);
@@ -280,12 +278,12 @@ describe('useAdminPosts', () => {
       mockDeleteBlogPost.mockRejectedValueOnce(new Error('Forbidden'));
 
       const { result } = renderHook(() =>
-        useAdminPosts({ pagination: { offset: 0, limit: 10 } }),
+        useAdminPosts({ pagination: { page: 1, pageSize: 10 } }),
       );
 
       let deleted = true;
       await act(async () => {
-        deleted = await result.current.remove('p1');
+        deleted = await result.current.remove(1);
       });
 
       expect(deleted).toBe(false);
@@ -297,11 +295,11 @@ describe('useAdminPosts', () => {
       mockDeleteBlogPost.mockRejectedValueOnce('unknown');
 
       const { result } = renderHook(() =>
-        useAdminPosts({ pagination: { offset: 0, limit: 10 } }),
+        useAdminPosts({ pagination: { page: 1, pageSize: 10 } }),
       );
 
       await act(async () => {
-        await result.current.remove('p1');
+        await result.current.remove(1);
       });
 
       expect(result.current.mutationError).toBe('Failed to delete post');
@@ -316,7 +314,7 @@ describe('useAdminPosts', () => {
     );
 
     const { result } = renderHook(() =>
-      useAdminPosts({ pagination: { offset: 0, limit: 10 } }),
+      useAdminPosts({ pagination: { page: 1, pageSize: 10 } }),
     );
 
     expect(result.current.isEmpty).toBe(true);

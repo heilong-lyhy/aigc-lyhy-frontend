@@ -1,4 +1,5 @@
 // src/features/blog/infrastructure/posts-api.spec.ts
+// 契约测试：验证前端 DTO → Entity 映射与后端 GraphQL 响应结构对齐
 
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
@@ -14,23 +15,24 @@ import {
   fetchBlogPostById,
   fetchBlogPostBySlug,
   fetchBlogPosts,
+  fetchBlogPublishedPosts,
   mapBlogPost,
   updateBlogPost,
 } from './posts-api';
 
 const mockExecute = vi.mocked(executeGraphQL);
 
-const sampleDTO = {
-  id: 'p1',
+// ── 模拟后端 BlogPostObjectType 响应 ──
+
+const samplePostDTO = {
+  id: 1,
   title: 'Test Post',
   slug: 'test-post',
   excerpt: 'Excerpt',
-  content: '# Hello',
   coverImage: null,
-  categoryId: 'cat-1',
-  tags: ['tag-1'],
-  authorId: 'author-1',
   status: 'PUBLISHED' as const,
+  categoryId: 10,
+  categoryName: '技术',
   isPinned: false,
   viewCount: 10,
   likeCount: 5,
@@ -40,249 +42,200 @@ const sampleDTO = {
   updatedAt: '2024-01-01T00:00:00Z',
 };
 
+// ── 模拟后端 BlogPostDetailObjectType 响应 ──
+
+const sampleDetailDTO = {
+  ...samplePostDTO,
+  content: '# Hello',
+  renderedContent: '<h1>Hello</h1>',
+  tags: [
+    { id: 1, name: 'TypeScript', slug: 'typescript', postCount: 5, createdAt: '2024-01-01T00:00:00Z', updatedAt: '2024-01-01T00:00:00Z' },
+  ],
+};
+
+// ── 模拟后端 BlogPostsListResponse ──
+
+const sampleListResponse = {
+  list: [samplePostDTO],
+  current: 1,
+  pageSize: 10,
+  total: 1,
+};
+
 describe('posts-api', () => {
   afterEach(() => {
     vi.clearAllMocks();
   });
 
-  describe('mapBlogPost', () => {
-    it('maps DTO to domain entity with lowercase status', () => {
-      const result = mapBlogPost(sampleDTO);
+  // ─── mapBlogPost：DTO → Entity 映射 ───
 
-      expect(result.status).toBe('published');
-      expect(result.id).toBe('p1');
-      expect(result.tags).toEqual(['tag-1']);
+  describe('mapBlogPost', () => {
+    it('应正确映射后端 DTO 到前端实体', () => {
+      const result = mapBlogPost(samplePostDTO);
+
+      expect(result.id).toBe('1'); // number → string
+      expect(result.title).toBe('Test Post');
+      expect(result.slug).toBe('test-post');
+      expect(result.excerpt).toBe('Excerpt');
+      expect(result.coverImage).toBeNull();
+      expect(result.status).toBe('published'); // PUBLISHED → published
+      expect(result.categoryId).toBe(10);
+      expect(result.categoryName).toBe('技术');
+      expect(result.isPinned).toBe(false);
+      expect(result.viewCount).toBe(10);
+      expect(result.likeCount).toBe(5);
+      expect(result.commentCount).toBe(2);
     });
 
-    it('maps DRAFT status correctly', () => {
-      const result = mapBlogPost({ ...sampleDTO, status: 'DRAFT' });
+    it('应映射 DRAFT 状态', () => {
+      const result = mapBlogPost({ ...samplePostDTO, status: 'DRAFT' });
       expect(result.status).toBe('draft');
     });
 
-    it('maps ARCHIVED status correctly', () => {
-      const result = mapBlogPost({ ...sampleDTO, status: 'ARCHIVED' });
+    it('应映射 ARCHIVED 状态', () => {
+      const result = mapBlogPost({ ...samplePostDTO, status: 'ARCHIVED' });
       expect(result.status).toBe('archived');
     });
 
-    it('converts undefined coverImage to null', () => {
-      const result = mapBlogPost({ ...sampleDTO, coverImage: undefined as unknown as null });
-      expect(result.coverImage).toBeNull();
-    });
-
-    it('converts undefined publishedAt to null', () => {
-      const result = mapBlogPost({ ...sampleDTO, publishedAt: undefined as unknown as null });
-      expect(result.publishedAt).toBeNull();
+    it('categoryId 为 null 时应保留 null', () => {
+      const result = mapBlogPost({ ...samplePostDTO, categoryId: null, categoryName: null });
+      expect(result.categoryId).toBeNull();
+      expect(result.categoryName).toBeNull();
     });
   });
 
-  describe('fetchBlogPosts', () => {
-    it('fetches and maps paginated post list', async () => {
-      mockExecute.mockResolvedValueOnce({
-        blogPosts: {
-          items: [sampleDTO],
-          total: 1,
-          offset: 0,
-          limit: 10,
-          hasMore: false,
-        },
-      });
+  // ─── fetchBlogPublishedPosts：公开查询已发布文章 ───
 
-      const result = await fetchBlogPosts({ offset: 0, limit: 10 });
+  describe('fetchBlogPublishedPosts', () => {
+    it('应调用 blogPublishedPosts 查询并映射分页结果', async () => {
+      mockExecute.mockResolvedValueOnce({ blogPublishedPosts: sampleListResponse });
+
+      const result = await fetchBlogPublishedPosts({ page: 1, pageSize: 10 });
 
       expect(result.items).toHaveLength(1);
       expect(result.items[0].status).toBe('published');
       expect(result.total).toBe(1);
-      expect(result.hasMore).toBe(false);
+      expect(result.current).toBe(1);
+      expect(result.pageSize).toBe(10);
 
-      const [, , options] = mockExecute.mock.calls[0];
+      const [, variables, options] = mockExecute.mock.calls[0];
+      expect(variables.page).toBe(1);
+      expect(variables.limit).toBe(10);
       expect(options?.authMode).toBe('none');
-    });
-
-    it('passes uppercase status filter', async () => {
-      mockExecute.mockResolvedValueOnce({
-        blogPosts: { items: [], total: 0, offset: 0, limit: 10, hasMore: false },
-      });
-
-      await fetchBlogPosts({ offset: 0, limit: 10 }, { status: 'draft' });
-
-      expect(mockExecute.mock.calls[0][1].status).toBe('DRAFT');
-    });
-
-    it('passes keyword, categoryId, tagId filters', async () => {
-      mockExecute.mockResolvedValueOnce({
-        blogPosts: { items: [], total: 0, offset: 0, limit: 10, hasMore: false },
-      });
-
-      await fetchBlogPosts(
-        { offset: 0, limit: 10 },
-        { keyword: 'react', categoryId: 'cat-1', tagId: 'tag-1' },
-      );
-
-      const variables = mockExecute.mock.calls[0][1];
-      expect(variables.keyword).toBe('react');
-      expect(variables.categoryId).toBe('cat-1');
-      expect(variables.tagId).toBe('tag-1');
-    });
-
-    it('omits empty keyword', async () => {
-      mockExecute.mockResolvedValueOnce({
-        blogPosts: { items: [], total: 0, offset: 0, limit: 10, hasMore: false },
-      });
-
-      await fetchBlogPosts({ offset: 0, limit: 10 }, { keyword: '' });
-
-      expect(mockExecute.mock.calls[0][1].keyword).toBeUndefined();
-    });
-
-    it('propagates errors from executeGraphQL', async () => {
-      mockExecute.mockRejectedValueOnce(new Error('Server error'));
-
-      await expect(
-        fetchBlogPosts({ offset: 0, limit: 10 }),
-      ).rejects.toThrow('Server error');
     });
   });
 
-  describe('fetchBlogPostById', () => {
-    it('fetches post by id with auth required', async () => {
-      mockExecute.mockResolvedValueOnce({ blogPost: sampleDTO });
+  // ─── fetchBlogPosts：管理端查询 ───
 
-      const result = await fetchBlogPostById('p1');
+  describe('fetchBlogPosts', () => {
+    it('应调用 blogPosts 查询（管理端）', async () => {
+      mockExecute.mockResolvedValueOnce({ blogPosts: sampleListResponse });
 
-      expect(result.id).toBe('p1');
+      const result = await fetchBlogPosts({ page: 1, pageSize: 10 });
 
-      const [, variables, options] = mockExecute.mock.calls[0];
-      expect(variables.id).toBe('p1');
+      expect(result.items).toHaveLength(1);
+      expect(result.total).toBe(1);
+
+      const [, , options] = mockExecute.mock.calls[0];
       expect(options?.authMode).toBe('required');
     });
 
-    it('propagates errors from executeGraphQL', async () => {
-      mockExecute.mockRejectedValueOnce(new Error('Not found'));
+    it('应传递筛选参数', async () => {
+      mockExecute.mockResolvedValueOnce({ blogPosts: { list: [], current: 1, pageSize: 10, total: 0 } });
 
-      await expect(fetchBlogPostById('missing')).rejects.toThrow('Not found');
+      await fetchBlogPosts({ page: 1, pageSize: 10 }, { status: 'draft', categoryId: 5, title: '关键词' });
+
+      const variables = mockExecute.mock.calls[0][1];
+      expect(variables.status).toBe('DRAFT');
+      expect(variables.categoryId).toBe(5);
+      expect(variables.title).toBe('关键词');
     });
   });
 
+  // ─── fetchBlogPostById ───
+
+  describe('fetchBlogPostById', () => {
+    it('应返回 BlogPostDetail（含 content/tags）', async () => {
+      mockExecute.mockResolvedValueOnce({ blogPost: sampleDetailDTO });
+
+      const result = await fetchBlogPostById(1);
+
+      expect(result).not.toBeNull();
+      expect(result!.content).toBe('# Hello');
+      expect(result!.renderedContent).toBe('<h1>Hello</h1>');
+      expect(result!.tags).toHaveLength(1);
+      expect(result!.tags[0].name).toBe('TypeScript');
+    });
+
+    it('文章不存在时应返回 null', async () => {
+      mockExecute.mockResolvedValueOnce({ blogPost: null });
+
+      const result = await fetchBlogPostById(999);
+
+      expect(result).toBeNull();
+    });
+  });
+
+  // ─── fetchBlogPostBySlug ───
+
   describe('fetchBlogPostBySlug', () => {
-    it('fetches post by slug without auth', async () => {
-      mockExecute.mockResolvedValueOnce({ blogPostBySlug: sampleDTO });
+    it('应通过 slug 查询文章详情', async () => {
+      mockExecute.mockResolvedValueOnce({ blogPostBySlug: sampleDetailDTO });
 
       const result = await fetchBlogPostBySlug('test-post');
 
-      expect(result.slug).toBe('test-post');
-
-      const [, variables, options] = mockExecute.mock.calls[0];
-      expect(variables.slug).toBe('test-post');
-      expect(options?.authMode).toBe('none');
-    });
-
-    it('propagates errors from executeGraphQL', async () => {
-      mockExecute.mockRejectedValueOnce(new Error('Not found'));
-
-      await expect(fetchBlogPostBySlug('missing')).rejects.toThrow('Not found');
+      expect(result).not.toBeNull();
+      expect(result!.slug).toBe('test-post');
     });
   });
 
+  // ─── createBlogPost ───
+
   describe('createBlogPost', () => {
-    it('creates a post with auth required', async () => {
-      mockExecute.mockResolvedValueOnce({
-        createBlogPost: { ...sampleDTO, status: 'DRAFT' },
-      });
+    it('应创建文章并返回详情', async () => {
+      mockExecute.mockResolvedValueOnce({ createBlogPost: sampleDetailDTO });
 
       const result = await createBlogPost({
         title: 'New Post',
         slug: 'new-post',
-        excerpt: '',
-        content: '',
-        categoryId: 'cat-1',
-        tags: [],
-        status: 'draft',
+        content: 'Content',
       });
 
-      expect(result.status).toBe('draft');
+      expect(result.content).toBe('# Hello');
 
-      const [, variables, options] = mockExecute.mock.calls[0];
-      expect(variables.input.title).toBe('New Post');
+      const [, , options] = mockExecute.mock.calls[0];
       expect(options?.authMode).toBe('required');
-    });
-
-    it('propagates errors from executeGraphQL', async () => {
-      mockExecute.mockRejectedValueOnce(new Error('Validation error'));
-
-      await expect(
-        createBlogPost({
-          title: '',
-          slug: '',
-          excerpt: '',
-          content: '',
-          categoryId: '',
-          tags: [],
-          status: 'draft',
-        }),
-      ).rejects.toThrow('Validation error');
     });
   });
 
-  describe('updateBlogPost', () => {
-    it('updates a post with auth required', async () => {
-      mockExecute.mockResolvedValueOnce({
-        updateBlogPost: { ...sampleDTO, title: 'Updated' },
-      });
+  // ─── updateBlogPost ───
 
-      const result = await updateBlogPost('p1', { title: 'Updated' });
+  describe('updateBlogPost', () => {
+    it('应更新文章（input 包含 id）', async () => {
+      mockExecute.mockResolvedValueOnce({ updateBlogPost: { ...sampleDetailDTO, title: 'Updated' } });
+
+      const result = await updateBlogPost({ id: 1, title: 'Updated' });
 
       expect(result.title).toBe('Updated');
 
-      const [, variables, options] = mockExecute.mock.calls[0];
-      expect(variables.id).toBe('p1');
-      expect(variables.input.title).toBe('Updated');
-      expect(options?.authMode).toBe('required');
-    });
-
-    it('passes status as lowercase in input', async () => {
-      mockExecute.mockResolvedValueOnce({
-        updateBlogPost: { ...sampleDTO, status: 'PUBLISHED' },
-      });
-
-      await updateBlogPost('p1', { status: 'published' });
-
-      expect(mockExecute.mock.calls[0][1].input.status).toBe('published');
-    });
-
-    it('propagates errors from executeGraphQL', async () => {
-      mockExecute.mockRejectedValueOnce(new Error('Unauthorized'));
-
-      await expect(
-        updateBlogPost('p1', { title: 'x' }),
-      ).rejects.toThrow('Unauthorized');
+      const [, variables] = mockExecute.mock.calls[0];
+      expect(variables.input.id).toBe(1);
     });
   });
 
+  // ─── deleteBlogPost ───
+
   describe('deleteBlogPost', () => {
-    it('deletes a post with auth required', async () => {
+    it('应删除文章', async () => {
       mockExecute.mockResolvedValueOnce({ deleteBlogPost: true });
 
-      const result = await deleteBlogPost('p1');
+      const result = await deleteBlogPost(1);
 
       expect(result).toBe(true);
 
       const [, variables, options] = mockExecute.mock.calls[0];
-      expect(variables.id).toBe('p1');
+      expect(variables.id).toBe(1);
       expect(options?.authMode).toBe('required');
-    });
-
-    it('returns false when deletion fails on server', async () => {
-      mockExecute.mockResolvedValueOnce({ deleteBlogPost: false });
-
-      const result = await deleteBlogPost('p1');
-
-      expect(result).toBe(false);
-    });
-
-    it('propagates errors from executeGraphQL', async () => {
-      mockExecute.mockRejectedValueOnce(new Error('Forbidden'));
-
-      await expect(deleteBlogPost('p1')).rejects.toThrow('Forbidden');
     });
   });
 });

@@ -182,8 +182,8 @@ export default function AuthPage() {
   return (
     <div className="page-stack">
       <PageHeader
-        description="登录或注册以继续使用 AIGC 工作台"
-        title="认证"
+        description="登录或注册以继续使用"
+        title="Login"
       />
 
       <div className="surface-panel">

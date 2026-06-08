@@ -20,7 +20,7 @@ import {
 import { useMutationError } from '../lib/use-mutation-error';
 
 type UseAdminCommentsOptions = {
-  readonly postId?: string;
+  readonly postId?: number;
   readonly pagination: PaginationInput;
   readonly status?: BlogCommentStatus;
   readonly autoLoad?: boolean;
@@ -33,35 +33,34 @@ type UseAdminCommentsResult = {
   readonly error: string | null;
   readonly mutationError: string | null;
   readonly refetch: () => Promise<void>;
-  readonly updateStatus: (id: string, status: BlogCommentStatus) => Promise<BlogComment | null>;
-  readonly remove: (id: string) => Promise<boolean>;
+  readonly updateStatus: (id: number, status: BlogCommentStatus) => Promise<BlogComment | null>;
+  readonly remove: (id: number) => Promise<boolean>;
   readonly batchUpdateStatus: (
-    ids: readonly string[],
+    ids: readonly number[],
     status: BlogCommentStatus,
   ) => Promise<readonly BlogComment[]>;
-  readonly batchRemove: (ids: readonly string[]) => Promise<readonly boolean[]>;
+  readonly batchRemove: (ids: readonly number[]) => Promise<readonly boolean[]>;
 };
 
 export function useAdminComments(options: UseAdminCommentsOptions): UseAdminCommentsResult {
   const { postId, pagination, status, autoLoad = true } = options;
 
   const fetcher = useCallback(async (): Promise<PaginatedResult<BlogComment>> => {
-    if (!postId) throw new Error('postId is required');
-    return await fetchBlogComments(postId, pagination, { status });
+    return await fetchBlogComments(pagination, { postId, status });
   }, [postId, pagination, status]);
 
   const { data, isLoading, error, refetch } = useAsyncQuery<PaginatedResult<BlogComment>>({
     fetcher,
-    autoLoad: autoLoad && !!postId,
+    autoLoad,
   });
 
   const { mutationError, clearMutationError, setMutationError } = useMutationError();
 
   const updateStatus = useCallback(
-    async (id: string, newStatus: BlogCommentStatus): Promise<BlogComment | null> => {
+    async (id: number, newStatus: BlogCommentStatus): Promise<BlogComment | null> => {
       clearMutationError();
       try {
-        return await updateBlogCommentStatus(id, newStatus);
+        return await updateBlogCommentStatus({ id, status: newStatus });
       } catch (err) {
         const message = err instanceof Error ? err.message : 'Failed to update comment status';
         setMutationError(message);
@@ -71,7 +70,7 @@ export function useAdminComments(options: UseAdminCommentsOptions): UseAdminComm
     [clearMutationError, setMutationError],
   );
 
-  const remove = useCallback(async (id: string): Promise<boolean> => {
+  const remove = useCallback(async (id: number): Promise<boolean> => {
     clearMutationError();
     try {
       return await deleteBlogComment(id);
@@ -84,12 +83,12 @@ export function useAdminComments(options: UseAdminCommentsOptions): UseAdminComm
 
   const batchUpdateStatus = useCallback(
     async (
-      ids: readonly string[],
+      ids: readonly number[],
       newStatus: BlogCommentStatus,
     ): Promise<readonly BlogComment[]> => {
       clearMutationError();
       try {
-        return await Promise.all(ids.map((id) => updateBlogCommentStatus(id, newStatus)));
+        return await Promise.all(ids.map((id) => updateBlogCommentStatus({ id, status: newStatus })));
       } catch (err) {
         const message = err instanceof Error ? err.message : 'Failed to batch update comment status';
         setMutationError(message);
@@ -99,7 +98,7 @@ export function useAdminComments(options: UseAdminCommentsOptions): UseAdminComm
     [clearMutationError, setMutationError],
   );
 
-  const batchRemove = useCallback(async (ids: readonly string[]): Promise<readonly boolean[]> => {
+  const batchRemove = useCallback(async (ids: readonly number[]): Promise<readonly boolean[]> => {
     clearMutationError();
     try {
       return await Promise.all(ids.map((id) => deleteBlogComment(id)));

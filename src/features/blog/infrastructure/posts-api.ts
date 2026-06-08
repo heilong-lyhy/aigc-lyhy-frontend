@@ -1,6 +1,13 @@
 // src/features/blog/infrastructure/posts-api.ts
 
-import type { BlogPost, BlogPostStatus, PaginatedResult, PaginationInput } from '@/entities/blog';
+import type {
+  BlogPost,
+  BlogPostDetail,
+  BlogPostStatus,
+  BlogTag,
+  PaginatedResult,
+  PaginationInput,
+} from '@/entities/blog';
 
 import { executeGraphQL } from '@/shared/graphql';
 
@@ -8,17 +15,16 @@ import { executeGraphQL } from '@/shared/graphql';
 
 export type PostStatusDTO = 'DRAFT' | 'PUBLISHED' | 'ARCHIVED';
 
+/** 后端 BlogPostObjectType（列表项） */
 export interface BlogPostDTO {
-  readonly id: string;
+  readonly id: number;
   readonly title: string;
   readonly slug: string;
-  readonly excerpt: string;
-  readonly content: string;
+  readonly excerpt: string | null;
   readonly coverImage: string | null;
-  readonly categoryId: string;
-  readonly tags: readonly string[];
-  readonly authorId: string;
   readonly status: PostStatusDTO;
+  readonly categoryId: number | null;
+  readonly categoryName: string | null;
   readonly isPinned: boolean;
   readonly viewCount: number;
   readonly likeCount: number;
@@ -28,12 +34,28 @@ export interface BlogPostDTO {
   readonly updatedAt: string;
 }
 
+/** 后端 BlogPostDetailObjectType（详情，多 content/renderedContent/tags） */
+export interface BlogPostDetailDTO extends BlogPostDTO {
+  readonly content: string;
+  readonly renderedContent: string | null;
+  readonly tags: readonly BlogTagDTO[];
+}
+
+interface BlogTagDTO {
+  readonly id: number;
+  readonly name: string;
+  readonly slug: string;
+  readonly postCount: number;
+  readonly createdAt: string;
+  readonly updatedAt: string;
+}
+
+/** 后端 BlogPostsListResponse */
 interface BlogPostListDTO {
-  readonly items: readonly BlogPostDTO[];
+  readonly list: readonly BlogPostDTO[];
+  readonly current: number;
+  readonly pageSize: number;
   readonly total: number;
-  readonly offset: number;
-  readonly limit: number;
-  readonly hasMore: boolean;
 }
 
 // ── Mapper：防腐层，DTO → 前端实体类型 ──
@@ -48,18 +70,27 @@ function mapPostStatus(raw: PostStatusDTO): BlogPostStatus {
   return postStatusMap[raw];
 }
 
+function mapTag(raw: BlogTagDTO): BlogTag {
+  return {
+    id: String(raw.id),
+    name: raw.name,
+    slug: raw.slug,
+    postCount: raw.postCount,
+    createdAt: raw.createdAt,
+    updatedAt: raw.updatedAt,
+  };
+}
+
 export function mapBlogPost(raw: BlogPostDTO): BlogPost {
   return {
-    id: raw.id,
+    id: String(raw.id),
     title: raw.title,
     slug: raw.slug,
-    excerpt: raw.excerpt,
-    content: raw.content,
+    excerpt: raw.excerpt ?? null,
     coverImage: raw.coverImage ?? null,
-    categoryId: raw.categoryId,
-    tags: [...raw.tags],
-    authorId: raw.authorId,
     status: mapPostStatus(raw.status),
+    categoryId: raw.categoryId,
+    categoryName: raw.categoryName ?? null,
     isPinned: raw.isPinned,
     viewCount: raw.viewCount,
     likeCount: raw.likeCount,
@@ -70,164 +101,223 @@ export function mapBlogPost(raw: BlogPostDTO): BlogPost {
   };
 }
 
+function mapBlogPostDetail(raw: BlogPostDetailDTO): BlogPostDetail {
+  return {
+    ...mapBlogPost(raw),
+    content: raw.content,
+    renderedContent: raw.renderedContent ?? null,
+    tags: raw.tags.map(mapTag),
+  };
+}
+
 function mapBlogPostList(raw: BlogPostListDTO): PaginatedResult<BlogPost> {
   return {
-    items: raw.items.map(mapBlogPost),
+    items: raw.list.map(mapBlogPost),
     total: raw.total,
-    offset: raw.offset,
-    limit: raw.limit,
-    hasMore: raw.hasMore,
+    current: raw.current,
+    pageSize: raw.pageSize,
   };
 }
 
 // ── GraphQL Documents ──
 
-const POST_FRAGMENT = `
-  fragment PostFields on BlogPost {
-    id title slug excerpt content coverImage categoryId tags authorId
-    status isPinned viewCount likeCount commentCount publishedAt createdAt updatedAt
+const POST_LIST_FRAGMENT = `
+  fragment PostListFields on BlogPost {
+    id title slug excerpt coverImage status categoryId categoryName
+    isPinned viewCount likeCount commentCount publishedAt createdAt updatedAt
   }
 `;
 
-const FETCH_POSTS_QUERY = `
-  query FetchBlogPosts($offset: Int!, $limit: Int!, $keyword: String, $status: PostStatusDTO, $categoryId: ID, $tagId: ID) {
-    blogPosts(offset: $offset, limit: $limit, keyword: $keyword, status: $status, categoryId: $categoryId, tagId: $tagId) {
-      items { ...PostFields }
-      total offset limit hasMore
+const POST_DETAIL_FRAGMENT = `
+  fragment PostDetailFields on BlogPostDetail {
+    id title slug excerpt content renderedContent coverImage status categoryId categoryName
+    isPinned viewCount likeCount commentCount publishedAt createdAt updatedAt
+    tags { id name slug postCount createdAt updatedAt }
+  }
+`;
+
+/** 公开：查询已发布文章列表 */
+const FETCH_PUBLISHED_POSTS_QUERY = `
+  query FetchBlogPublishedPosts($page: Int!, $limit: Int!, $sortBy: String, $sortOrder: SortDirection) {
+    blogPublishedPosts(page: $page, limit: $limit, sortBy: $sortBy, sortOrder: $sortOrder) {
+      list { ...PostListFields }
+      current pageSize total
     }
   }
-  ${POST_FRAGMENT}
+  ${POST_LIST_FRAGMENT}
 `;
 
-const FETCH_POST_BY_ID_QUERY = `
-  query FetchBlogPostById($id: ID!) {
-    blogPost(id: $id) { ...PostFields }
+/** 管理端：查询文章列表（支持筛选） */
+const FETCH_POSTS_QUERY = `
+  query FetchBlogPosts($page: Int!, $limit: Int!, $sortBy: String, $sortOrder: SortDirection, $status: BlogPostStatus, $categoryId: Int, $title: String) {
+    blogPosts(page: $page, limit: $limit, sortBy: $sortBy, sortOrder: $sortOrder, status: $status, categoryId: $categoryId, title: $title) {
+      list { ...PostListFields }
+      current pageSize total
+    }
   }
-  ${POST_FRAGMENT}
+  ${POST_LIST_FRAGMENT}
 `;
 
+/** 公开：按 ID 查询文章详情 */
+const FETCH_POST_BY_ID_QUERY = `
+  query FetchBlogPostById($id: Int!) {
+    blogPost(id: $id) { ...PostDetailFields }
+  }
+  ${POST_DETAIL_FRAGMENT}
+`;
+
+/** 公开：按 slug 查询文章详情 */
 const FETCH_POST_BY_SLUG_QUERY = `
   query FetchBlogPostBySlug($slug: String!) {
-    blogPostBySlug(slug: $slug) { ...PostFields }
+    blogPostBySlug(slug: $slug) { ...PostDetailFields }
   }
-  ${POST_FRAGMENT}
+  ${POST_DETAIL_FRAGMENT}
 `;
 
 const CREATE_POST_MUTATION = `
   mutation CreateBlogPost($input: CreateBlogPostInput!) {
-    createBlogPost(input: $input) { ...PostFields }
+    createBlogPost(input: $input) { ...PostDetailFields }
   }
-  ${POST_FRAGMENT}
+  ${POST_DETAIL_FRAGMENT}
 `;
 
 const UPDATE_POST_MUTATION = `
-  mutation UpdateBlogPost($id: ID!, $input: UpdateBlogPostInput!) {
-    updateBlogPost(id: $id, input: $input) { ...PostFields }
+  mutation UpdateBlogPost($input: UpdateBlogPostInput!) {
+    updateBlogPost(input: $input) { ...PostDetailFields }
   }
-  ${POST_FRAGMENT}
+  ${POST_DETAIL_FRAGMENT}
 `;
 
 const DELETE_POST_MUTATION = `
-  mutation DeleteBlogPost($id: ID!) {
+  mutation DeleteBlogPost($id: Int!) {
     deleteBlogPost(id: $id)
   }
 `;
 
 // ── API 函数 ──
 
+/** 公开：查询已发布文章列表 */
+export async function fetchBlogPublishedPosts(
+  pagination: PaginationInput,
+  options?: {
+    readonly sortBy?: string;
+    readonly sortOrder?: string;
+  },
+): Promise<PaginatedResult<BlogPost>> {
+  const data = await executeGraphQL<{ blogPublishedPosts: BlogPostListDTO }, Record<string, unknown>>(
+    FETCH_PUBLISHED_POSTS_QUERY,
+    {
+      page: pagination.page,
+      limit: pagination.pageSize,
+      sortBy: options?.sortBy,
+      sortOrder: options?.sortOrder,
+    },
+    { authMode: 'none' },
+  );
+
+  return mapBlogPostList(data.blogPublishedPosts);
+}
+
+/** 管理端：查询文章列表（支持筛选） */
 export async function fetchBlogPosts(
   pagination: PaginationInput,
   filters?: {
-    readonly keyword?: string;
     readonly status?: BlogPostStatus;
-    readonly categoryId?: string;
-    readonly tagId?: string;
+    readonly categoryId?: number;
+    readonly title?: string;
   },
 ): Promise<PaginatedResult<BlogPost>> {
   const data = await executeGraphQL<{ blogPosts: BlogPostListDTO }, Record<string, unknown>>(
     FETCH_POSTS_QUERY,
     {
-      offset: pagination.offset,
-      limit: pagination.limit,
-      keyword: filters?.keyword || undefined,
+      page: pagination.page,
+      limit: pagination.pageSize,
       status: filters?.status?.toUpperCase(),
       categoryId: filters?.categoryId,
-      tagId: filters?.tagId,
+      title: filters?.title,
     },
-    { authMode: 'none' },
+    { authMode: 'required' },
   );
 
   return mapBlogPostList(data.blogPosts);
 }
 
-export async function fetchBlogPostById(id: string): Promise<BlogPost> {
-  const data = await executeGraphQL<{ blogPost: BlogPostDTO }, { id: string }>(
+/** 公开：按 ID 查询文章详情 */
+export async function fetchBlogPostById(id: number): Promise<BlogPostDetail | null> {
+  const data = await executeGraphQL<{ blogPost: BlogPostDetailDTO | null }, { id: number }>(
     FETCH_POST_BY_ID_QUERY,
     { id },
-    { authMode: 'required' },
+    { authMode: 'none' },
   );
 
-  return mapBlogPost(data.blogPost);
+  return data.blogPost ? mapBlogPostDetail(data.blogPost) : null;
 }
 
-export async function fetchBlogPostBySlug(slug: string): Promise<BlogPost> {
-  const data = await executeGraphQL<{ blogPostBySlug: BlogPostDTO }, { slug: string }>(
+/** 公开：按 slug 查询文章详情 */
+export async function fetchBlogPostBySlug(slug: string): Promise<BlogPostDetail | null> {
+  const data = await executeGraphQL<{ blogPostBySlug: BlogPostDetailDTO | null }, { slug: string }>(
     FETCH_POST_BY_SLUG_QUERY,
     { slug },
     { authMode: 'none' },
   );
 
-  return mapBlogPost(data.blogPostBySlug);
+  return data.blogPostBySlug ? mapBlogPostDetail(data.blogPostBySlug) : null;
 }
 
+/** 管理端：创建文章 */
 export async function createBlogPost(
   input: Readonly<{
     title: string;
     slug: string;
-    excerpt: string;
+    excerpt?: string;
     content: string;
+    renderedContent?: string;
     coverImage?: string | null;
-    categoryId: string;
-    tags: readonly string[];
-    status: BlogPostStatus;
+    status?: BlogPostStatus;
+    categoryId?: number;
+    tagIds?: readonly number[];
+    isPinned?: boolean;
+    publishedAt?: string;
   }>,
-): Promise<BlogPost> {
-  const data = await executeGraphQL<{ createBlogPost: BlogPostDTO }, Record<string, unknown>>(
+): Promise<BlogPostDetail> {
+  const data = await executeGraphQL<{ createBlogPost: BlogPostDetailDTO }, Record<string, unknown>>(
     CREATE_POST_MUTATION,
     { input },
     { authMode: 'required' },
   );
 
-  return mapBlogPost(data.createBlogPost);
+  return mapBlogPostDetail(data.createBlogPost);
 }
 
+/** 管理端：更新文章 */
 export async function updateBlogPost(
-  id: string,
-  input: Readonly<
-    Partial<{
-      title: string;
-      slug: string;
-      excerpt: string;
-      content: string;
-      coverImage: string | null;
-      categoryId: string;
-      tags: readonly string[];
-      status: BlogPostStatus;
-      isPinned: boolean;
-    }>
-  >,
-): Promise<BlogPost> {
-  const data = await executeGraphQL<{ updateBlogPost: BlogPostDTO }, Record<string, unknown>>(
+  input: Readonly<{
+    id: number;
+    title?: string;
+    slug?: string;
+    excerpt?: string;
+    content?: string;
+    renderedContent?: string;
+    coverImage?: string | null;
+    status?: BlogPostStatus;
+    categoryId?: number;
+    tagIds?: readonly number[];
+    isPinned?: boolean;
+    publishedAt?: string;
+  }>,
+): Promise<BlogPostDetail> {
+  const data = await executeGraphQL<{ updateBlogPost: BlogPostDetailDTO }, Record<string, unknown>>(
     UPDATE_POST_MUTATION,
-    { id, input },
+    { input },
     { authMode: 'required' },
   );
 
-  return mapBlogPost(data.updateBlogPost);
+  return mapBlogPostDetail(data.updateBlogPost);
 }
 
-export async function deleteBlogPost(id: string): Promise<boolean> {
-  const data = await executeGraphQL<{ deleteBlogPost: boolean }, { id: string }>(
+/** 管理端：删除文章 */
+export async function deleteBlogPost(id: number): Promise<boolean> {
+  const data = await executeGraphQL<{ deleteBlogPost: boolean }, { id: number }>(
     DELETE_POST_MUTATION,
     { id },
     { authMode: 'required' },

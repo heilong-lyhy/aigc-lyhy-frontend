@@ -18,7 +18,7 @@ import {
   Typography,
 } from 'antd';
 
-import type { BlogProfile, BlogSocialLink } from '@/entities/blog';
+import type { BlogProfile } from '@/entities/blog';
 
 const { Title } = Typography;
 
@@ -84,9 +84,9 @@ type ProfileSettingsProps = {
     input: Readonly<
       Partial<{
         nickname: string;
-        avatar: string | null;
+        avatarUrl: string | null;
         bio: string;
-        socialLinks: readonly BlogSocialLink[];
+        socialLinks: Record<string, string>;
       }>
     >,
   ) => Promise<BlogProfile | null>;
@@ -122,14 +122,14 @@ export function ProfileSettings({
       initializedProfileId.current = profile.id;
       profileForm.setFieldsValue({
         nickname: profile.nickname,
-        bio: profile.bio,
-        avatar: profile.avatar ?? '',
+        bio: profile.bio ?? '',
+        avatar: profile.avatarUrl ?? '',
       });
       setSocialLinks(
-        profile.socialLinks.map((link) => ({
-          platform: link.platform,
-          url: link.url,
-          icon: link.icon,
+        Object.entries(profile.socialLinks ?? {}).map(([platform, url]) => ({
+          platform,
+          url,
+          icon: null,
         })),
       );
     }
@@ -142,10 +142,12 @@ export function ProfileSettings({
       await onUpdateProfile({
         nickname: values.nickname,
         bio: values.bio,
-        avatar: values.avatar || null,
-        socialLinks: socialLinks
-          .filter((link) => link.platform && link.url)
-          .map((link) => ({ platform: link.platform, url: link.url, icon: link.icon })),
+        avatarUrl: values.avatar || null,
+        socialLinks: Object.fromEntries(
+          socialLinks
+            .filter((link) => link.platform && link.url)
+            .map((link) => [link.platform, link.url]),
+        ),
       });
     } finally {
       setIsSavingProfile(false);
@@ -197,7 +199,7 @@ export function ProfileSettings({
         </Title>
       </div>
 
-      {mutationError && <Alert message={mutationError} showIcon type="error" />}
+      {mutationError && <Alert title={mutationError} showIcon type="error" />}
 
       {/* 博主信息 */}
       <Card loading={isLoading} title={LABEL_PROFILE_INFO}>
@@ -287,7 +289,7 @@ export function ProfileSettings({
         {passwordError && (
           <div className="mb-4">
             <Alert
-              message={passwordError}
+              title={passwordError}
               showIcon
               type="error"
             />

@@ -1,38 +1,34 @@
 // src/entities/blog/pagination.ts
 
-// 当前仅 blog 业务消费；若未来其他 feature 也使用 offset/limit 分页，应迁移至 shared/pagination/
+// 当前仅 blog 业务消费；若未来其他 feature 也使用 page/pageSize 分页，应迁移至 shared/pagination/
 
-/** 通用分页输入（offset/limit 风格，与后端对齐） */
+/** 通用分页输入（page/pageSize 风格，与后端对齐） */
 export interface PaginationInput {
-  readonly offset: number;
-  readonly limit: number;
+  readonly page: number;
+  readonly pageSize: number;
 }
 
-/** 通用分页输出 */
+/** 通用分页输出（与后端 BlogPostsListResponse / BlogCommentsListResponse 对齐） */
 export interface PaginatedResult<T> {
   readonly items: readonly T[];
   readonly total: number;
-  readonly offset: number;
-  readonly limit: number;
-  readonly hasMore: boolean;
+  readonly current: number;
+  readonly pageSize: number;
 }
 
-/** 从 offset/limit 计算当前页码（1-based） */
-export function toCurrentPage(pagination: PaginationInput): number {
-  return Math.floor(pagination.offset / pagination.limit) + 1;
-}
-
-/** 从页码和每页条数计算 offset/limit */
+/** 从页码和每页条数构造分页输入 */
 export function toPaginationInput(page: number, pageSize: number): PaginationInput {
-  return { offset: (page - 1) * pageSize, limit: pageSize };
+  return { page, pageSize };
 }
 
-/**
- * 计算分页组件需要的有效 total。
- * 当 hasMore=true 时，AntD Pagination 需要比实际 total 多 1 才能显示"下一页"按钮。
- */
-export function toEffectiveTotal(total: number, hasMore: boolean): number {
-  return hasMore ? total + 1 : total;
+/** 计算分页组件需要的有效 total */
+export function toEffectiveTotal(total: number): number {
+  return total;
+}
+
+/** 获取当前页码（page/pageSize 模式下直接返回 page） */
+export function toCurrentPage(pagination: PaginationInput): number {
+  return pagination.page;
 }
 
 /** 判断分页结果是否为空（数据已加载、无错误、列表为空） */

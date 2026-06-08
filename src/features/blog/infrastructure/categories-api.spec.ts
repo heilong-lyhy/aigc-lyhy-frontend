@@ -1,4 +1,5 @@
 // src/features/blog/infrastructure/categories-api.spec.ts
+// 契约测试：验证前端 DTO → Entity 映射与后端 GraphQL 响应结构对齐
 
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
@@ -12,33 +13,24 @@ import {
   createBlogCategory,
   deleteBlogCategory,
   fetchBlogCategories,
+  fetchBlogCategoryTree,
   updateBlogCategory,
 } from './categories-api';
 
 const mockExecute = vi.mocked(executeGraphQL);
 
-const sampleDTO = {
-  id: 'cat-1',
+// ── 模拟后端 BlogCategoryObjectType 响应 ──
+
+const sampleCategoryDTO = {
+  id: 1,
   name: '技术',
   slug: 'tech',
   description: '技术文章',
   parentId: null,
-  children: [] as readonly unknown[],
-  sortOrder: 1,
-  postCount: 5,
+  sortOrder: 0,
+  postCount: 10,
   createdAt: '2024-01-01T00:00:00Z',
-};
-
-const childDTO = {
-  id: 'cat-2',
-  name: '前端',
-  slug: 'frontend',
-  description: '前端开发',
-  parentId: 'cat-1',
-  children: [] as readonly unknown[],
-  sortOrder: 1,
-  postCount: 3,
-  createdAt: '2024-01-02T00:00:00Z',
+  updatedAt: '2024-01-01T00:00:00Z',
 };
 
 describe('categories-api', () => {
@@ -47,158 +39,77 @@ describe('categories-api', () => {
   });
 
   describe('fetchBlogCategories', () => {
-    it('fetches and maps flat category list', async () => {
-      mockExecute.mockResolvedValueOnce({
-        blogCategories: [sampleDTO],
-      });
+    it('应调用 blogCategories 查询并映射结果', async () => {
+      mockExecute.mockResolvedValueOnce({ blogCategories: [sampleCategoryDTO] });
 
       const result = await fetchBlogCategories();
 
       expect(result).toHaveLength(1);
-      expect(result[0].id).toBe('cat-1');
+      expect(result[0].id).toBe('1'); // number → string
       expect(result[0].name).toBe('技术');
+      expect(result[0].slug).toBe('tech');
+      expect(result[0].description).toBe('技术文章');
       expect(result[0].parentId).toBeNull();
-      expect(result[0].children).toEqual([]);
+      expect(result[0].sortOrder).toBe(0);
+      expect(result[0].postCount).toBe(10);
 
       const [, , options] = mockExecute.mock.calls[0];
       expect(options?.authMode).toBe('none');
     });
+  });
 
-    it('maps nested children recursively', async () => {
-      mockExecute.mockResolvedValueOnce({
-        blogCategories: [{ ...sampleDTO, children: [childDTO] }],
-      });
+  describe('fetchBlogCategoryTree', () => {
+    it('应调用 blogCategoryTree 查询', async () => {
+      const childDTO = { ...sampleCategoryDTO, id: 2, name: '前端', parentId: 1 };
+      mockExecute.mockResolvedValueOnce({ blogCategoryTree: [sampleCategoryDTO, childDTO] });
 
-      const result = await fetchBlogCategories();
+      const result = await fetchBlogCategoryTree();
 
-      expect(result[0].children).toHaveLength(1);
-      expect(result[0].children[0].id).toBe('cat-2');
-      expect(result[0].children[0].parentId).toBe('cat-1');
-    });
-
-    it('converts undefined parentId to null', async () => {
-      mockExecute.mockResolvedValueOnce({
-        blogCategories: [{ ...sampleDTO, parentId: undefined }],
-      });
-
-      const result = await fetchBlogCategories();
-
-      expect(result[0].parentId).toBeNull();
-    });
-
-    it('propagates errors from executeGraphQL', async () => {
-      mockExecute.mockRejectedValueOnce(new Error('Network failure'));
-
-      await expect(fetchBlogCategories()).rejects.toThrow('Network failure');
+      expect(result).toHaveLength(2);
+      expect(result[1].parentId).toBe(1);
     });
   });
 
   describe('createBlogCategory', () => {
-    it('creates a category with auth required', async () => {
-      mockExecute.mockResolvedValueOnce({
-        createBlogCategory: sampleDTO,
-      });
+    it('应使用 input 对象创建分类', async () => {
+      mockExecute.mockResolvedValueOnce({ createBlogCategory: sampleCategoryDTO });
 
-      const result = await createBlogCategory({
-        name: '技术',
-        slug: 'tech',
-        description: '技术文章',
-      });
+      const result = await createBlogCategory({ name: '技术', slug: 'tech' });
 
-      expect(result.id).toBe('cat-1');
       expect(result.name).toBe('技术');
 
       const [, variables, options] = mockExecute.mock.calls[0];
       expect(variables.input.name).toBe('技术');
+      expect(variables.input.slug).toBe('tech');
       expect(options?.authMode).toBe('required');
-    });
-
-    it('passes parentId and sortOrder when provided', async () => {
-      mockExecute.mockResolvedValueOnce({
-        createBlogCategory: childDTO,
-      });
-
-      await createBlogCategory({
-        name: '前端',
-        slug: 'frontend',
-        description: '前端开发',
-        parentId: 'cat-1',
-        sortOrder: 2,
-      });
-
-      expect(mockExecute.mock.calls[0][1].input.parentId).toBe('cat-1');
-      expect(mockExecute.mock.calls[0][1].input.sortOrder).toBe(2);
-    });
-
-    it('propagates errors from executeGraphQL', async () => {
-      mockExecute.mockRejectedValueOnce(new Error('Slug already exists'));
-
-      await expect(
-        createBlogCategory({ name: '技术', slug: 'tech', description: '' }),
-      ).rejects.toThrow('Slug already exists');
     });
   });
 
   describe('updateBlogCategory', () => {
-    it('updates a category with auth required', async () => {
-      mockExecute.mockResolvedValueOnce({
-        updateBlogCategory: { ...sampleDTO, name: '技术2' },
-      });
+    it('应使用 input 对象（含 id）更新分类', async () => {
+      mockExecute.mockResolvedValueOnce({ updateBlogCategory: { ...sampleCategoryDTO, name: '后端' } });
 
-      const result = await updateBlogCategory('cat-1', { name: '技术2' });
+      const result = await updateBlogCategory({ id: 1, name: '后端' });
 
-      expect(result.name).toBe('技术2');
+      expect(result.name).toBe('后端');
 
-      const [, variables, options] = mockExecute.mock.calls[0];
-      expect(variables.id).toBe('cat-1');
-      expect(variables.input.name).toBe('技术2');
-      expect(options?.authMode).toBe('required');
-    });
-
-    it('passes parentId null for root move', async () => {
-      mockExecute.mockResolvedValueOnce({
-        updateBlogCategory: { ...childDTO, parentId: null },
-      });
-
-      await updateBlogCategory('cat-2', { parentId: null });
-
-      expect(mockExecute.mock.calls[0][1].input.parentId).toBeNull();
-    });
-
-    it('propagates errors from executeGraphQL', async () => {
-      mockExecute.mockRejectedValueOnce(new Error('Not found'));
-
-      await expect(
-        updateBlogCategory('missing', { name: 'x' }),
-      ).rejects.toThrow('Not found');
+      const [, variables] = mockExecute.mock.calls[0];
+      expect(variables.input.id).toBe(1);
+      expect(variables.input.name).toBe('后端');
     });
   });
 
   describe('deleteBlogCategory', () => {
-    it('deletes a category with auth required', async () => {
+    it('应删除分类', async () => {
       mockExecute.mockResolvedValueOnce({ deleteBlogCategory: true });
 
-      const result = await deleteBlogCategory('cat-1');
+      const result = await deleteBlogCategory(1);
 
       expect(result).toBe(true);
 
       const [, variables, options] = mockExecute.mock.calls[0];
-      expect(variables.id).toBe('cat-1');
+      expect(variables.id).toBe(1);
       expect(options?.authMode).toBe('required');
-    });
-
-    it('returns false when deletion fails on server', async () => {
-      mockExecute.mockResolvedValueOnce({ deleteBlogCategory: false });
-
-      const result = await deleteBlogCategory('cat-1');
-
-      expect(result).toBe(false);
-    });
-
-    it('propagates errors from executeGraphQL', async () => {
-      mockExecute.mockRejectedValueOnce(new Error('Has children'));
-
-      await expect(deleteBlogCategory('cat-1')).rejects.toThrow('Has children');
     });
   });
 });

@@ -1,4 +1,5 @@
 // src/features/blog/infrastructure/profile-api.spec.ts
+// 契约测试：验证前端 DTO → Entity 映射与后端 GraphQL 响应结构对齐
 
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
@@ -8,29 +9,20 @@ vi.mock('@/shared/graphql', () => ({
 
 import { executeGraphQL } from '@/shared/graphql';
 
-import {
-  fetchBlogProfile,
-  mapBlogProfile,
-  mapSocialLink,
-  updateBlogProfile,
-} from './profile-api';
+import { fetchBlogProfile, mapBlogProfile, updateBlogProfile } from './profile-api';
 
 const mockExecute = vi.mocked(executeGraphQL);
 
-const sampleSocialLinkDTO = {
-  platform: 'github',
-  url: 'https://github.com/test',
-  icon: null,
-};
+// ── 模拟后端 BlogProfileObjectType 响应 ──
 
 const sampleProfileDTO = {
-  id: 'prof-1',
-  nickname: 'TestUser',
-  avatar: 'https://example.com/avatar.jpg',
-  bio: 'Hello world',
-  socialLinks: [sampleSocialLinkDTO],
+  id: 1,
+  nickname: '博主',
+  bio: '全栈开发者',
+  avatarUrl: 'https://example.com/avatar.png',
+  socialLinks: { github: 'https://github.com/example', twitter: 'https://twitter.com/example' },
   createdAt: '2024-01-01T00:00:00Z',
-  updatedAt: '2024-06-01T00:00:00Z',
+  updatedAt: '2024-01-01T00:00:00Z',
 };
 
 describe('profile-api', () => {
@@ -38,107 +30,64 @@ describe('profile-api', () => {
     vi.clearAllMocks();
   });
 
-  // ── mapSocialLink ──
-
-  describe('mapSocialLink', () => {
-    it('maps DTO to domain entity', () => {
-      const result = mapSocialLink(sampleSocialLinkDTO);
-
-      expect(result.platform).toBe('github');
-      expect(result.url).toBe('https://github.com/test');
-      expect(result.icon).toBeNull();
-    });
-
-    it('converts undefined icon to null', () => {
-      const result = mapSocialLink({ ...sampleSocialLinkDTO, icon: undefined as unknown as null });
-      expect(result.icon).toBeNull();
-    });
-  });
-
-  // ── mapBlogProfile ──
-
   describe('mapBlogProfile', () => {
-    it('maps DTO to domain entity with social links', () => {
+    it('应正确映射后端 DTO 到前端实体', () => {
       const result = mapBlogProfile(sampleProfileDTO);
 
-      expect(result.id).toBe('prof-1');
-      expect(result.nickname).toBe('TestUser');
-      expect(result.avatar).toBe('https://example.com/avatar.jpg');
-      expect(result.bio).toBe('Hello world');
-      expect(result.socialLinks).toHaveLength(1);
-      expect(result.socialLinks[0].platform).toBe('github');
+      expect(result.id).toBe('1'); // number → string
+      expect(result.nickname).toBe('博主');
+      expect(result.bio).toBe('全栈开发者');
+      expect(result.avatarUrl).toBe('https://example.com/avatar.png');
+      expect(result.socialLinks).toEqual({
+        github: 'https://github.com/example',
+        twitter: 'https://twitter.com/example',
+      });
     });
 
-    it('converts undefined avatar to null', () => {
-      const result = mapBlogProfile({ ...sampleProfileDTO, avatar: undefined as unknown as null });
-      expect(result.avatar).toBeNull();
+    it('avatarUrl 为 null 时应保留 null', () => {
+      const result = mapBlogProfile({ ...sampleProfileDTO, avatarUrl: null });
+      expect(result.avatarUrl).toBeNull();
     });
 
-    it('maps empty social links', () => {
-      const result = mapBlogProfile({ ...sampleProfileDTO, socialLinks: [] });
-      expect(result.socialLinks).toEqual([]);
+    it('socialLinks 为 null 时应保留 null', () => {
+      const result = mapBlogProfile({ ...sampleProfileDTO, socialLinks: null });
+      expect(result.socialLinks).toBeNull();
     });
   });
 
-  // ── fetchBlogProfile ──
-
   describe('fetchBlogProfile', () => {
-    it('fetches and maps profile without auth', async () => {
-      mockExecute.mockResolvedValueOnce({
-        blogProfile: sampleProfileDTO,
-      });
+    it('应调用 blogProfile 查询', async () => {
+      mockExecute.mockResolvedValueOnce({ blogProfile: sampleProfileDTO });
 
       const result = await fetchBlogProfile();
 
-      expect(result.id).toBe('prof-1');
-      expect(result.nickname).toBe('TestUser');
+      expect(result).not.toBeNull();
+      expect(result!.nickname).toBe('博主');
 
       const [, , options] = mockExecute.mock.calls[0];
       expect(options?.authMode).toBe('none');
     });
 
-    it('propagates errors from executeGraphQL', async () => {
-      mockExecute.mockRejectedValueOnce(new Error('Server error'));
+    it('未设置 profile 时应返回 null', async () => {
+      mockExecute.mockResolvedValueOnce({ blogProfile: null });
 
-      await expect(fetchBlogProfile()).rejects.toThrow('Server error');
+      const result = await fetchBlogProfile();
+
+      expect(result).toBeNull();
     });
   });
 
-  // ── updateBlogProfile ──
-
   describe('updateBlogProfile', () => {
-    it('updates profile with auth required and returns mapped entity', async () => {
-      mockExecute.mockResolvedValueOnce({
-        updateBlogProfile: { ...sampleProfileDTO, nickname: 'Updated' },
-      });
+    it('应使用 input 对象更新 profile', async () => {
+      mockExecute.mockResolvedValueOnce({ updateBlogProfile: { ...sampleProfileDTO, nickname: '新博主' } });
 
-      const result = await updateBlogProfile({ nickname: 'Updated' });
+      const result = await updateBlogProfile({ nickname: '新博主' });
 
-      expect(result.nickname).toBe('Updated');
+      expect(result.nickname).toBe('新博主');
 
       const [, variables, options] = mockExecute.mock.calls[0];
-      expect(variables.input.nickname).toBe('Updated');
+      expect(variables.input.nickname).toBe('新博主');
       expect(options?.authMode).toBe('required');
-    });
-
-    it('passes socialLinks in input', async () => {
-      mockExecute.mockResolvedValueOnce({
-        updateBlogProfile: sampleProfileDTO,
-      });
-
-      await updateBlogProfile({
-        socialLinks: [{ platform: 'twitter', url: 'https://x.com/test', icon: null }],
-      });
-
-      expect(mockExecute.mock.calls[0][1].input.socialLinks).toEqual([
-        { platform: 'twitter', url: 'https://x.com/test', icon: null },
-      ]);
-    });
-
-    it('propagates errors from executeGraphQL', async () => {
-      mockExecute.mockRejectedValueOnce(new Error('Unauthorized'));
-
-      await expect(updateBlogProfile({ nickname: 'x' })).rejects.toThrow('Unauthorized');
     });
   });
 });

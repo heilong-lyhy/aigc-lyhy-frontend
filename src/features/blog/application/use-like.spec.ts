@@ -4,13 +4,13 @@
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { checkBlogLiked, toggleBlogLike } from '../infrastructure/likes-api';
+import { checkBlogPostLiked, toggleBlogPostLike } from '../infrastructure/likes-api';
 
 import { useLike } from './use-like';
 
 vi.mock('../infrastructure/likes-api', () => ({
-  checkBlogLiked: vi.fn(),
-  toggleBlogLike: vi.fn(),
+  checkBlogPostLiked: vi.fn(),
+  toggleBlogPostLike: vi.fn(),
 }));
 
 // eslint-disable-next-line prefer-const
@@ -32,8 +32,8 @@ vi.mock('../lib/use-mutation-error', () => ({
   },
 }));
 
-const mockCheckBlogLiked = vi.mocked(checkBlogLiked);
-const mockToggleBlogLike = vi.mocked(toggleBlogLike);
+const mockCheckBlogPostLiked = vi.mocked(checkBlogPostLiked);
+const mockToggleBlogPostLike = vi.mocked(toggleBlogPostLike);
 
 afterEach(() => {
   vi.clearAllMocks();
@@ -41,50 +41,40 @@ afterEach(() => {
 });
 
 describe('useLike', () => {
-  it('does not check status when targetId is empty', () => {
-    renderHook(() => useLike({ targetType: 'post', targetId: '', autoCheck: true }));
+  it('does not check status when postId is 0', () => {
+    renderHook(() => useLike({ postId: 0, userIdentifier: 'user-1', autoCheck: true }));
 
-    expect(mockCheckBlogLiked).not.toHaveBeenCalled();
+    expect(mockCheckBlogPostLiked).not.toHaveBeenCalled();
   });
 
   it('checks like status on mount when autoCheck is true', async () => {
-    mockCheckBlogLiked.mockResolvedValueOnce(true);
+    mockCheckBlogPostLiked.mockResolvedValueOnce(true);
 
     const { result } = renderHook(() =>
-      useLike({ targetType: 'post', targetId: 'post-1', autoCheck: true }),
+      useLike({ postId: 1, userIdentifier: 'user-1', autoCheck: true }),
     );
 
     await waitFor(() => {
       expect(result.current.liked).toBe(true);
     });
 
-    expect(mockCheckBlogLiked).toHaveBeenCalledWith('post', 'post-1');
+    expect(mockCheckBlogPostLiked).toHaveBeenCalledWith(1, 'user-1');
   });
 
   it('does not check when autoCheck is false', () => {
     renderHook(() =>
-      useLike({ targetType: 'post', targetId: 'post-1', autoCheck: false }),
+      useLike({ postId: 1, userIdentifier: 'user-1', autoCheck: false }),
     );
 
-    expect(mockCheckBlogLiked).not.toHaveBeenCalled();
+    expect(mockCheckBlogPostLiked).not.toHaveBeenCalled();
   });
 
   it('toggles like from unliked to liked', async () => {
-    mockCheckBlogLiked.mockResolvedValueOnce(false);
-    mockToggleBlogLike.mockResolvedValueOnce({
-      liked: true,
-      like: {
-        id: 'like-1',
-        targetType: 'post',
-        targetId: 'post-1',
-        userId: null,
-        fingerprint: null,
-        createdAt: '2024-01-01T00:00:00Z',
-      },
-    });
+    mockCheckBlogPostLiked.mockResolvedValueOnce(false);
+    mockToggleBlogPostLike.mockResolvedValueOnce({ liked: true });
 
     const { result } = renderHook(() =>
-      useLike({ targetType: 'post', targetId: 'post-1' }),
+      useLike({ postId: 1, userIdentifier: 'user-1' }),
     );
 
     await waitFor(() => {
@@ -94,27 +84,23 @@ describe('useLike', () => {
     await act(() => result.current.toggle());
 
     expect(result.current.liked).toBe(true);
-    expect(mockToggleBlogLike).toHaveBeenCalledWith({
-      targetType: 'post',
-      targetId: 'post-1',
-      fingerprint: undefined,
-    });
+    expect(mockToggleBlogPostLike).toHaveBeenCalledWith(1, 'user-1');
   });
 
-  it('does not toggle when targetId is empty', async () => {
+  it('does not toggle when postId is 0', async () => {
     const { result } = renderHook(() =>
-      useLike({ targetType: 'post', targetId: '' }),
+      useLike({ postId: 0, userIdentifier: 'user-1' }),
     );
 
     await act(() => result.current.toggle());
-    expect(mockToggleBlogLike).not.toHaveBeenCalled();
+    expect(mockToggleBlogPostLike).not.toHaveBeenCalled();
   });
 
   it('captures check error', async () => {
-    mockCheckBlogLiked.mockRejectedValueOnce(new Error('Check failed'));
+    mockCheckBlogPostLiked.mockRejectedValueOnce(new Error('Check failed'));
 
     const { result } = renderHook(() =>
-      useLike({ targetType: 'post', targetId: 'post-1' }),
+      useLike({ postId: 1, userIdentifier: 'user-1' }),
     );
 
     await waitFor(() => {
@@ -123,11 +109,11 @@ describe('useLike', () => {
   });
 
   it('captures toggle error as mutationError', async () => {
-    mockCheckBlogLiked.mockResolvedValueOnce(false);
-    mockToggleBlogLike.mockRejectedValueOnce(new Error('Toggle failed'));
+    mockCheckBlogPostLiked.mockResolvedValueOnce(false);
+    mockToggleBlogPostLike.mockRejectedValueOnce(new Error('Toggle failed'));
 
     const { result } = renderHook(() =>
-      useLike({ targetType: 'post', targetId: 'post-1' }),
+      useLike({ postId: 1, userIdentifier: 'user-1' }),
     );
 
     await waitFor(() => {

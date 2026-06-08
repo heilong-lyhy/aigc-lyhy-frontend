@@ -31,9 +31,8 @@ const mockDeleteBlogComment = vi.mocked(deleteBlogComment);
 
 const sampleComment: BlogComment = {
   id: 'c1',
-  postId: 'p1',
+  postId: 1,
   authorName: 'User',
-  authorEmail: 'user@test.com',
   authorAvatar: null,
   content: 'Nice post',
   status: 'pending',
@@ -47,9 +46,8 @@ const sampleComment: BlogComment = {
 const samplePage: PaginatedResult<BlogComment> = {
   items: [sampleComment],
   total: 1,
-  offset: 0,
-  limit: 10,
-  hasMore: false,
+  current: 1,
+  pageSize: 10,
 };
 
 function mockAsyncQueryReturn(overrides: Partial<ReturnType<typeof useAsyncQuery>> = {}) {
@@ -67,15 +65,15 @@ afterEach(() => {
 });
 
 describe('useAdminComments', () => {
-  it('does not auto-load when postId is empty', () => {
+  it('does not auto-load when postId is undefined', () => {
     mockUseAsyncQuery.mockReturnValue(mockAsyncQueryReturn());
 
     renderHook(() =>
-      useAdminComments({ postId: '', pagination: { offset: 0, limit: 10 } }),
+      useAdminComments({ pagination: { page: 1, pageSize: 10 } }),
     );
 
     const options = mockUseAsyncQuery.mock.calls[0][0];
-    expect(options.autoLoad).toBe(false);
+    expect(options.autoLoad).toBe(true);
   });
 
   // ── updateStatus ──
@@ -87,16 +85,16 @@ describe('useAdminComments', () => {
       mockUpdateBlogCommentStatus.mockResolvedValueOnce(approved);
 
       const { result } = renderHook(() =>
-        useAdminComments({ postId: 'p1', pagination: { offset: 0, limit: 10 } }),
+        useAdminComments({ postId: 1, pagination: { page: 1, pageSize: 10 } }),
       );
 
       let returned: BlogComment | null = null;
       await act(async () => {
-        returned = await result.current.updateStatus('c1', 'approved');
+        returned = await result.current.updateStatus(1, 'approved');
       });
 
       expect(returned).toEqual(approved);
-      expect(mockUpdateBlogCommentStatus).toHaveBeenCalledWith('c1', 'approved');
+      expect(mockUpdateBlogCommentStatus).toHaveBeenCalledWith({ id: 1, status: 'approved' });
     });
 
     it('captures update error and returns null', async () => {
@@ -104,12 +102,12 @@ describe('useAdminComments', () => {
       mockUpdateBlogCommentStatus.mockRejectedValueOnce(new Error('Forbidden'));
 
       const { result } = renderHook(() =>
-        useAdminComments({ postId: 'p1', pagination: { offset: 0, limit: 10 } }),
+        useAdminComments({ postId: 1, pagination: { page: 1, pageSize: 10 } }),
       );
 
       let returned: BlogComment | null = undefined as unknown as BlogComment | null;
       await act(async () => {
-        returned = await result.current.updateStatus('c1', 'approved');
+        returned = await result.current.updateStatus(1, 'approved');
       });
 
       expect(returned).toBeNull();
@@ -121,11 +119,11 @@ describe('useAdminComments', () => {
       mockUpdateBlogCommentStatus.mockRejectedValueOnce('unknown');
 
       const { result } = renderHook(() =>
-        useAdminComments({ postId: 'p1', pagination: { offset: 0, limit: 10 } }),
+        useAdminComments({ postId: 1, pagination: { page: 1, pageSize: 10 } }),
       );
 
       await act(async () => {
-        await result.current.updateStatus('c1', 'approved');
+        await result.current.updateStatus(1, 'approved');
       });
 
       expect(result.current.mutationError).toBe('Failed to update comment status');
@@ -140,12 +138,12 @@ describe('useAdminComments', () => {
       mockDeleteBlogComment.mockResolvedValueOnce(true);
 
       const { result } = renderHook(() =>
-        useAdminComments({ postId: 'p1', pagination: { offset: 0, limit: 10 } }),
+        useAdminComments({ postId: 1, pagination: { page: 1, pageSize: 10 } }),
       );
 
       let deleted = false;
       await act(async () => {
-        deleted = await result.current.remove('c1');
+        deleted = await result.current.remove(1);
       });
 
       expect(deleted).toBe(true);
@@ -156,12 +154,12 @@ describe('useAdminComments', () => {
       mockDeleteBlogComment.mockRejectedValueOnce(new Error('Not found'));
 
       const { result } = renderHook(() =>
-        useAdminComments({ postId: 'p1', pagination: { offset: 0, limit: 10 } }),
+        useAdminComments({ postId: 1, pagination: { page: 1, pageSize: 10 } }),
       );
 
       let deleted = true;
       await act(async () => {
-        deleted = await result.current.remove('c1');
+        deleted = await result.current.remove(1);
       });
 
       expect(deleted).toBe(false);
@@ -180,12 +178,12 @@ describe('useAdminComments', () => {
         .mockResolvedValueOnce({ ...approved, id: 'c2' });
 
       const { result } = renderHook(() =>
-        useAdminComments({ postId: 'p1', pagination: { offset: 0, limit: 10 } }),
+        useAdminComments({ postId: 1, pagination: { page: 1, pageSize: 10 } }),
       );
 
       let results: readonly BlogComment[] = [];
       await act(async () => {
-        results = await result.current.batchUpdateStatus(['c1', 'c2'], 'approved');
+        results = await result.current.batchUpdateStatus([1, 2], 'approved');
       });
 
       expect(results).toHaveLength(2);
@@ -197,12 +195,12 @@ describe('useAdminComments', () => {
       mockUpdateBlogCommentStatus.mockRejectedValueOnce(new Error('Server error'));
 
       const { result } = renderHook(() =>
-        useAdminComments({ postId: 'p1', pagination: { offset: 0, limit: 10 } }),
+        useAdminComments({ postId: 1, pagination: { page: 1, pageSize: 10 } }),
       );
 
       let results: readonly BlogComment[] = [sampleComment];
       await act(async () => {
-        results = await result.current.batchUpdateStatus(['c1'], 'approved');
+        results = await result.current.batchUpdateStatus([1], 'approved');
       });
 
       expect(results).toEqual([]);
@@ -220,12 +218,12 @@ describe('useAdminComments', () => {
         .mockResolvedValueOnce(true);
 
       const { result } = renderHook(() =>
-        useAdminComments({ postId: 'p1', pagination: { offset: 0, limit: 10 } }),
+        useAdminComments({ postId: 1, pagination: { page: 1, pageSize: 10 } }),
       );
 
       let results: readonly boolean[] = [];
       await act(async () => {
-        results = await result.current.batchRemove(['c1', 'c2']);
+        results = await result.current.batchRemove([1, 2]);
       });
 
       expect(results).toEqual([true, true]);
@@ -237,12 +235,12 @@ describe('useAdminComments', () => {
       mockDeleteBlogComment.mockRejectedValueOnce(new Error('Forbidden'));
 
       const { result } = renderHook(() =>
-        useAdminComments({ postId: 'p1', pagination: { offset: 0, limit: 10 } }),
+        useAdminComments({ postId: 1, pagination: { page: 1, pageSize: 10 } }),
       );
 
       let results: readonly boolean[] = [true];
       await act(async () => {
-        results = await result.current.batchRemove(['c1']);
+        results = await result.current.batchRemove([1]);
       });
 
       expect(results).toEqual([]);
@@ -258,7 +256,7 @@ describe('useAdminComments', () => {
     );
 
     const { result } = renderHook(() =>
-      useAdminComments({ postId: 'p1', pagination: { offset: 0, limit: 10 } }),
+      useAdminComments({ postId: 1, pagination: { page: 1, pageSize: 10 } }),
     );
 
     expect(result.current.isEmpty).toBe(true);

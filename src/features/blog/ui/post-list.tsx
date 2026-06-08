@@ -14,7 +14,6 @@ type PostListProps = {
   readonly tags: readonly BlogTag[];
   readonly pagination: PaginationInput;
   readonly total: number;
-  readonly hasMore: boolean;
   readonly isLoading: boolean;
   readonly error: string | null;
   readonly onPaginationChange: (pagination: PaginationInput) => void;
@@ -28,7 +27,6 @@ export function PostList({
   tags,
   pagination,
   total,
-  hasMore,
   isLoading,
   error,
   onPaginationChange,
@@ -62,7 +60,6 @@ export function PostList({
       </div>
       <div className="flex justify-center">
         <Pagination
-          hasMore={hasMore}
           pagination={pagination}
           total={total}
           onChange={onPaginationChange}

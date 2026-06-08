@@ -25,7 +25,7 @@ import { Error404 } from '@/features/error-feedback';
 
 import type { BlogComment, PaginationInput } from '@/entities/blog';
 
-const COMMENTS_PAGINATION: PaginationInput = { offset: 0, limit: 20 };
+const COMMENTS_PAGINATION: PaginationInput = { page: 1, pageSize: 20 };
 
 export function BlogPostPage() {
   const { slug } = useParams<{ slug: string }>();
@@ -39,19 +39,18 @@ export function BlogPostPage() {
     refetch,
   } = useBlogPostDetail(slug ?? null);
 
-  const { data: categories } = useBlogCategories({ useMockFallback: true });
-  const { data: tags } = useBlogTags({ useMockFallback: true });
+  const { data: categories } = useBlogCategories();
+  const { data: tags } = useBlogTags();
 
   const likeHook = useLike({
-    targetType: 'post',
-    targetId: post?.id ?? '',
+    postId: post?.id ? Number(post.id) : 0,
+    userIdentifier: 'anonymous',
     autoCheck: !!post?.id,
   });
 
   const { data: commentsData, refetch: refetchComments } = useBlogComments({
-    postId: post?.id ?? '',
+    postId: post?.id ? Number(post.id) : 0,
     pagination: COMMENTS_PAGINATION,
-    status: 'approved',
     autoLoad: !!post?.id,
   });
 

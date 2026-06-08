@@ -30,7 +30,7 @@ export function CommentForm({ postId, onSuccess }: CommentFormProps) {
   const handleSubmit = useCallback(
     async (values: CommentFormValues) => {
       const result = await submitComment({
-        postId,
+        postId: Number(postId),
         authorName: stripHtml(values.authorName.trim()),
         authorEmail: stripHtml(values.authorEmail.trim()),
         content: stripHtml(values.content.trim()),

@@ -25,8 +25,7 @@ const LABEL_NO_ARCHIVES = '暂无归档文章';
 const LABEL_YEAR_SUFFIX = ' 年';
 const LABEL_MONTH_SUFFIX = ' 月';
 const LABEL_PINNED = '置顶';
-const DEFAULT_PAGINATION: PaginationInput = { offset: 0, limit: 100 };
-const USE_MOCK_FALLBACK = false;
+const DEFAULT_PAGINATION: PaginationInput = { page: 1, pageSize: 100 };
 
 const { Text } = Typography;
 
@@ -40,17 +39,11 @@ export function BlogArchivePage() {
     refetch,
   } = useBlogPosts({
     pagination: DEFAULT_PAGINATION,
-    status: 'published',
-    useMockFallback: USE_MOCK_FALLBACK,
   });
 
-  const { data: categories, isLoading: isLoadingCategories } = useBlogCategories({
-    useMockFallback: USE_MOCK_FALLBACK,
-  });
+  const { data: categories, isLoading: isLoadingCategories } = useBlogCategories();
 
-  const { data: tags, isLoading: isLoadingTags } = useBlogTags({
-    useMockFallback: USE_MOCK_FALLBACK,
-  });
+  const { data: tags, isLoading: isLoadingTags } = useBlogTags();
 
   const handlePostClick = useCallback(
     (slug: string) => {

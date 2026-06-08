@@ -35,12 +35,12 @@ export function ReplyForm({ postId, parentComment, onCancel, onSuccess }: ReplyF
   const handleSubmit = useCallback(
     async (values: ReplyFormValues) => {
       const result = await submitComment({
-        postId,
+        postId: Number(postId),
         authorName: stripHtml(values.authorName.trim()),
         authorEmail: stripHtml(values.authorEmail.trim()),
         content: stripHtml(values.content.trim()),
-        parentId: parentComment.id,
-        replyToId: parentComment.replyToId ?? parentComment.id,
+        parentId: parentComment.parentId ? Number(parentComment.parentId) : null,
+        replyToId: parentComment.replyToId ? Number(parentComment.replyToId) : Number(parentComment.id),
       });
 
       if (result) {

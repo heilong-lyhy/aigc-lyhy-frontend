@@ -69,7 +69,7 @@ export function CommentManager({
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
 
   const items = data?.items ?? [];
-  const total = data ? toEffectiveTotal(data.total, data.hasMore) : 0;
+  const total = data ? toEffectiveTotal(data.total) : 0;
   const current = toCurrentPage(pagination);
 
   const columns: ColumnsType<BlogComment> = useMemo(() => [
@@ -194,10 +194,10 @@ export function CommentManager({
         loading={isLoading}
         pagination={{
           current,
-          pageSize: pagination.limit,
+          pageSize: pagination.pageSize,
           total,
           showSizeChanger: false,
-          onChange: (page) => onPaginationChange(toPaginationInput(page, pagination.limit)),
+          onChange: (page) => onPaginationChange(toPaginationInput(page, pagination.pageSize)),
         }}
         rowKey="id"
         rowSelection={{

@@ -15,6 +15,8 @@ import { useAuth } from '@/features/auth';
 
 import type { AssistantRouteCandidate } from '@/entities/assistant-session';
 
+import { LoginPrompt } from '@/shared/ui/login-prompt';
+
 import { EntryAccentGlyph } from './entry-accent-glyph';
 
 function toRouteCandidate(
@@ -63,6 +65,13 @@ export function AppLayout({ children }: AppLayoutProps = {}) {
     () => navigationItems.map((item) => toRouteCandidate(item)),
     [navigationItems],
   );
+
+  // 未登录时，首页自动跳转至登录页
+  useEffect(() => {
+    if (!isAuthenticated && location.pathname === '/') {
+      navigate('/auth', { replace: true });
+    }
+  }, [isAuthenticated, location.pathname, navigate]);
 
   useEffect(() => {
     if (wasSidecarOpenRef.current && !isSidecarOpen) {
@@ -172,7 +181,13 @@ export function AppLayout({ children }: AppLayoutProps = {}) {
         </div>
       </header>
 
-      <main className="app-main">{children ?? <Outlet />}</main>
+      <main className="app-main">
+        {!isAuthenticated && location.pathname !== '/auth' ? (
+          <LoginPrompt />
+        ) : (
+          children ?? <Outlet />
+        )}
+      </main>
 
       {!isSidecarOpen ? (
         <div className="entry-trigger-shell" data-entry-open="false">

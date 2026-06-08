@@ -3,15 +3,12 @@
 import { HeartFilled, HeartOutlined } from '@ant-design/icons';
 import { Button, Tooltip } from 'antd';
 
-import type { BlogLikeTargetType } from '@/entities/blog';
-
 import { useLike } from '../application/use-like';
 
 type LikeButtonProps = {
-  readonly targetType: BlogLikeTargetType;
-  readonly targetId: string;
+  readonly postId: number;
+  readonly userIdentifier: string;
   readonly initialLikeCount?: number;
-  readonly fingerprint?: string;
   readonly size?: 'small' | 'middle' | 'large';
 };
 
@@ -19,17 +16,15 @@ const LABEL_LIKE = '点赞';
 const LABEL_LIKED = '已赞';
 
 export function LikeButton({
-  targetType,
-  targetId,
+  postId,
+  userIdentifier,
   initialLikeCount = 0,
-  fingerprint,
   size = 'middle',
 }: LikeButtonProps) {
   const { liked, isLoading, mutationError, toggle } = useLike({
-    targetType,
-    targetId,
-    fingerprint,
-    autoCheck: targetId !== '',
+    postId,
+    userIdentifier,
+    autoCheck: postId > 0,
   });
 
   const displayCount = initialLikeCount + (liked ? 1 : 0);

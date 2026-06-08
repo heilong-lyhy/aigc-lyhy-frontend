@@ -13,27 +13,27 @@ import { executeGraphQL } from '@/shared/graphql';
 
 export type CommentStatusDTO = 'PENDING' | 'APPROVED' | 'REJECTED';
 
+/** 后端 BlogCommentObjectType */
 export interface BlogCommentDTO {
-  readonly id: string;
-  readonly postId: string;
+  readonly id: number;
+  readonly postId: number;
+  readonly parentId: number | null;
+  readonly replyToId: number | null;
   readonly authorName: string;
-  readonly authorEmail: string;
   readonly authorAvatar: string | null;
   readonly content: string;
   readonly status: CommentStatusDTO;
-  readonly parentId: string | null;
-  readonly replyToId: string | null;
   readonly nestingLevel: number;
   readonly createdAt: string;
   readonly updatedAt: string;
 }
 
+/** 后端 BlogCommentsListResponse */
 interface BlogCommentListDTO {
-  readonly items: readonly BlogCommentDTO[];
+  readonly list: readonly BlogCommentDTO[];
+  readonly current: number;
+  readonly pageSize: number;
   readonly total: number;
-  readonly offset: number;
-  readonly limit: number;
-  readonly hasMore: boolean;
 }
 
 // ── Mapper：防腐层，DTO → 前端实体类型 ──
@@ -50,15 +50,14 @@ function mapCommentStatus(raw: CommentStatusDTO): BlogCommentStatus {
 
 export function mapBlogComment(raw: BlogCommentDTO): BlogComment {
   return {
-    id: raw.id,
+    id: String(raw.id),
     postId: raw.postId,
+    parentId: raw.parentId,
+    replyToId: raw.replyToId,
     authorName: raw.authorName,
-    authorEmail: raw.authorEmail,
     authorAvatar: raw.authorAvatar ?? null,
     content: raw.content,
     status: mapCommentStatus(raw.status),
-    parentId: raw.parentId ?? null,
-    replyToId: raw.replyToId ?? null,
     nestingLevel: raw.nestingLevel,
     createdAt: raw.createdAt,
     updatedAt: raw.updatedAt,
@@ -67,11 +66,10 @@ export function mapBlogComment(raw: BlogCommentDTO): BlogComment {
 
 function mapBlogCommentList(raw: BlogCommentListDTO): PaginatedResult<BlogComment> {
   return {
-    items: raw.items.map(mapBlogComment),
+    items: raw.list.map(mapBlogComment),
     total: raw.total,
-    offset: raw.offset,
-    limit: raw.limit,
-    hasMore: raw.hasMore,
+    current: raw.current,
+    pageSize: raw.pageSize,
   };
 }
 
@@ -79,16 +77,28 @@ function mapBlogCommentList(raw: BlogCommentListDTO): PaginatedResult<BlogCommen
 
 const COMMENT_FRAGMENT = `
   fragment CommentFields on BlogComment {
-    id postId authorName authorEmail authorAvatar content status
-    parentId replyToId nestingLevel createdAt updatedAt
+    id postId parentId replyToId authorName authorAvatar content
+    status nestingLevel createdAt updatedAt
   }
 `;
 
+/** 公开：查询指定文章的评论列表 */
+const FETCH_COMMENTS_BY_POST_QUERY = `
+  query FetchBlogCommentsByPost($postId: Int!, $page: Int!, $limit: Int!, $sortBy: String, $sortOrder: SortDirection) {
+    blogCommentsByPost(postId: $postId, page: $page, limit: $limit, sortBy: $sortBy, sortOrder: $sortOrder) {
+      list { ...CommentFields }
+      current pageSize total
+    }
+  }
+  ${COMMENT_FRAGMENT}
+`;
+
+/** 管理端：查询评论列表（支持筛选） */
 const FETCH_COMMENTS_QUERY = `
-  query FetchBlogComments($postId: ID!, $offset: Int!, $limit: Int!, $status: CommentStatusDTO) {
-    blogComments(postId: $postId, offset: $offset, limit: $limit, status: $status) {
-      items { ...CommentFields }
-      total offset limit hasMore
+  query FetchBlogComments($page: Int!, $limit: Int!, $sortBy: String, $sortOrder: SortDirection, $postId: Int, $status: BlogCommentStatus) {
+    blogComments(page: $page, limit: $limit, sortBy: $sortBy, sortOrder: $sortOrder, postId: $postId, status: $status) {
+      list { ...CommentFields }
+      current pageSize total
     }
   }
   ${COMMENT_FRAGMENT}
@@ -102,47 +112,75 @@ const CREATE_COMMENT_MUTATION = `
 `;
 
 const UPDATE_COMMENT_STATUS_MUTATION = `
-  mutation UpdateBlogCommentStatus($id: ID!, $status: CommentStatusDTO!) {
-    updateBlogCommentStatus(id: $id, status: $status) { ...CommentFields }
+  mutation UpdateBlogCommentStatus($input: UpdateBlogCommentStatusInput!) {
+    updateBlogCommentStatus(input: $input) { ...CommentFields }
   }
   ${COMMENT_FRAGMENT}
 `;
 
 const DELETE_COMMENT_MUTATION = `
-  mutation DeleteBlogComment($id: ID!) {
+  mutation DeleteBlogComment($id: Int!) {
     deleteBlogComment(id: $id)
   }
 `;
 
 // ── API 函数 ──
 
-export async function fetchBlogComments(
-  postId: string,
+/** 公开：查询指定文章的评论列表 */
+export async function fetchBlogCommentsByPost(
+  postId: number,
   pagination: PaginationInput,
-  filters?: { readonly status?: BlogCommentStatus },
+  options?: {
+    readonly sortBy?: string;
+    readonly sortOrder?: string;
+  },
+): Promise<PaginatedResult<BlogComment>> {
+  const data = await executeGraphQL<{ blogCommentsByPost: BlogCommentListDTO }, Record<string, unknown>>(
+    FETCH_COMMENTS_BY_POST_QUERY,
+    {
+      postId,
+      page: pagination.page,
+      limit: pagination.pageSize,
+      sortBy: options?.sortBy,
+      sortOrder: options?.sortOrder,
+    },
+    { authMode: 'none' },
+  );
+
+  return mapBlogCommentList(data.blogCommentsByPost);
+}
+
+/** 管理端：查询评论列表（支持筛选） */
+export async function fetchBlogComments(
+  pagination: PaginationInput,
+  filters?: {
+    readonly postId?: number;
+    readonly status?: BlogCommentStatus;
+  },
 ): Promise<PaginatedResult<BlogComment>> {
   const data = await executeGraphQL<{ blogComments: BlogCommentListDTO }, Record<string, unknown>>(
     FETCH_COMMENTS_QUERY,
     {
-      postId,
-      offset: pagination.offset,
-      limit: pagination.limit,
+      page: pagination.page,
+      limit: pagination.pageSize,
+      postId: filters?.postId,
       status: filters?.status?.toUpperCase(),
     },
-    { authMode: 'none' },
+    { authMode: 'required' },
   );
 
   return mapBlogCommentList(data.blogComments);
 }
 
+/** 公开：创建评论 */
 export async function createBlogComment(
   input: Readonly<{
-    postId: string;
+    postId: number;
     authorName: string;
     authorEmail: string;
     content: string;
-    parentId?: string | null;
-    replyToId?: string | null;
+    parentId?: number;
+    replyToId?: number;
   }>,
 ): Promise<BlogComment> {
   const data = await executeGraphQL<{ createBlogComment: BlogCommentDTO }, Record<string, unknown>>(
@@ -154,20 +192,21 @@ export async function createBlogComment(
   return mapBlogComment(data.createBlogComment);
 }
 
+/** 管理端：更新评论审核状态 */
 export async function updateBlogCommentStatus(
-  id: string,
-  status: BlogCommentStatus,
+  input: Readonly<{ id: number; status: BlogCommentStatus }>,
 ): Promise<BlogComment> {
   const data = await executeGraphQL<
     { updateBlogCommentStatus: BlogCommentDTO },
     Record<string, unknown>
-  >(UPDATE_COMMENT_STATUS_MUTATION, { id, status: status.toUpperCase() }, { authMode: 'required' });
+  >(UPDATE_COMMENT_STATUS_MUTATION, { input: { id: input.id, status: input.status.toUpperCase() } }, { authMode: 'required' });
 
   return mapBlogComment(data.updateBlogCommentStatus);
 }
 
-export async function deleteBlogComment(id: string): Promise<boolean> {
-  const data = await executeGraphQL<{ deleteBlogComment: boolean }, { id: string }>(
+/** 管理端：删除评论 */
+export async function deleteBlogComment(id: number): Promise<boolean> {
+  const data = await executeGraphQL<{ deleteBlogComment: boolean }, { id: number }>(
     DELETE_COMMENT_MUTATION,
     { id },
     { authMode: 'required' },

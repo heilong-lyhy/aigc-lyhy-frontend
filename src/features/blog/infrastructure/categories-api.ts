@@ -7,75 +7,78 @@ import { executeGraphQL } from '@/shared/graphql';
 // ── DTO：后端原始响应类型，只允许停留在 infrastructure ──
 
 interface BlogCategoryDTO {
-  readonly id: string;
+  readonly id: number;
   readonly name: string;
   readonly slug: string;
-  readonly description: string;
-  readonly parentId: string | null;
-  readonly children: readonly BlogCategoryDTO[];
+  readonly description: string | null;
+  readonly parentId: number | null;
   readonly sortOrder: number;
   readonly postCount: number;
   readonly createdAt: string;
+  readonly updatedAt: string;
 }
 
 // ── Mapper：防腐层，DTO → 前端实体类型 ──
 
 function mapBlogCategory(raw: BlogCategoryDTO): BlogCategory {
   return {
-    id: raw.id,
+    id: String(raw.id),
     name: raw.name,
     slug: raw.slug,
-    description: raw.description,
-    parentId: raw.parentId ?? null,
-    children: raw.children.map(mapBlogCategory),
+    description: raw.description ?? null,
+    parentId: raw.parentId,
     sortOrder: raw.sortOrder,
     postCount: raw.postCount,
     createdAt: raw.createdAt,
+    updatedAt: raw.updatedAt,
   };
 }
 
 // ── GraphQL Documents ──
 
-const BLOG_CATEGORY_FRAGMENT = `
-  fragment BlogCategoryFields on BlogCategory {
-    id name slug description parentId sortOrder postCount createdAt
-    children { id name slug description parentId sortOrder postCount createdAt
-      children { id name slug description parentId sortOrder postCount createdAt
-        children { id }
-      }
-    }
+const CATEGORY_FRAGMENT = `
+  fragment CategoryFields on BlogCategory {
+    id name slug description parentId sortOrder postCount createdAt updatedAt
   }
 `;
 
 const FETCH_CATEGORIES_QUERY = `
   query FetchBlogCategories {
-    blogCategories { ...BlogCategoryFields }
+    blogCategories { ...CategoryFields }
   }
-  ${BLOG_CATEGORY_FRAGMENT}
+  ${CATEGORY_FRAGMENT}
+`;
+
+const FETCH_CATEGORY_TREE_QUERY = `
+  query FetchBlogCategoryTree {
+    blogCategoryTree { ...CategoryFields }
+  }
+  ${CATEGORY_FRAGMENT}
 `;
 
 const CREATE_CATEGORY_MUTATION = `
   mutation CreateBlogCategory($input: CreateBlogCategoryInput!) {
-    createBlogCategory(input: $input) { ...BlogCategoryFields }
+    createBlogCategory(input: $input) { ...CategoryFields }
   }
-  ${BLOG_CATEGORY_FRAGMENT}
+  ${CATEGORY_FRAGMENT}
 `;
 
 const UPDATE_CATEGORY_MUTATION = `
-  mutation UpdateBlogCategory($id: ID!, $input: UpdateBlogCategoryInput!) {
-    updateBlogCategory(id: $id, input: $input) { ...BlogCategoryFields }
+  mutation UpdateBlogCategory($input: UpdateBlogCategoryInput!) {
+    updateBlogCategory(input: $input) { ...CategoryFields }
   }
-  ${BLOG_CATEGORY_FRAGMENT}
+  ${CATEGORY_FRAGMENT}
 `;
 
 const DELETE_CATEGORY_MUTATION = `
-  mutation DeleteBlogCategory($id: ID!) {
+  mutation DeleteBlogCategory($id: Int!) {
     deleteBlogCategory(id: $id)
   }
 `;
 
 // ── API 函数 ──
 
+/** 公开：查询所有分类（平铺列表） */
 export async function fetchBlogCategories(): Promise<readonly BlogCategory[]> {
   const data = await executeGraphQL<
     { blogCategories: readonly BlogCategoryDTO[] },
@@ -85,12 +88,23 @@ export async function fetchBlogCategories(): Promise<readonly BlogCategory[]> {
   return data.blogCategories.map(mapBlogCategory);
 }
 
+/** 公开：查询分类树 */
+export async function fetchBlogCategoryTree(): Promise<readonly BlogCategory[]> {
+  const data = await executeGraphQL<
+    { blogCategoryTree: readonly BlogCategoryDTO[] },
+    Record<string, unknown>
+  >(FETCH_CATEGORY_TREE_QUERY, {}, { authMode: 'none' });
+
+  return data.blogCategoryTree.map(mapBlogCategory);
+}
+
+/** 管理端：创建分类 */
 export async function createBlogCategory(
   input: Readonly<{
     name: string;
     slug: string;
-    description: string;
-    parentId?: string | null;
+    description?: string;
+    parentId?: number;
     sortOrder?: number;
   }>,
 ): Promise<BlogCategory> {
@@ -102,28 +116,28 @@ export async function createBlogCategory(
   return mapBlogCategory(data.createBlogCategory);
 }
 
+/** 管理端：更新分类 */
 export async function updateBlogCategory(
-  id: string,
-  input: Readonly<
-    Partial<{
-      name: string;
-      slug: string;
-      description: string;
-      parentId: string | null;
-      sortOrder: number;
-    }>
-  >,
+  input: Readonly<{
+    id: number;
+    name?: string;
+    slug?: string;
+    description?: string;
+    parentId?: number;
+    sortOrder?: number;
+  }>,
 ): Promise<BlogCategory> {
   const data = await executeGraphQL<
     { updateBlogCategory: BlogCategoryDTO },
     Record<string, unknown>
-  >(UPDATE_CATEGORY_MUTATION, { id, input }, { authMode: 'required' });
+  >(UPDATE_CATEGORY_MUTATION, { input }, { authMode: 'required' });
 
   return mapBlogCategory(data.updateBlogCategory);
 }
 
-export async function deleteBlogCategory(id: string): Promise<boolean> {
-  const data = await executeGraphQL<{ deleteBlogCategory: boolean }, { id: string }>(
+/** 管理端：删除分类 */
+export async function deleteBlogCategory(id: number): Promise<boolean> {
+  const data = await executeGraphQL<{ deleteBlogCategory: boolean }, { id: number }>(
     DELETE_CATEGORY_MUTATION,
     { id },
     { authMode: 'required' },

@@ -15,7 +15,7 @@ export {
 } from './comments-api';
 export { fetchBlogDashboard } from './dashboard-api';
 export { deleteBlogFile, uploadBlogFile } from './files-api';
-export { checkBlogLiked, toggleBlogLike } from './likes-api';
+export { checkBlogPostLiked, toggleBlogPostLike } from './likes-api';
 export {
   createBlogPost,
   deleteBlogPost,

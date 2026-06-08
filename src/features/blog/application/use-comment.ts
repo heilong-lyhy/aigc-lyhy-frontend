@@ -13,15 +13,15 @@ type UseCommentResult = {
   readonly error: string | null;
   readonly submitComment: (
     input: Readonly<{
-      postId: string;
+      postId: number;
       authorName: string;
       authorEmail: string;
       content: string;
-      parentId?: string | null;
-      replyToId?: string | null;
+      parentId?: number | null;
+      replyToId?: number | null;
     }>,
   ) => Promise<BlogComment | null>;
-  readonly removeComment: (id: string) => Promise<boolean>;
+  readonly removeComment: (id: number) => Promise<boolean>;
 };
 
 type State = {
@@ -62,12 +62,12 @@ export function useComment(): UseCommentResult {
   const submitComment = useCallback(
     async (
       input: Readonly<{
-        postId: string;
+        postId: number;
         authorName: string;
         authorEmail: string;
         content: string;
-        parentId?: string | null;
-        replyToId?: string | null;
+        parentId?: number | null;
+        replyToId?: number | null;
       }>,
     ): Promise<BlogComment | null> => {
       clearMutationError();
@@ -86,7 +86,7 @@ export function useComment(): UseCommentResult {
     [clearMutationError, setMutationError],
   );
 
-  const removeComment = useCallback(async (id: string): Promise<boolean> => {
+  const removeComment = useCallback(async (id: number): Promise<boolean> => {
     clearMutationError();
     dispatch({ type: 'DELETE_START' });
     try {

@@ -122,14 +122,14 @@ export function FileManager({
             <div className="flex flex-col">
               <div
                 className="flex h-32 cursor-pointer items-center justify-center bg-bg-layout"
-                onClick={() => isImageFile(file.mimeType) && handlePreview(file.url)}
+                onClick={() => isImageFile(file.mimeType) && handlePreview(file.storagePath)}
               >
                 {isImageFile(file.mimeType) ? (
                   <Image
-                    alt={file.name}
+                    alt={file.originalName}
                     height={120}
                     preview={false}
-                    src={file.url}
+                    src={file.storagePath}
                   />
                 ) : (
                   <FileImageOutlined className="text-3xl" />
@@ -138,17 +138,17 @@ export function FileManager({
               <div className="flex flex-col gap-1 p-3">
                 <div className="max-w-full">
                   <Text ellipsis>
-                    {file.name}
+                    {file.originalName}
                   </Text>
                 </div>
-                <Text type="secondary">{formatFileSize(file.size)}</Text>
+                <Text type="secondary">{formatFileSize(file.fileSize)}</Text>
                 <Text type="secondary">{formatAbsoluteDate(file.createdAt)}</Text>
                 <div className="flex gap-2">
                   <Button
                     icon={<CopyOutlined />}
                     size="small"
                     type="link"
-                    onClick={() => handleCopyUrl(file.url)}
+                    onClick={() => handleCopyUrl(file.storagePath)}
                 >
                   {LABEL_COPY}
                 </Button>
@@ -198,7 +198,7 @@ export function FileManager({
         </Upload>
       </div>
 
-      {error && <Alert message={error} showIcon type="error" />}
+      {error && <Alert title={error} showIcon type="error" />}
 
       {files.length === 0 ? (
         <Empty

@@ -18,8 +18,7 @@ import { PageHeader } from '@/shared/ui';
 
 const PAGE_TITLE = '博客';
 const PAGE_DESCRIPTION = '技术文章与生活随笔';
-const DEFAULT_PAGINATION: PaginationInput = { offset: 0, limit: 6 };
-const USE_MOCK_FALLBACK = false;
+const DEFAULT_PAGINATION: PaginationInput = { page: 1, pageSize: 6 };
 
 export function BlogHomePage() {
   const navigate = useNavigate();
@@ -34,23 +33,14 @@ export function BlogHomePage() {
     refetch: refetchPosts,
   } = useBlogPosts({
     pagination,
-    status: 'published',
-    categoryId: selectedCategoryId,
-    tagId: selectedTagId,
-    useMockFallback: USE_MOCK_FALLBACK,
   });
 
-  const { data: categories, isLoading: isLoadingCategories } = useBlogCategories({
-    useMockFallback: USE_MOCK_FALLBACK,
-  });
+  const { data: categories, isLoading: isLoadingCategories } = useBlogCategories();
 
-  const { data: tags, isLoading: isLoadingTags } = useBlogTags({
-    useMockFallback: USE_MOCK_FALLBACK,
-  });
+  const { data: tags, isLoading: isLoadingTags } = useBlogTags();
 
   const { data: profile, isLoading: isLoadingProfile } = useBlogProfile({
     autoLoad: true,
-    useMockFallback: USE_MOCK_FALLBACK,
   });
 
   const handlePaginationChange = useCallback((newPagination: PaginationInput) => {
@@ -78,7 +68,6 @@ export function BlogHomePage() {
 
   const displayPosts = postsData?.items ?? [];
   const displayTotal = postsData?.total ?? 0;
-  const displayHasMore = postsData?.hasMore ?? false;
 
   return (
     <div className="page-stack">
@@ -89,7 +78,6 @@ export function BlogHomePage() {
           <PostList
             categories={categories}
             error={postsError}
-            hasMore={displayHasMore}
             isLoading={isLoadingPosts}
             pagination={pagination}
             posts={displayPosts}

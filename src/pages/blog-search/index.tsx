@@ -21,8 +21,7 @@ import { PageHeader } from '@/shared/ui';
 
 const PAGE_TITLE = '搜索';
 const LABEL_NO_RESULTS = '未找到匹配的文章';
-const DEFAULT_PAGINATION: PaginationInput = { offset: 0, limit: 6 };
-const USE_MOCK_FALLBACK = false;
+const DEFAULT_PAGINATION: PaginationInput = { page: 1, pageSize: 6 };
 
 export function BlogSearchPage() {
   const navigate = useNavigate();
@@ -41,31 +40,13 @@ export function BlogSearchPage() {
     refetch,
   } = useBlogSearch({ pagination: DEFAULT_PAGINATION });
 
-  const { data: categories, isLoading: isLoadingCategories } = useBlogCategories({
-    useMockFallback: USE_MOCK_FALLBACK,
-  });
+  const { data: categories, isLoading: isLoadingCategories } = useBlogCategories();
 
-  const { data: tags, isLoading: isLoadingTags } = useBlogTags({
-    useMockFallback: USE_MOCK_FALLBACK,
-  });
+  const { data: tags, isLoading: isLoadingTags } = useBlogTags();
 
   const handleKeywordChange = useCallback(
     (keyword: string) => {
       setFilters({ keyword });
-    },
-    [setFilters],
-  );
-
-  const handleCategorySelect = useCallback(
-    (categoryId: string | undefined) => {
-      setFilters({ categoryId });
-    },
-    [setFilters],
-  );
-
-  const handleTagSelect = useCallback(
-    (tagId: string | undefined) => {
-      setFilters({ tagId });
     },
     [setFilters],
   );
@@ -110,14 +91,10 @@ export function BlogSearchPage() {
             categories={categories}
             keyword={filters.keyword}
             searchHistory={searchHistory}
-            selectedCategoryId={filters.categoryId}
-            selectedTagId={filters.tagId}
             tags={tags}
-            onCategorySelect={handleCategorySelect}
             onClearHistory={handleClearHistory}
             onHistoryClick={handleHistoryClick}
             onKeywordChange={handleKeywordChange}
-            onTagSelect={handleTagSelect}
           />
 
           {isLoading && <LoadingSkeleton />}
@@ -146,11 +123,7 @@ export function BlogSearchPage() {
         {!isSidebarLoading && (
           <BlogSidebar
             categories={categories}
-            selectedCategoryId={filters.categoryId}
-            selectedTagId={filters.tagId}
             tags={tags}
-            onCategorySelect={handleCategorySelect}
-            onTagSelect={handleTagSelect}
           />
         )}
       </div>

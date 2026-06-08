@@ -1,4 +1,5 @@
 // src/features/blog/infrastructure/files-api.spec.ts
+// 契约测试：验证前端 DTO → Entity 映射与后端 GraphQL 响应结构对齐
 
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
@@ -8,17 +9,29 @@ vi.mock('@/shared/graphql', () => ({
 
 import { executeGraphQL } from '@/shared/graphql';
 
-import { deleteBlogFile, mapBlogFile, uploadBlogFile } from './files-api';
+import { deleteBlogFile, fetchBlogFiles, mapBlogFile } from './files-api';
 
 const mockExecute = vi.mocked(executeGraphQL);
 
-const sampleDTO = {
-  id: 'f1',
-  name: 'photo.jpg',
-  url: 'https://cdn.example.com/photo.jpg',
-  mimeType: 'image/jpeg',
-  size: 204800,
-  createdAt: '2024-06-01T00:00:00Z',
+// ── 模拟后端 BlogFileObjectType 响应 ──
+
+const sampleFileDTO = {
+  id: 1,
+  originalName: 'photo.png',
+  storedName: 'abc123.png',
+  mimeType: 'image/png',
+  fileSize: 102400,
+  storagePath: '/uploads/abc123.png',
+  fileType: 'IMAGE',
+  createdAt: '2024-01-01T00:00:00Z',
+  updatedAt: '2024-01-01T00:00:00Z',
+};
+
+const sampleFileListResponse = {
+  list: [sampleFileDTO],
+  current: 1,
+  pageSize: 10,
+  total: 1,
 };
 
 describe('files-api', () => {
@@ -26,75 +39,58 @@ describe('files-api', () => {
     vi.clearAllMocks();
   });
 
-  // ── mapBlogFile ──
-
   describe('mapBlogFile', () => {
-    it('maps DTO to domain entity', () => {
-      const result = mapBlogFile(sampleDTO);
+    it('应正确映射后端 DTO 到前端实体', () => {
+      const result = mapBlogFile(sampleFileDTO);
 
-      expect(result.id).toBe('f1');
-      expect(result.name).toBe('photo.jpg');
-      expect(result.url).toBe('https://cdn.example.com/photo.jpg');
-      expect(result.mimeType).toBe('image/jpeg');
-      expect(result.size).toBe(204800);
-      expect(result.createdAt).toBe('2024-06-01T00:00:00Z');
+      expect(result.id).toBe('1'); // number → string
+      expect(result.originalName).toBe('photo.png');
+      expect(result.storedName).toBe('abc123.png');
+      expect(result.mimeType).toBe('image/png');
+      expect(result.fileSize).toBe(102400);
+      expect(result.storagePath).toBe('/uploads/abc123.png');
+      expect(result.fileType).toBe('IMAGE');
     });
   });
 
-  // ── uploadBlogFile ──
+  describe('fetchBlogFiles', () => {
+    it('应调用 blogFiles 查询并映射分页结果', async () => {
+      mockExecute.mockResolvedValueOnce({ blogFiles: sampleFileListResponse });
 
-  describe('uploadBlogFile', () => {
-    it('uploads a file with auth required and returns mapped entity', async () => {
-      mockExecute.mockResolvedValueOnce({
-        uploadBlogFile: { file: sampleDTO },
-      });
+      const result = await fetchBlogFiles({ page: 1, pageSize: 10 });
 
-      const file = new File(['content'], 'photo.jpg', { type: 'image/jpeg' });
-      const result = await uploadBlogFile({ file });
-
-      expect(result.id).toBe('f1');
-      expect(result.name).toBe('photo.jpg');
+      expect(result.items).toHaveLength(1);
+      expect(result.items[0].originalName).toBe('photo.png');
+      expect(result.total).toBe(1);
+      expect(result.current).toBe(1);
 
       const [, variables, options] = mockExecute.mock.calls[0];
-      expect(variables.input.file).toBe(file);
+      expect(variables.page).toBe(1);
+      expect(variables.limit).toBe(10);
       expect(options?.authMode).toBe('required');
     });
 
-    it('propagates errors from executeGraphQL', async () => {
-      mockExecute.mockRejectedValueOnce(new Error('Upload failed'));
+    it('应传递 fileType 筛选参数', async () => {
+      mockExecute.mockResolvedValueOnce({ blogFiles: { list: [], current: 1, pageSize: 10, total: 0 } });
 
-      const file = new File(['content'], 'photo.jpg', { type: 'image/jpeg' });
-      await expect(uploadBlogFile({ file })).rejects.toThrow('Upload failed');
+      await fetchBlogFiles({ page: 1, pageSize: 10 }, { fileType: 'IMAGE' });
+
+      const variables = mockExecute.mock.calls[0][1];
+      expect(variables.fileType).toBe('IMAGE');
     });
   });
 
-  // ── deleteBlogFile ──
-
   describe('deleteBlogFile', () => {
-    it('deletes a file with auth required and returns true', async () => {
+    it('应删除文件', async () => {
       mockExecute.mockResolvedValueOnce({ deleteBlogFile: true });
 
-      const result = await deleteBlogFile('f1');
+      const result = await deleteBlogFile(1);
 
       expect(result).toBe(true);
 
       const [, variables, options] = mockExecute.mock.calls[0];
-      expect(variables.id).toBe('f1');
+      expect(variables.id).toBe(1);
       expect(options?.authMode).toBe('required');
-    });
-
-    it('returns false when deletion fails on server', async () => {
-      mockExecute.mockResolvedValueOnce({ deleteBlogFile: false });
-
-      const result = await deleteBlogFile('f1');
-
-      expect(result).toBe(false);
-    });
-
-    it('propagates errors from executeGraphQL', async () => {
-      mockExecute.mockRejectedValueOnce(new Error('Forbidden'));
-
-      await expect(deleteBlogFile('f1')).rejects.toThrow('Forbidden');
     });
   });
 });

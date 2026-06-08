@@ -2,14 +2,14 @@
 
 import { useCallback } from 'react';
 
-import type { BlogPost } from '@/entities/blog';
+import type { BlogPostDetail } from '@/entities/blog';
 
 import { useAsyncQuery } from '@/shared/hooks';
 
 import { fetchBlogPostBySlug } from '../infrastructure/posts-api';
 
 type UseBlogPostDetailResult = {
-  readonly data: BlogPost | null;
+  readonly data: BlogPostDetail | null;
   readonly isLoading: boolean;
   readonly isEmpty: boolean;
   readonly error: string | null;
@@ -17,12 +17,12 @@ type UseBlogPostDetailResult = {
 };
 
 export function useBlogPostDetail(slug: string | null): UseBlogPostDetailResult {
-  const fetcher = useCallback(async (): Promise<BlogPost> => {
+  const fetcher = useCallback(async (): Promise<BlogPostDetail> => {
     if (!slug) throw new Error('Slug is required');
     return await fetchBlogPostBySlug(slug);
   }, [slug]);
 
-  const { data, isLoading, error, refetch } = useAsyncQuery<BlogPost>({
+  const { data, isLoading, error, refetch } = useAsyncQuery<BlogPostDetail>({
     fetcher,
     autoLoad: slug !== null,
   });

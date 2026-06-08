@@ -2,15 +2,14 @@
 
 import { useCallback, useEffect, useReducer } from 'react';
 
-import type { BlogLike, BlogLikeTargetType } from '@/entities/blog';
+import type { BlogLike } from '@/entities/blog';
 
-import { checkBlogLiked, toggleBlogLike } from '../infrastructure/likes-api';
+import { checkBlogPostLiked, toggleBlogPostLike } from '../infrastructure/likes-api';
 import { useMutationError } from '../lib/use-mutation-error';
 
 type UseLikeOptions = {
-  readonly targetType: BlogLikeTargetType;
-  readonly targetId: string;
-  readonly fingerprint?: string;
+  readonly postId: number;
+  readonly userIdentifier: string;
   /** 是否在挂载时自动检查点赞状态，默认 true */
   readonly autoCheck?: boolean;
 };
@@ -68,8 +67,8 @@ function reducer(state: State, action: Action): State {
 }
 
 export function useLike(options: UseLikeOptions): UseLikeResult {
-  const { targetType, targetId, fingerprint, autoCheck = true } = options;
-  const enabled = targetId !== '';
+  const { postId, userIdentifier, autoCheck = true } = options;
+  const enabled = postId > 0;
 
   const [state, dispatch] = useReducer(reducer, initialState);
   const { mutationError, clearMutationError, setMutationError } = useMutationError();
@@ -78,13 +77,13 @@ export function useLike(options: UseLikeOptions): UseLikeResult {
     if (!enabled) return;
     dispatch({ type: 'CHECK_START' });
     try {
-      const result = await checkBlogLiked(targetType, targetId);
+      const result = await checkBlogPostLiked(postId, userIdentifier);
       dispatch({ type: 'CHECK_SUCCESS', payload: result });
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to check like status';
       dispatch({ type: 'FETCH_ERROR', payload: message });
     }
-  }, [enabled, targetType, targetId]);
+  }, [enabled, postId, userIdentifier]);
 
   useEffect(() => {
     if (autoCheck && enabled) {
@@ -97,13 +96,13 @@ export function useLike(options: UseLikeOptions): UseLikeResult {
     clearMutationError();
     dispatch({ type: 'TOGGLE_START' });
     try {
-      const result = await toggleBlogLike({ targetType, targetId, fingerprint });
-      dispatch({ type: 'TOGGLE_SUCCESS', payload: result });
+      const result = await toggleBlogPostLike(postId, userIdentifier);
+      dispatch({ type: 'TOGGLE_SUCCESS', payload: { liked: result.liked, like: result } });
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to toggle like';
       setMutationError(message);
     }
-  }, [enabled, targetType, targetId, fingerprint, clearMutationError, setMutationError]);
+  }, [enabled, postId, userIdentifier, clearMutationError, setMutationError]);
 
   return {
     liked: state.liked,

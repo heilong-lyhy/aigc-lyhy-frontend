@@ -6,7 +6,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 // Mock the infrastructure layer to prevent Apollo Client loading
 vi.mock('../infrastructure/comments-api', () => ({
-  fetchBlogComments: vi.fn(),
+  fetchBlogCommentsByPost: vi.fn(),
 }));
 
 // Mock the shared layer to prevent full dependency chain and OOM
@@ -39,7 +39,7 @@ describe('useBlogComments', () => {
     mockUseAsyncQuery.mockReturnValue(mockAsyncQueryReturn({ isLoading: true }));
 
     renderHook(() =>
-      useBlogComments({ postId: 'p1', pagination: { offset: 0, limit: 20 } }),
+      useBlogComments({ postId: 1, pagination: { page: 1, pageSize: 20 } }),
     );
 
     expect(mockUseAsyncQuery).toHaveBeenCalledWith(
@@ -52,8 +52,8 @@ describe('useBlogComments', () => {
 
     renderHook(() =>
       useBlogComments({
-        postId: 'p1',
-        pagination: { offset: 0, limit: 20 },
+        postId: 1,
+        pagination: { page: 1, pageSize: 20 },
         autoLoad: false,
       }),
     );
@@ -65,12 +65,12 @@ describe('useBlogComments', () => {
   it('reports isEmpty when data has no items and not loading', () => {
     mockUseAsyncQuery.mockReturnValue(
       mockAsyncQueryReturn({
-        data: { items: [], total: 0, offset: 0, limit: 20, hasMore: false },
+        data: { items: [], total: 0, current: 1, pageSize: 20 },
       }),
     );
 
     const { result } = renderHook(() =>
-      useBlogComments({ postId: 'p1', pagination: { offset: 0, limit: 20 } }),
+      useBlogComments({ postId: 1, pagination: { page: 1, pageSize: 20 } }),
     );
 
     expect(result.current.isEmpty).toBe(true);
@@ -82,15 +82,14 @@ describe('useBlogComments', () => {
         data: {
           items: [{ id: 'c1' }],
           total: 1,
-          offset: 0,
-          limit: 20,
-          hasMore: false,
+          current: 1,
+          pageSize: 20,
         },
       }),
     );
 
     const { result } = renderHook(() =>
-      useBlogComments({ postId: 'p1', pagination: { offset: 0, limit: 20 } }),
+      useBlogComments({ postId: 1, pagination: { page: 1, pageSize: 20 } }),
     );
 
     expect(result.current.isEmpty).toBe(false);
@@ -102,43 +101,42 @@ describe('useBlogComments', () => {
     );
 
     const { result } = renderHook(() =>
-      useBlogComments({ postId: 'p1', pagination: { offset: 0, limit: 20 } }),
+      useBlogComments({ postId: 1, pagination: { page: 1, pageSize: 20 } }),
     );
 
     expect(result.current.error).toBe('Server error');
     expect(result.current.data).toBeNull();
   });
 
-  it('fetcher validates postId is not empty', async () => {
+  it('fetcher validates postId is not zero', async () => {
     mockUseAsyncQuery.mockReturnValue(mockAsyncQueryReturn());
 
     renderHook(() =>
-      useBlogComments({ postId: '', pagination: { offset: 0, limit: 20 } }),
+      useBlogComments({ postId: 0, pagination: { page: 1, pageSize: 20 } }),
     );
 
     const { fetcher } = mockUseAsyncQuery.mock.calls[0][0];
     await expect(fetcher()).rejects.toThrow('postId is required');
   });
 
-  it('fetcher calls fetchBlogComments with correct arguments', async () => {
-    const { fetchBlogComments } = await import('../infrastructure/comments-api');
-    const mockFetch = vi.mocked(fetchBlogComments);
+  it('fetcher calls fetchBlogCommentsByPost with correct arguments', async () => {
+    const { fetchBlogCommentsByPost } = await import('../infrastructure/comments-api');
+    const mockFetch = vi.mocked(fetchBlogCommentsByPost);
     mockFetch.mockResolvedValueOnce({
       items: [],
       total: 0,
-      offset: 0,
-      limit: 20,
-      hasMore: false,
+      current: 1,
+      pageSize: 20,
     });
     mockUseAsyncQuery.mockReturnValue(mockAsyncQueryReturn());
 
     renderHook(() =>
-      useBlogComments({ postId: 'p1', pagination: { offset: 0, limit: 20 } }),
+      useBlogComments({ postId: 1, pagination: { page: 1, pageSize: 20 } }),
     );
 
     const { fetcher } = mockUseAsyncQuery.mock.calls[0][0];
     await fetcher();
 
-    expect(mockFetch).toHaveBeenCalledWith('p1', { offset: 0, limit: 20 }, {});
+    expect(mockFetch).toHaveBeenCalledWith(1, { page: 1, pageSize: 20 });
   });
 });

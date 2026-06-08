@@ -8,15 +8,14 @@ import { toCurrentPage, toEffectiveTotal, toPaginationInput } from '@/entities/b
 type PaginationProps = {
   readonly pagination: PaginationInput;
   readonly total: number;
-  readonly hasMore: boolean;
   readonly onChange: (pagination: PaginationInput) => void;
 };
 
 const PAGE_SIZE_OPTIONS = [6, 12, 24];
 
-export function Pagination({ pagination, total, hasMore, onChange }: PaginationProps) {
+export function Pagination({ pagination, total, onChange }: PaginationProps) {
   const currentPage = toCurrentPage(pagination);
-  const effectiveTotal = toEffectiveTotal(total, hasMore);
+  const effectiveTotal = toEffectiveTotal(total);
 
   function handleChange(page: number, pageSize: number) {
     onChange(toPaginationInput(page, pageSize));
@@ -26,7 +25,7 @@ export function Pagination({ pagination, total, hasMore, onChange }: PaginationP
     <nav aria-label="pagination">
       <AntPagination
         current={currentPage}
-        pageSize={pagination.limit}
+        pageSize={pagination.pageSize}
         pageSizeOptions={PAGE_SIZE_OPTIONS}
         showSizeChanger
         showTotal={(t, range) => `${range[0]}-${range[1]} / ${t}`}

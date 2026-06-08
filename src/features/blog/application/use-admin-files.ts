@@ -12,7 +12,7 @@ type UseAdminFilesResult = {
   readonly isDeleting: boolean;
   readonly error: string | null;
   readonly upload: (file: File) => Promise<BlogFile | null>;
-  readonly remove: (id: string) => Promise<boolean>;
+  readonly remove: (id: number) => Promise<boolean>;
 };
 
 type State = {
@@ -65,7 +65,7 @@ export function useAdminFiles(): UseAdminFilesResult {
     }
   }, [clearMutationError, setMutationError]);
 
-  const remove = useCallback(async (id: string): Promise<boolean> => {
+  const remove = useCallback(async (id: number): Promise<boolean> => {
     clearMutationError();
     dispatch({ type: 'DELETE_START' });
     try {

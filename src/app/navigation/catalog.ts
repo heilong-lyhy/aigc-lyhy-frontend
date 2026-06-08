@@ -32,12 +32,12 @@ const STABLE_NAVIGATION_ITEMS: NavigationItem[] = [
 ];
 
 const BLOG_ADMIN_LAB_ITEM: NavigationItem = {
-  description: '博客管理端：仪表盘、文章管理、评论管理等。',
+  description: '登录或注册以继续使用。',
   id: 'blog-admin-lab',
   kind: 'labs',
-  label: 'Admin',
-  path: '/admin',
-  tags: ['admin', 'dashboard', 'manage', '管理', '仪表盘'],
+  label: 'Login',
+  path: '/auth',
+  tags: ['login', 'auth', '登录', '认证'],
 };
 
 const GAME_2048_LAB_ITEM: NavigationItem = {
