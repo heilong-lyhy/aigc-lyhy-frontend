@@ -63,6 +63,7 @@ export interface BlogComment {
   readonly authorAvatar: string | null;
   readonly content: string;
   readonly status: BlogCommentStatus;
+  readonly isAdminReply?: boolean;
   readonly nestingLevel: number;
   readonly createdAt: string;
   readonly updatedAt: string;

@@ -4,6 +4,7 @@ import { useCallback, useMemo, useState } from 'react';
 import {
   CheckOutlined,
   CloseOutlined,
+  DeleteOutlined,
   StopOutlined,
 } from '@ant-design/icons';
 import { Button, Popconfirm, Space, Table, Tag, Typography } from 'antd';
@@ -31,6 +32,8 @@ const LABEL_BATCH_REJECT = '批量驳回';
 const LABEL_STATUS_PENDING = '待审核';
 const LABEL_STATUS_APPROVED = '已通过';
 const LABEL_STATUS_REJECTED = '已驳回';
+const LABEL_DELETE = '删除';
+const LABEL_CONFIRM_DELETE = '确定要删除此评论吗？此操作不可恢复';
 
 const COMMENT_STATUS_OPTIONS: readonly { readonly label: string; readonly value: BlogCommentStatus; readonly color: string }[] = [
   { label: LABEL_STATUS_PENDING, value: 'pending', color: 'gold' },
@@ -46,6 +49,7 @@ type CommentManagerProps = {
   readonly onApprove: (id: string) => void;
   readonly onReject: (id: string) => void;
   readonly onMarkSpam: (id: string) => void;
+  readonly onDelete: (id: string) => void;
   readonly onBatchApprove: (ids: readonly string[]) => void;
   readonly onBatchReject: (ids: readonly string[]) => void;
 };
@@ -63,6 +67,7 @@ export function CommentManager({
   onApprove,
   onReject,
   onMarkSpam,
+  onDelete,
   onBatchApprove,
   onBatchReject,
 }: CommentManagerProps) {
@@ -138,10 +143,23 @@ export function CommentManager({
               {LABEL_SPAM}
             </Button>
           </Popconfirm>
+          <Popconfirm
+            title={LABEL_CONFIRM_DELETE}
+            onConfirm={() => onDelete(record.id)}
+          >
+            <Button
+              danger
+              icon={<DeleteOutlined />}
+              size="small"
+              type="link"
+            >
+              {LABEL_DELETE}
+            </Button>
+          </Popconfirm>
         </Space>
       ),
     },
-  ], [onApprove, onReject, onMarkSpam]);
+  ], [onApprove, onReject, onMarkSpam, onDelete]);
 
   const handleBatchApprove = useCallback(() => {
     if (selectedRowKeys.length === 0) return;

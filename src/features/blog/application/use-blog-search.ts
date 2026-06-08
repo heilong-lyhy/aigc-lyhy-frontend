@@ -1,4 +1,4 @@
-// src/features/blog/hooks/use-blog-search.ts
+// src/features/blog/application/use-blog-search.ts
 
 import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
 

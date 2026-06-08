@@ -1,6 +1,6 @@
-// src/features/blog/hooks/use-admin-posts.ts
+// src/features/blog/application/use-admin-posts.ts
 
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 
 import type { BlogPost, BlogPostDetail, BlogPostStatus, PaginatedResult, PaginationInput } from '@/entities/blog';
 import { isEmptyPage } from '@/entities/blog';
@@ -62,7 +62,14 @@ type UseAdminPostsResult = {
 };
 
 export function useAdminPosts(options: UseAdminPostsOptions): UseAdminPostsResult {
-  const { pagination, status, autoLoad = true } = options;
+  const { status, autoLoad = true } = options;
+
+  /* eslint-disable react-hooks/exhaustive-deps -- 字段级 deps 防止调用方传字面量对象导致引用不稳定 */
+  const pagination = useMemo(
+    () => options.pagination,
+    [options.pagination?.page, options.pagination?.pageSize],
+  );
+  /* eslint-enable react-hooks/exhaustive-deps */
 
   const fetcher = useCallback(async (): Promise<PaginatedResult<BlogPost>> => {
     return await fetchBlogPosts(pagination, { status });

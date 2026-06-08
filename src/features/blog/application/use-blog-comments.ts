@@ -1,6 +1,6 @@
-// src/features/blog/hooks/use-blog-comments.ts
+// src/features/blog/application/use-blog-comments.ts
 
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 
 import type {
   BlogComment,
@@ -30,12 +30,19 @@ type UseBlogCommentsResult = {
 };
 
 export function useBlogComments(options: UseBlogCommentsOptions): UseBlogCommentsResult {
-  const { postId, pagination, status, autoLoad = true } = options;
+  const { postId, autoLoad = true } = options;
+
+  /* eslint-disable react-hooks/exhaustive-deps -- 字段级 deps 防止调用方传字面量对象导致引用不稳定 */
+  const pagination = useMemo(
+    () => options.pagination,
+    [options.pagination?.page, options.pagination?.pageSize],
+  );
+  /* eslint-enable react-hooks/exhaustive-deps */
 
   const fetcher = useCallback(async (): Promise<PaginatedResult<BlogComment>> => {
     if (!postId) throw new Error('postId is required');
     return await fetchBlogCommentsByPost(postId, pagination);
-  }, [postId, pagination, status]);
+  }, [postId, pagination]);
 
   const { data, isLoading, error, refetch } = useAsyncQuery<PaginatedResult<BlogComment>>({
     fetcher,

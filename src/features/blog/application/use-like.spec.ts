@@ -1,5 +1,5 @@
 // @vitest-environment happy-dom
-// src/features/blog/hooks/use-like.spec.ts
+// src/features/blog/application/use-like.spec.ts
 
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';

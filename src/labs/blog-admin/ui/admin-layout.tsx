@@ -1,6 +1,7 @@
 // src/labs/blog-admin/ui/admin-layout.tsx
 
 import {
+  CommentOutlined,
   DashboardOutlined,
   FileOutlined,
   FolderOutlined,
@@ -14,6 +15,7 @@ const { Content, Header, Sider } = Layout;
 const LABEL_ADMIN = '管理端';
 const LABEL_DASHBOARD = '仪表盘';
 const LABEL_POSTS = '文章管理';
+const LABEL_COMMENTS = '评论管理';
 const LABEL_FILES = '文件管理';
 const LABEL_PROFILE = '个人设置';
 const LABEL_BRAND = 'Blog Admin';
@@ -30,6 +32,7 @@ type AdminNavItem = {
 const ADMIN_NAV_ITEMS: readonly AdminNavItem[] = [
   { icon: <DashboardOutlined />, key: 'dashboard', label: LABEL_DASHBOARD, path: '/admin' },
   { icon: <FileOutlined />, key: 'posts', label: LABEL_POSTS, path: '/admin/posts' },
+  { icon: <CommentOutlined />, key: 'comments', label: LABEL_COMMENTS, path: '/admin/comments' },
   { icon: <FolderOutlined />, key: 'files', label: LABEL_FILES, path: '/admin/files' },
   { icon: <SettingOutlined />, key: 'profile', label: LABEL_PROFILE, path: '/admin/profile' },
 ];

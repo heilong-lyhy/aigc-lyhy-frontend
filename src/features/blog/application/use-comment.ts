@@ -1,4 +1,4 @@
-// src/features/blog/hooks/use-comment.ts
+// src/features/blog/application/use-comment.ts
 
 import { useCallback, useReducer } from 'react';
 

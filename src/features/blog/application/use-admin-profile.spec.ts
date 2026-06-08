@@ -1,5 +1,5 @@
 // @vitest-environment happy-dom
-// src/features/blog/hooks/use-admin-profile.spec.ts
+// src/features/blog/application/use-admin-profile.spec.ts
 
 import * as React from 'react';
 import { act, renderHook } from '@testing-library/react';

@@ -25,6 +25,7 @@ import { HomePage } from '@/pages/home';
 import { ProjectStructurePage } from '@/pages/project-structure';
 import { changePassword } from '@/features/auth';
 import {
+  useAdminComments,
   useAdminFiles,
   useAdminPosts,
   useAdminProfile,
@@ -44,6 +45,7 @@ import { getAppEnv } from '@/shared/env';
 import {
   AdminLayout,
   canAccessBlogAdminLab,
+  CommentManager,
   DashboardPage,
   FileManager,
   PostEditor,
@@ -292,19 +294,67 @@ function AdminPostEditorPage() {
   );
 }
 
-function AdminFileManagerPage() {
-  const { isUploading, isDeleting, error, upload, remove } = useAdminFiles();
+function AdminCommentManagerPage() {
+  const [commentPagination, setCommentPagination] = useState<PaginationInput>({ page: 1, pageSize: 10 });
 
-  // TODO(backend): 后端实现文件列表查询后替换为真实数据
-  const files = [] as const;
+  const { data, isLoading, refetch, updateStatus, remove } = useAdminComments({
+    pagination: commentPagination,
+    autoLoad: true,
+  });
+
+  const handleApprove = useCallback((id: string) => {
+    void updateStatus(Number(id), 'approved').then(() => void refetch());
+  }, [updateStatus, refetch]);
+
+  const handleReject = useCallback((id: string) => {
+    void updateStatus(Number(id), 'rejected').then(() => void refetch());
+  }, [updateStatus, refetch]);
+
+  // 当前 BlogCommentStatus 无 'spam' 状态，标记垃圾暂映射为 rejected
+  const handleMarkSpam = handleReject;
+
+  const handleDelete = useCallback((id: string) => {
+    void remove(Number(id));
+  }, [remove]);
+
+  const handleBatchApprove = useCallback((ids: readonly string[]) => {
+    void Promise.all(ids.map((id) => updateStatus(Number(id), 'approved'))).then(() => void refetch());
+  }, [updateStatus, refetch]);
+
+  const handleBatchReject = useCallback((ids: readonly string[]) => {
+    void Promise.all(ids.map((id) => updateStatus(Number(id), 'rejected'))).then(() => void refetch());
+  }, [updateStatus, refetch]);
+
+  return (
+    <CommentManager
+      data={data}
+      isLoading={isLoading}
+      pagination={commentPagination}
+      onPaginationChange={setCommentPagination}
+      onApprove={handleApprove}
+      onReject={handleReject}
+      onMarkSpam={handleMarkSpam}
+      onDelete={handleDelete}
+      onBatchApprove={handleBatchApprove}
+      onBatchReject={handleBatchReject}
+    />
+  );
+}
+
+function AdminFileManagerPage() {
+  const { files, isLoadingFiles, isUploading, isDeleting, error, upload, remove, refetchFiles } = useAdminFiles();
+
+  const fileList = files?.items ?? [];
 
   return (
     <FileManager
       error={error}
-      files={files}
+      files={fileList}
       isDeleting={isDeleting}
+      isLoading={isLoadingFiles}
       isUploading={isUploading}
-      onDelete={remove}
+      onDelete={(id) => remove(Number(id))}
+      onRefetch={() => void refetchFiles()}
       onUpload={upload}
     />
   );
@@ -463,6 +513,10 @@ const router = createBrowserRouter([
           {
             element: <AdminFileManagerPage />,
             path: 'files',
+          },
+          {
+            element: <AdminCommentManagerPage />,
+            path: 'comments',
           },
           {
             element: <AdminProfileSettingsPage />,

@@ -7,6 +7,7 @@ import {
   FileImageOutlined,
   InboxOutlined,
   PlusOutlined,
+  ReloadOutlined,
 } from '@ant-design/icons';
 import {
   Alert,
@@ -16,6 +17,7 @@ import {
   Image,
   message,
   Popconfirm,
+  Spin,
   Typography,
   Upload,
 } from 'antd';
@@ -32,6 +34,7 @@ const LABEL_UPLOAD_FIRST = '上传第一个文件';
 const LABEL_COPY = '复制';
 const LABEL_DELETE = '删除';
 const LABEL_CONFIRM_DELETE = '确定删除该文件？';
+const LABEL_REFRESH = '刷新';
 const MSG_UNSUPPORTED_TYPE = '不支持的文件类型';
 const MSG_IMAGE_ONLY = '仅支持图片文件';
 const MSG_FILE_SIZE_EXCEEDED = '文件大小超过限制';
@@ -53,11 +56,13 @@ const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
 
 type FileManagerProps = {
   readonly files: readonly BlogFile[];
+  readonly isLoading: boolean;
   readonly isUploading: boolean;
   readonly isDeleting: boolean;
   readonly error: string | null;
   readonly onUpload: (file: File) => Promise<BlogFile | null>;
   readonly onDelete: (id: string) => Promise<boolean>;
+  readonly onRefetch: () => void;
 };
 
 function formatFileSize(bytes: number): string {
@@ -72,11 +77,13 @@ function isImageFile(mimeType: string): boolean {
 
 export function FileManager({
   files,
+  isLoading,
   isUploading,
   isDeleting,
   error,
   onUpload,
   onDelete,
+  onRefetch,
 }: FileManagerProps) {
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewSrc, setPreviewSrc] = useState('');
@@ -132,7 +139,9 @@ export function FileManager({
                     src={file.storagePath}
                   />
                 ) : (
-                  <FileImageOutlined className="text-3xl" />
+                  <div className="text-3xl">
+                    <FileImageOutlined />
+                  </div>
                 )}
               </div>
               <div className="flex flex-col gap-1 p-3">
@@ -149,22 +158,22 @@ export function FileManager({
                     size="small"
                     type="link"
                     onClick={() => handleCopyUrl(file.storagePath)}
-                >
-                  {LABEL_COPY}
-                </Button>
-                <Popconfirm
-                  title={LABEL_CONFIRM_DELETE}
-                  onConfirm={() => onDelete(file.id)}
-                >
-                  <Button
-                    danger
-                    disabled={isDeleting}
-                    icon={<DeleteOutlined />}
-                    loading={isDeleting}
-                    size="small"
-                    type="link"
                   >
-                    {LABEL_DELETE}
+                    {LABEL_COPY}
+                  </Button>
+                  <Popconfirm
+                    title={LABEL_CONFIRM_DELETE}
+                    onConfirm={() => onDelete(file.id)}
+                  >
+                    <Button
+                      danger
+                      disabled={isDeleting}
+                      icon={<DeleteOutlined />}
+                      loading={isDeleting}
+                      size="small"
+                      type="link"
+                    >
+                      {LABEL_DELETE}
                     </Button>
                   </Popconfirm>
                 </div>
@@ -184,23 +193,36 @@ export function FileManager({
             {LABEL_PAGE_TITLE}
           </Title>
         </div>
-        <Upload
-          accept={ALLOWED_MIME_TYPES.join(',')}
-          beforeUpload={handleBeforeUpload}
-          customRequest={async ({ file }) => {
-            await handleUpload(file as File);
-          }}
-          showUploadList={false}
-        >
-          <Button icon={<PlusOutlined />} loading={isUploading} type="primary">
-            {LABEL_UPLOAD}
+        <div className="flex gap-2">
+          <Button
+            icon={<ReloadOutlined />}
+            loading={isLoading}
+            onClick={onRefetch}
+          >
+            {LABEL_REFRESH}
           </Button>
-        </Upload>
+          <Upload
+            accept={ALLOWED_MIME_TYPES.join(',')}
+            beforeUpload={handleBeforeUpload}
+            customRequest={async ({ file }) => {
+              await handleUpload(file as File);
+            }}
+            showUploadList={false}
+          >
+            <Button icon={<PlusOutlined />} loading={isUploading} type="primary">
+              {LABEL_UPLOAD}
+            </Button>
+          </Upload>
+        </div>
       </div>
 
-      {error && <Alert title={error} showIcon type="error" />}
+      {error && <Alert message={error} showIcon type="error" />}
 
-      {files.length === 0 ? (
+      {isLoading ? (
+        <div className="flex justify-center py-12">
+          <Spin size="large" />
+        </div>
+      ) : files.length === 0 ? (
         <Empty
           description={LABEL_NO_FILES}
           image={Empty.PRESENTED_IMAGE_SIMPLE}

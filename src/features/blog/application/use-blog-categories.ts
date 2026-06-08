@@ -1,4 +1,4 @@
-// src/features/blog/hooks/use-blog-categories.ts
+// src/features/blog/application/use-blog-categories.ts
 
 import { useCallback } from 'react';
 

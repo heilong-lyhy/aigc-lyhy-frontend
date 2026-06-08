@@ -1,5 +1,5 @@
 // @vitest-environment happy-dom
-// src/features/blog/hooks/use-post-editor.spec.ts
+// src/features/blog/application/use-post-editor.spec.ts
 
 import { act, renderHook } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';

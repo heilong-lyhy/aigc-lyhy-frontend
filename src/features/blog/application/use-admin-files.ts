@@ -1,18 +1,30 @@
-// src/features/blog/hooks/use-admin-files.ts
+// src/features/blog/application/use-admin-files.ts
 
-import { useCallback, useReducer } from 'react';
+import { useCallback, useMemo, useReducer } from 'react';
 
 import type { BlogFile } from '@/entities/blog';
 
-import { deleteBlogFile, uploadBlogFile } from '../infrastructure/files-api';
+import { useAsyncQuery } from '@/shared/hooks';
+
+import type { BlogFileListResult } from '../infrastructure/files-api';
+import { deleteBlogFile, fetchBlogFiles, uploadBlogFile } from '../infrastructure/files-api';
 import { useMutationError } from '../lib/use-mutation-error';
 
+type UseAdminFilesOptions = {
+  readonly pagination?: { readonly page: number; readonly pageSize: number };
+  readonly fileType?: string;
+  readonly autoLoad?: boolean;
+};
+
 type UseAdminFilesResult = {
+  readonly files: BlogFileListResult | null;
+  readonly isLoadingFiles: boolean;
   readonly isUploading: boolean;
   readonly isDeleting: boolean;
   readonly error: string | null;
   readonly upload: (file: File) => Promise<BlogFile | null>;
   readonly remove: (id: number) => Promise<boolean>;
+  readonly refetchFiles: () => Promise<void>;
 };
 
 type State = {
@@ -46,7 +58,27 @@ function reducer(state: State, action: Action): State {
   }
 }
 
-export function useAdminFiles(): UseAdminFilesResult {
+const DEFAULT_PAGINATION = { page: 1, pageSize: 20 };
+
+export function useAdminFiles(options: UseAdminFilesOptions = {}): UseAdminFilesResult {
+  const { fileType, autoLoad = true } = options;
+
+  /* eslint-disable react-hooks/exhaustive-deps -- 字段级 deps 防止调用方传字面量对象导致引用不稳定 */
+  const pagination = useMemo(
+    () => options.pagination ?? DEFAULT_PAGINATION,
+    [options.pagination?.page, options.pagination?.pageSize],
+  );
+  /* eslint-enable react-hooks/exhaustive-deps */
+
+  const fetcher = useCallback(async (): Promise<BlogFileListResult> => {
+    return await fetchBlogFiles(pagination, fileType ? { fileType } : undefined);
+  }, [pagination, fileType]);
+
+  const { data: files, isLoading: isLoadingFiles, refetch: refetchFiles } = useAsyncQuery<BlogFileListResult>({
+    fetcher,
+    autoLoad,
+  });
+
   const [state, dispatch] = useReducer(reducer, initialState);
   const { mutationError: error, clearMutationError, setMutationError } = useMutationError();
 
@@ -56,6 +88,7 @@ export function useAdminFiles(): UseAdminFilesResult {
     try {
       const result = await uploadBlogFile({ file });
       dispatch({ type: 'UPLOAD_SUCCESS' });
+      await refetchFiles();
       return result;
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to upload file';
@@ -63,7 +96,7 @@ export function useAdminFiles(): UseAdminFilesResult {
       dispatch({ type: 'UPLOAD_SUCCESS' });
       return null;
     }
-  }, [clearMutationError, setMutationError]);
+  }, [clearMutationError, setMutationError, refetchFiles]);
 
   const remove = useCallback(async (id: number): Promise<boolean> => {
     clearMutationError();
@@ -71,6 +104,7 @@ export function useAdminFiles(): UseAdminFilesResult {
     try {
       const result = await deleteBlogFile(id);
       dispatch({ type: 'DELETE_SUCCESS' });
+      await refetchFiles();
       return result;
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to delete file';
@@ -78,13 +112,16 @@ export function useAdminFiles(): UseAdminFilesResult {
       dispatch({ type: 'DELETE_SUCCESS' });
       return false;
     }
-  }, [clearMutationError, setMutationError]);
+  }, [clearMutationError, setMutationError, refetchFiles]);
 
   return {
+    files,
+    isLoadingFiles,
     isUploading: state.isUploading,
     isDeleting: state.isDeleting,
     error,
     upload,
     remove,
+    refetchFiles,
   };
 }

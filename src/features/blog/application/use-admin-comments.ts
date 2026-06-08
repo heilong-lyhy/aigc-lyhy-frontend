@@ -1,6 +1,6 @@
-// src/features/blog/hooks/use-admin-comments.ts
+// src/features/blog/application/use-admin-comments.ts
 
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 
 import type {
   BlogComment,
@@ -43,7 +43,14 @@ type UseAdminCommentsResult = {
 };
 
 export function useAdminComments(options: UseAdminCommentsOptions): UseAdminCommentsResult {
-  const { postId, pagination, status, autoLoad = true } = options;
+  const { postId, status, autoLoad = true } = options;
+
+  /* eslint-disable react-hooks/exhaustive-deps -- 字段级 deps 防止调用方传字面量对象导致引用不稳定 */
+  const pagination = useMemo(
+    () => options.pagination,
+    [options.pagination?.page, options.pagination?.pageSize],
+  );
+  /* eslint-enable react-hooks/exhaustive-deps */
 
   const fetcher = useCallback(async (): Promise<PaginatedResult<BlogComment>> => {
     return await fetchBlogComments(pagination, { postId, status });
@@ -73,13 +80,15 @@ export function useAdminComments(options: UseAdminCommentsOptions): UseAdminComm
   const remove = useCallback(async (id: number): Promise<boolean> => {
     clearMutationError();
     try {
-      return await deleteBlogComment(id);
+      const result = await deleteBlogComment(id);
+      await refetch();
+      return result;
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to delete comment';
       setMutationError(message);
       return false;
     }
-  }, [clearMutationError, setMutationError]);
+  }, [clearMutationError, setMutationError, refetch]);
 
   const batchUpdateStatus = useCallback(
     async (

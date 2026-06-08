@@ -1,4 +1,4 @@
-// src/features/blog/hooks/use-blog-tags.ts
+// src/features/blog/application/use-blog-tags.ts
 
 import { useCallback } from 'react';
 

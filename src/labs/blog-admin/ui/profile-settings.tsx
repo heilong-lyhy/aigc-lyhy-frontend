@@ -199,7 +199,7 @@ export function ProfileSettings({
         </Title>
       </div>
 
-      {mutationError && <Alert title={mutationError} showIcon type="error" />}
+      {mutationError && <Alert message={mutationError} showIcon type="error" />}
 
       {/* 博主信息 */}
       <Card loading={isLoading} title={LABEL_PROFILE_INFO}>

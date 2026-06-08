@@ -1,4 +1,4 @@
-// src/features/blog/hooks/use-blog-profile.ts
+// src/features/blog/application/use-blog-profile.ts
 
 import { useCallback } from 'react';
 

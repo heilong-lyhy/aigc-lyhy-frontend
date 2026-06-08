@@ -23,6 +23,7 @@ export interface BlogCommentDTO {
   readonly authorAvatar: string | null;
   readonly content: string;
   readonly status: CommentStatusDTO;
+  readonly isAdminReply: boolean;
   readonly nestingLevel: number;
   readonly createdAt: string;
   readonly updatedAt: string;
@@ -58,6 +59,7 @@ export function mapBlogComment(raw: BlogCommentDTO): BlogComment {
     authorAvatar: raw.authorAvatar ?? null,
     content: raw.content,
     status: mapCommentStatus(raw.status),
+    isAdminReply: raw.isAdminReply,
     nestingLevel: raw.nestingLevel,
     createdAt: raw.createdAt,
     updatedAt: raw.updatedAt,
@@ -78,7 +80,7 @@ function mapBlogCommentList(raw: BlogCommentListDTO): PaginatedResult<BlogCommen
 const COMMENT_FRAGMENT = `
   fragment CommentFields on BlogComment {
     id postId parentId replyToId authorName authorAvatar content
-    status nestingLevel createdAt updatedAt
+    status isAdminReply nestingLevel createdAt updatedAt
   }
 `;
 

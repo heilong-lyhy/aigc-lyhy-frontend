@@ -1,4 +1,4 @@
-// src/features/blog/hooks/use-like.ts
+// src/features/blog/application/use-like.ts
 
 import { useCallback, useEffect, useReducer } from 'react';
 

@@ -1,4 +1,4 @@
-// src/features/blog/hooks/use-auto-save.ts
+// src/features/blog/application/use-auto-save.ts
 
 import { useCallback, useEffect, useRef } from 'react';
 

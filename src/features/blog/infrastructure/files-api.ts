@@ -74,16 +74,19 @@ const DELETE_FILE_MUTATION = `
 
 // ── API 函数 ──
 
+/** 文件列表查询结果 */
+export type BlogFileListResult = {
+  readonly items: readonly BlogFile[];
+  readonly total: number;
+  readonly current: number;
+  readonly pageSize: number;
+};
+
 /** 管理端：查询文件列表 */
 export async function fetchBlogFiles(
   pagination: { page: number; pageSize: number },
   filters?: { readonly fileType?: string },
-): Promise<{
-  items: readonly BlogFile[];
-  total: number;
-  current: number;
-  pageSize: number;
-}> {
+): Promise<BlogFileListResult> {
   const data = await executeGraphQL<{ blogFiles: BlogFileListDTO }, Record<string, unknown>>(
     FETCH_FILES_QUERY,
     {

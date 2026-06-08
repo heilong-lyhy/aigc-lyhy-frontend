@@ -1,5 +1,5 @@
 // @vitest-environment happy-dom
-// src/features/blog/hooks/use-blog-comments.spec.ts
+// src/features/blog/application/use-blog-comments.spec.ts
 
 import { renderHook } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';

@@ -1,4 +1,4 @@
-// src/features/blog/hooks/use-admin-profile.ts
+// src/features/blog/application/use-admin-profile.ts
 
 import { useCallback } from 'react';
 

@@ -1,4 +1,4 @@
-// src/features/blog/hooks/use-post-editor.ts
+// src/features/blog/application/use-post-editor.ts
 
 import { useCallback, useState } from 'react';
 
