@@ -25,4 +25,4 @@ export {
   updateBlogPost,
 } from './posts-api';
 export { fetchBlogProfile, updateBlogProfile } from './profile-api';
-export { createBlogTag, deleteBlogTag, fetchBlogTags } from './tags-api';
+export { createBlogTag, deleteBlogTag, fetchBlogTags, updateBlogTag } from './tags-api';

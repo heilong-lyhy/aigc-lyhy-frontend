@@ -1,8 +1,8 @@
 // src/labs/blog-admin/ui/tag-manager.tsx
 
 import { useCallback, useMemo, useState } from 'react';
-import { DeleteOutlined, PlusOutlined } from '@ant-design/icons';
-import { Button, Form, Input, Modal, Popconfirm, Table, Typography } from 'antd';
+import { DeleteOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons';
+import { Button, Form, Input, Modal, Popconfirm, Space, Table, Typography } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 
 import type { BlogTag, PaginatedResult, PaginationInput } from '@/entities/blog';
@@ -17,8 +17,10 @@ const LABEL_COL_POST_COUNT = '文章数';
 const LABEL_COL_CREATED = '创建时间';
 const LABEL_COL_ACTIONS = '操作';
 const LABEL_DELETE = '删除';
+const LABEL_EDIT = '编辑';
 const LABEL_CONFIRM_DELETE = '确定删除该标签？';
-const LABEL_MODAL_TITLE = '新建标签';
+const LABEL_MODAL_CREATE = '新建标签';
+const LABEL_MODAL_EDIT = '编辑标签';
 const LABEL_NAME = '标签名称';
 const LABEL_NAME_REQUIRED = '请输入标签名称';
 const LABEL_SLUG_REQUIRED = '请输入 Slug';
@@ -30,6 +32,7 @@ type TagManagerProps = {
   readonly pagination: PaginationInput;
   readonly onPaginationChange: (pagination: PaginationInput) => void;
   readonly onCreate: (input: { readonly name: string; readonly slug: string }) => void;
+  readonly onUpdate: (id: string, input: { readonly name: string; readonly slug: string }) => void;
   readonly onDelete: (id: string) => void;
 };
 
@@ -44,14 +47,28 @@ export function TagManager({
   pagination,
   onPaginationChange,
   onCreate,
+  onUpdate,
   onDelete,
 }: TagManagerProps) {
   const [modalOpen, setModalOpen] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [form] = Form.useForm<TagFormValues>();
 
   const items = data?.items ?? [];
   const total = data ? toEffectiveTotal(data.total) : 0;
   const current = toCurrentPage(pagination);
+
+  const openCreateModal = useCallback(() => {
+    setEditingId(null);
+    form.resetFields();
+    setModalOpen(true);
+  }, [form]);
+
+  const openEditModal = useCallback((tag: BlogTag) => {
+    setEditingId(tag.id);
+    form.setFieldsValue({ name: tag.name, slug: tag.slug });
+    setModalOpen(true);
+  }, [form]);
 
   const columns: ColumnsType<BlogTag> = useMemo(() => [
     {
@@ -80,31 +97,45 @@ export function TagManager({
     {
       title: LABEL_COL_ACTIONS,
       key: 'actions',
-      width: 100,
+      width: 140,
       render: (_, record) => (
-        <Popconfirm
-          title={LABEL_CONFIRM_DELETE}
-          onConfirm={() => onDelete(record.id)}
-        >
+        <Space size={4}>
           <Button
-            danger
-            icon={<DeleteOutlined />}
+            icon={<EditOutlined />}
             size="small"
             type="link"
+            onClick={() => openEditModal(record)}
           >
-            {LABEL_DELETE}
+            {LABEL_EDIT}
           </Button>
-        </Popconfirm>
+          <Popconfirm
+            title={LABEL_CONFIRM_DELETE}
+            onConfirm={() => onDelete(record.id)}
+          >
+            <Button
+              danger
+              icon={<DeleteOutlined />}
+              size="small"
+              type="link"
+            >
+              {LABEL_DELETE}
+            </Button>
+          </Popconfirm>
+        </Space>
       ),
     },
-  ], [onDelete]);
+  ], [onDelete, openEditModal]);
 
   const handleModalOk = useCallback(async () => {
     const values = await form.validateFields();
-    onCreate(values);
+    if (editingId) {
+      onUpdate(editingId, values);
+    } else {
+      onCreate(values);
+    }
     setModalOpen(false);
     form.resetFields();
-  }, [form, onCreate]);
+  }, [editingId, form, onCreate, onUpdate]);
 
   return (
     <div className="flex flex-col gap-4">
@@ -115,10 +146,7 @@ export function TagManager({
         <Button
           icon={<PlusOutlined />}
           type="primary"
-          onClick={() => {
-            form.resetFields();
-            setModalOpen(true);
-          }}
+          onClick={openCreateModal}
         >
           {LABEL_CREATE}
         </Button>
@@ -141,7 +169,7 @@ export function TagManager({
       <Modal
         destroyOnClose
         open={modalOpen}
-        title={LABEL_MODAL_TITLE}
+        title={editingId ? LABEL_MODAL_EDIT : LABEL_MODAL_CREATE}
         onCancel={() => setModalOpen(false)}
         onOk={handleModalOk}
       >

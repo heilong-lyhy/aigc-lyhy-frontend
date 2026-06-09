@@ -30,6 +30,7 @@ import {
   useAdminFiles,
   useAdminPosts,
   useAdminProfile,
+  useAdminTags,
   useAutoSave,
   useBlogCategories,
   useBlogDashboard,
@@ -52,6 +53,7 @@ import {
   PostEditor,
   PostList,
   ProfileSettings,
+  TagManager,
 } from '@/labs/blog-admin';
 import { canAccessGame2048Lab, Game2048LabPage } from '@/labs/game-2048';
 import { canAccessSandboxPlayground, SandboxPlaygroundPage } from '@/sandbox/playground';
@@ -370,6 +372,48 @@ function AdminFileManagerPage() {
   );
 }
 
+function AdminTagManagerPage() {
+  const [tagPagination, setTagPagination] = useState<PaginationInput>(toPaginationInput(1, DEFAULT_PAGE_SIZE));
+  const { data, isLoading, create, update, remove } = useAdminTags({ autoLoad: true });
+
+  const tagData = data.length > 0
+    ? { items: data, total: data.length, current: tagPagination.page, pageSize: tagPagination.pageSize }
+    : null;
+
+  const handleCreate = useCallback(
+    (input: { readonly name: string; readonly slug: string }) => {
+      void create(input);
+    },
+    [create],
+  );
+
+  const handleUpdate = useCallback(
+    (id: string, input: { readonly name: string; readonly slug: string }) => {
+      void update({ id: Number(id), ...input });
+    },
+    [update],
+  );
+
+  const handleDelete = useCallback(
+    (id: string) => {
+      void remove(Number(id));
+    },
+    [remove],
+  );
+
+  return (
+    <TagManager
+      data={tagData}
+      isLoading={isLoading}
+      pagination={tagPagination}
+      onPaginationChange={setTagPagination}
+      onCreate={handleCreate}
+      onUpdate={handleUpdate}
+      onDelete={handleDelete}
+    />
+  );
+}
+
 function AdminProfileSettingsPage() {
   const { data, isLoading, mutationError, load, update } = useAdminProfile();
 
@@ -523,6 +567,10 @@ const router = createBrowserRouter([
           {
             element: <AdminFileManagerPage />,
             path: 'files',
+          },
+          {
+            element: <AdminTagManagerPage />,
+            path: 'tags',
           },
           {
             element: <AdminCommentManagerPage />,

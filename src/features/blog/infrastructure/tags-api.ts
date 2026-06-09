@@ -48,6 +48,12 @@ const DELETE_TAG_MUTATION = `
   }
 `;
 
+const UPDATE_TAG_MUTATION = `
+  mutation UpdateBlogTag($id: Int!, $name: String!, $slug: String!) {
+    updateBlogTag(id: $id, name: $name, slug: $slug) { id name slug postCount createdAt updatedAt }
+  }
+`;
+
 // ── API 函数 ──
 
 /** 公开：查询所有标签 */
@@ -83,4 +89,17 @@ export async function deleteBlogTag(id: number): Promise<boolean> {
   );
 
   return data.deleteBlogTag;
+}
+
+/** 管理端：更新标签（后端使用独立参数，非 input 对象） */
+export async function updateBlogTag(
+  input: Readonly<{ id: number; name: string; slug: string }>,
+): Promise<BlogTag> {
+  const data = await executeGraphQL<{ updateBlogTag: BlogTagDTO }, Record<string, unknown>>(
+    UPDATE_TAG_MUTATION,
+    { id: input.id, name: input.name, slug: input.slug },
+    { authMode: 'required' },
+  );
+
+  return mapBlogTag(data.updateBlogTag);
 }

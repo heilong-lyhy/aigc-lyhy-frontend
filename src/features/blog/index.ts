@@ -19,6 +19,7 @@ export { useAdminComments } from './application/use-admin-comments';
 export { useAdminFiles } from './application/use-admin-files';
 export { useAdminPosts } from './application/use-admin-posts';
 export { useAdminProfile } from './application/use-admin-profile';
+export { useAdminTags } from './application/use-admin-tags';
 export { usePostEditor } from './application/use-post-editor';
 
 // ── UI 组件 ──
