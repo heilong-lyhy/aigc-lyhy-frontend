@@ -14,6 +14,7 @@ interface BlogCategoryDTO {
   readonly parentId: number | null;
   readonly sortOrder: number;
   readonly postCount: number;
+  readonly children?: readonly BlogCategoryDTO[];
   readonly createdAt: string;
   readonly updatedAt: string;
 }
@@ -29,6 +30,7 @@ function mapBlogCategory(raw: BlogCategoryDTO): BlogCategory {
     parentId: raw.parentId,
     sortOrder: raw.sortOrder,
     postCount: raw.postCount,
+    children: raw.children ? raw.children.map(mapBlogCategory) : [],
     createdAt: raw.createdAt,
     updatedAt: raw.updatedAt,
   };
@@ -39,6 +41,9 @@ function mapBlogCategory(raw: BlogCategoryDTO): BlogCategory {
 const CATEGORY_FRAGMENT = `
   fragment CategoryFields on BlogCategory {
     id name slug description parentId sortOrder postCount createdAt updatedAt
+    children { id name slug description parentId sortOrder postCount createdAt updatedAt
+      children { id name slug description parentId sortOrder postCount createdAt updatedAt }
+    }
   }
 `;
 

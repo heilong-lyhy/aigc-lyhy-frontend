@@ -21,9 +21,6 @@ export { useAdminPosts } from './application/use-admin-posts';
 export { useAdminProfile } from './application/use-admin-profile';
 export { usePostEditor } from './application/use-post-editor';
 
-// ── 管理端类型（重导出自 entities） ──
-export type { PostEditorForm } from '@/entities/blog';
-
 // ── UI 组件 ──
 export { BlogSidebar } from './ui/blog-sidebar';
 export { CategorySidebar } from './ui/category-sidebar';
@@ -50,8 +47,4 @@ export { TagCloud } from './ui/tag-cloud';
 export type { TocItem } from './lib/types';
 export type { MarkdownRendererProps } from './ui/markdown-renderer';
 
-// ── Infrastructure（组合根使用） ──
-export { uploadBlogFile } from './infrastructure/files-api';
 
-// ── 上传校验常量（重导出自 entities） ──
-export { ALLOWED_COVER_MIME_TYPES, ALLOWED_FILE_MIME_TYPES, MAX_FILE_SIZE_BYTES, MAX_FILE_SIZE_MB } from '@/entities/blog';

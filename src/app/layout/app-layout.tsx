@@ -15,7 +15,7 @@ import { useAuth } from '@/features/auth';
 
 import type { AssistantRouteCandidate } from '@/entities/assistant-session';
 
-import { LoginPrompt } from '@/shared/ui/login-prompt';
+import { LoginPrompt } from '@/shared/ui';
 
 import { EntryAccentGlyph } from './entry-accent-glyph';
 

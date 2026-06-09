@@ -26,7 +26,6 @@ import { ProjectStructurePage } from '@/pages/project-structure';
 import { changePassword } from '@/features/auth';
 import {
   MarkdownRenderer,
-  uploadBlogFile,
   useAdminComments,
   useAdminFiles,
   useAdminPosts,
@@ -110,7 +109,7 @@ function AdminPostListPage() {
 
   const handleDelete = useCallback(
     async (id: string) => {
-      const ok = await remove(id);
+      const ok = await remove(Number(id));
       if (ok) {
         await refetch();
       }
@@ -120,7 +119,7 @@ function AdminPostListPage() {
 
   const handleTogglePublish = useCallback(
     async (id: string, status: BlogPostStatus) => {
-      const ok = await update(id, { status });
+      const ok = await update({ id: Number(id), status });
       if (ok) {
         await refetch();
       }
@@ -172,20 +171,22 @@ function AdminPostEditorPage() {
     useMockFallback: USE_MOCK_FALLBACK,
   });
 
+  const { upload: uploadFile } = useAdminFiles({ autoLoad: false });
+
   // Load existing post or draft when id changes
   useEffect(() => {
     if (id) {
-      loadById(id)
+      loadById(Number(id))
         .then((post) => {
           if (post) {
             resetEditor({
               title: post.title,
               slug: post.slug,
-              excerpt: post.excerpt,
+              excerpt: post.excerpt ?? '',
               content: post.content,
               coverImage: post.coverImage ?? '',
-              categoryId: post.categoryId,
-              tags: post.tags,
+              categoryId: post.categoryId != null ? String(post.categoryId) : '',
+              tags: post.tags.map((t) => t.id),
               status: post.status,
             });
           }
@@ -233,6 +234,7 @@ function AdminPostEditorPage() {
   const handleSave = useCallback(async () => {
     setIsSaving(true);
     try {
+      const categoryId = form.categoryId ? Number(form.categoryId) : undefined;
       if (isNew) {
         const result = await create({
           title: form.title,
@@ -240,7 +242,7 @@ function AdminPostEditorPage() {
           excerpt: form.excerpt,
           content: form.content,
           coverImage: form.coverImage || null,
-          categoryId: form.categoryId,
+          categoryId,
           tags: form.tags,
           status: form.status,
         });
@@ -249,13 +251,14 @@ function AdminPostEditorPage() {
           navigate(`/admin/posts/${result.id}`, { replace: true });
         }
       } else {
-        const result = await update(id, {
+        const result = await update({
+          id: Number(id),
           title: form.title,
           slug: form.slug,
           excerpt: form.excerpt,
           content: form.content,
           coverImage: form.coverImage || null,
-          categoryId: form.categoryId,
+          categoryId,
           tags: form.tags,
           status: form.status,
         });
@@ -288,8 +291,8 @@ function AdminPostEditorPage() {
       onContentChange={editorSetters.setContent}
       onCoverImageChange={editorSetters.setCoverImage}
       onCoverImageUpload={async (file) => {
-        const result = await uploadBlogFile({ file });
-        return result.storagePath;
+        const result = await uploadFile(file);
+        return result?.storagePath ?? '';
       }}
       onExcerptChange={editorSetters.setExcerpt}
       onSave={handleSave}

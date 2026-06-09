@@ -53,5 +53,5 @@ export function applyFilterParams(
 function parseIntParam(value: string | null): number | undefined {
   if (!value) return undefined;
   const n = Number(value);
-  return Number.isFinite(n) && n > 0 ? n : undefined;
+  return Number.isFinite(n) && Number.isInteger(n) && n > 0 ? n : undefined;
 }

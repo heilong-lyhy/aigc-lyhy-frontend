@@ -37,6 +37,7 @@ export interface BlogCategory {
   readonly parentId: number | null;
   readonly sortOrder: number;
   readonly postCount: number;
+  readonly children: readonly BlogCategory[];
   readonly createdAt: string;
   readonly updatedAt: string;
 }

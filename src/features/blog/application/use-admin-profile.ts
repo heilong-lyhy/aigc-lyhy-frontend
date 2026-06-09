@@ -2,7 +2,7 @@
 
 import { useCallback } from 'react';
 
-import type { BlogProfile, BlogSocialLink } from '@/entities/blog';
+import type { BlogProfile } from '@/entities/blog';
 
 import { useAsyncQuery } from '@/shared/hooks';
 
@@ -19,9 +19,9 @@ type UseAdminProfileResult = {
     input: Readonly<
       Partial<{
         nickname: string;
-        avatar: string | null;
+        avatarUrl: string | null;
         bio: string;
-        socialLinks: readonly BlogSocialLink[];
+        socialLinks: Record<string, string>;
       }>
     >,
   ) => Promise<BlogProfile | null>;
@@ -29,7 +29,16 @@ type UseAdminProfileResult = {
 
 export function useAdminProfile(): UseAdminProfileResult {
   const fetcher = useCallback(async (): Promise<BlogProfile> => {
-    return await fetchBlogProfile();
+    const result = await fetchBlogProfile();
+    return result ?? {
+      id: '',
+      nickname: '',
+      bio: null,
+      avatarUrl: null,
+      socialLinks: null,
+      createdAt: '',
+      updatedAt: '',
+    };
   }, []);
 
   const { data, isLoading, error, refetch } = useAsyncQuery<BlogProfile>({
@@ -48,9 +57,9 @@ export function useAdminProfile(): UseAdminProfileResult {
       input: Readonly<
         Partial<{
           nickname: string;
-          avatar: string | null;
+          avatarUrl: string | null;
           bio: string;
-          socialLinks: readonly BlogSocialLink[];
+          socialLinks: Record<string, string>;
         }>
       >,
     ): Promise<BlogProfile | null> => {

@@ -1,6 +1,6 @@
 // src/entities/blog/index.ts
 
-// ── 上传校验常量 ──
+// ── 上传校验常量（属于 blog domain 的业务约束） ──
 
 /** 通用文件上传允许的 MIME 类型 */
 export const ALLOWED_FILE_MIME_TYPES: readonly string[] = [
