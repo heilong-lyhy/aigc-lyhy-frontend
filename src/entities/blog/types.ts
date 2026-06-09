@@ -21,11 +21,20 @@ export interface BlogPost {
   readonly updatedAt: string;
 }
 
+/** 上一篇/下一篇文章导航摘要 */
+export interface PostNavigationItem {
+  readonly id: string;
+  readonly title: string;
+  readonly slug: string;
+}
+
 /** 博客文章详情（与后端 BlogPostDetailObjectType 对齐，比列表多 content/tags/renderedContent） */
 export interface BlogPostDetail extends BlogPost {
   readonly content: string;
   readonly renderedContent: string | null;
   readonly tags: readonly BlogTag[];
+  readonly prevPost?: PostNavigationItem;
+  readonly nextPost?: PostNavigationItem;
 }
 
 /** 博客分类（与后端 BlogCategoryObjectType 对齐） */

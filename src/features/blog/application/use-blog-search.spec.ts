@@ -107,6 +107,57 @@ describe('useBlogSearch', () => {
     expect(mockFetchBlogPublishedPosts).toHaveBeenCalled();
   });
 
+  it('keyword 应映射为 title 参数传递给 API', async () => {
+    mockFetchBlogPublishedPosts.mockResolvedValue(samplePage);
+
+    const { result } = renderHook(() =>
+      useBlogSearch({ pagination: { page: 1, pageSize: 10 }, debounceMs: 0 }),
+    );
+
+    await act(async () => {
+      result.current.setFilters({ keyword: 'react' });
+    });
+
+    await act(async () => {
+      await new Promise((r) => { setTimeout(r, 10); });
+    });
+
+    expect(mockFetchBlogPublishedPosts).toHaveBeenCalledWith(
+      { page: 1, pageSize: 10 },
+      expect.objectContaining({ title: 'react' }),
+    );
+  });
+
+  it('清空 keyword 后不应传递 title 参数', async () => {
+    mockFetchBlogPublishedPosts.mockResolvedValue(samplePage);
+
+    const { result } = renderHook(() =>
+      useBlogSearch({ pagination: { page: 1, pageSize: 10 }, debounceMs: 0 }),
+    );
+
+    // 先设置非空关键词触发搜索
+    await act(async () => {
+      result.current.setFilters({ keyword: 'react' });
+    });
+
+    await act(async () => {
+      await new Promise((r) => { setTimeout(r, 10); });
+    });
+
+    // 清空关键词，keyword 变化走防抖路径
+    await act(async () => {
+      result.current.setFilters({ keyword: '' });
+    });
+
+    await act(async () => {
+      await new Promise((r) => { setTimeout(r, 10); });
+    });
+
+    // 第二次调用不应传 title
+    const secondCallArgs = mockFetchBlogPublishedPosts.mock.calls[1];
+    expect(secondCallArgs[1]?.title).toBeUndefined();
+  });
+
   // ── 搜索历史 ──
 
   it('搜索成功时应将关键词添加到搜索历史', async () => {

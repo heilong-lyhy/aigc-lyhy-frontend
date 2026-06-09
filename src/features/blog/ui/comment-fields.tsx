@@ -1,10 +1,12 @@
 // src/features/blog/ui/comment-fields.tsx
 
 import { Form, Input } from 'antd';
+import type { ReactNode } from 'react';
 
 type CommentFieldsProps = {
   readonly nameLabel?: string;
   readonly emailLabel?: string;
+  readonly emailExtra?: ReactNode;
   readonly contentPlaceholder?: string;
   readonly contentRows?: number;
 };
@@ -17,6 +19,7 @@ const DEFAULT_CONTENT_ROWS = 4;
 export function CommentFields({
   nameLabel = DEFAULT_NAME_LABEL,
   emailLabel = DEFAULT_EMAIL_LABEL,
+  emailExtra,
   contentPlaceholder = DEFAULT_CONTENT_PLACEHOLDER,
   contentRows = DEFAULT_CONTENT_ROWS,
 }: CommentFieldsProps) {
@@ -32,6 +35,7 @@ export function CommentFields({
         </Form.Item>
 
         <Form.Item
+          extra={emailExtra}
           label={emailLabel}
           name="authorEmail"
           rules={[

@@ -44,4 +44,5 @@ export type {
   BlogProfile,
   BlogTag,
   PostEditorForm,
+  PostNavigationItem,
 } from './types';

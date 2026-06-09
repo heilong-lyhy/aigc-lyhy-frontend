@@ -7,6 +7,7 @@ import type {
   BlogTag,
   PaginatedResult,
   PaginationInput,
+  PostNavigationItem,
 } from '@/entities/blog';
 
 import { executeGraphQL } from '@/shared/graphql';
@@ -39,6 +40,8 @@ export interface BlogPostDetailDTO extends BlogPostDTO {
   readonly content: string;
   readonly renderedContent: string | null;
   readonly tags: readonly BlogTagDTO[];
+  readonly prevPost?: PostNavigationItemDTO | null;
+  readonly nextPost?: PostNavigationItemDTO | null;
 }
 
 interface BlogTagDTO {
@@ -48,6 +51,12 @@ interface BlogTagDTO {
   readonly postCount: number;
   readonly createdAt: string;
   readonly updatedAt: string;
+}
+
+interface PostNavigationItemDTO {
+  readonly id: number;
+  readonly title: string;
+  readonly slug: string;
 }
 
 /** 后端 BlogPostsListResponse */
@@ -101,12 +110,18 @@ export function mapBlogPost(raw: BlogPostDTO): BlogPost {
   };
 }
 
+function mapNavigationItem(raw: PostNavigationItemDTO): PostNavigationItem {
+  return { id: String(raw.id), title: raw.title, slug: raw.slug };
+}
+
 function mapBlogPostDetail(raw: BlogPostDetailDTO): BlogPostDetail {
   return {
     ...mapBlogPost(raw),
     content: raw.content,
     renderedContent: raw.renderedContent ?? null,
     tags: raw.tags.map(mapTag),
+    prevPost: raw.prevPost ? mapNavigationItem(raw.prevPost) : undefined,
+    nextPost: raw.nextPost ? mapNavigationItem(raw.nextPost) : undefined,
   };
 }
 
@@ -133,6 +148,8 @@ const POST_DETAIL_FRAGMENT = `
     id title slug excerpt content renderedContent coverImage status categoryId categoryName
     isPinned viewCount likeCount commentCount publishedAt createdAt updatedAt
     tags { id name slug postCount createdAt updatedAt }
+    prevPost { id title slug }
+    nextPost { id title slug }
   }
 `;
 

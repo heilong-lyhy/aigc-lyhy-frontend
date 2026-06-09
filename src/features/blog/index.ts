@@ -39,6 +39,7 @@ export { PostDetailHeader } from './ui/post-detail-header';
 export { PostDetailToc } from './ui/post-detail-toc';
 export { PostErrorBoundary } from './ui/post-error-boundary';
 export { PostList } from './ui/post-list';
+export { PostNavigation } from './ui/post-navigation';
 export { ReplyForm } from './ui/reply-form';
 export { SearchBar } from './ui/search-bar';
 export { TagCloud } from './ui/tag-cloud';

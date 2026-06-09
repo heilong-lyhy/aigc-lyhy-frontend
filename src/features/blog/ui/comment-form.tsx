@@ -47,8 +47,11 @@ export function CommentForm({ postId, onSuccess }: CommentFormProps) {
   return (
     <Form form={form} layout="vertical" onFinish={(v) => void handleSubmit(v)}>
       <CommentFields
-        contentPlaceholder="写下您的评论…"
-        contentRows={4}
+        emailExtra={
+          <Typography.Text type="secondary">
+            头像将根据邮箱自动生成
+          </Typography.Text>
+        }
         emailLabel="您的邮箱（不会公开）"
         nameLabel="您的昵称"
       />

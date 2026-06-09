@@ -98,6 +98,7 @@ export function useBlogSearch(options: UseBlogSearchOptions): UseBlogSearchResul
         const result = await fetchBlogPublishedPosts(pagination, {
           sortBy: currentFilters.sortBy,
           sortOrder: currentFilters.sortOrder,
+          title: currentFilters.keyword || undefined,
         });
         dispatch({ type: 'FETCH_SUCCESS', payload: result });
         if (currentFilters.keyword) {

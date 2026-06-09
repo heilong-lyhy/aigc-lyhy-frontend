@@ -14,6 +14,7 @@ import {
   PostDetailHeader,
   PostDetailToc,
   PostErrorBoundary,
+  PostNavigation,
   ReplyForm,
   useBlogCategories,
   useBlogComments,
@@ -103,6 +104,8 @@ export function BlogPostPage() {
               likeCount={post.likeCount}
               onToggleLike={likeHook.toggle}
             />
+
+            <PostNavigation nextPost={post.nextPost} prevPost={post.prevPost} />
 
             <CommentList comments={comments} onReply={handleReply} />
 
