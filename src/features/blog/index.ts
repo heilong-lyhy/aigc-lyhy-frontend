@@ -5,6 +5,7 @@ export { useAutoSave } from './application/use-auto-save';
 export { useBlogCategories } from './application/use-blog-categories';
 export { useBlogComments } from './application/use-blog-comments';
 export { useBlogDashboard } from './application/use-blog-dashboard';
+export { useBlogFilter } from './application/use-blog-filter';
 export { useBlogPostDetail } from './application/use-blog-post-detail';
 export { useBlogPosts } from './application/use-blog-posts';
 export { useBlogProfile } from './application/use-blog-profile';
@@ -47,3 +48,10 @@ export { TagCloud } from './ui/tag-cloud';
 
 // ── UI 类型 ──
 export type { TocItem } from './lib/types';
+export type { MarkdownRendererProps } from './ui/markdown-renderer';
+
+// ── Infrastructure（组合根使用） ──
+export { uploadBlogFile } from './infrastructure/files-api';
+
+// ── 上传校验常量（重导出自 entities） ──
+export { ALLOWED_COVER_MIME_TYPES, ALLOWED_FILE_MIME_TYPES, MAX_FILE_SIZE_BYTES, MAX_FILE_SIZE_MB } from '@/entities/blog';

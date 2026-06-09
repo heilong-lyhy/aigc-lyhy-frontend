@@ -7,6 +7,7 @@ import {
   BlogSidebar,
   PostList,
   useBlogCategories,
+  useBlogFilter,
   useBlogPosts,
   useBlogProfile,
   useBlogTags,
@@ -23,8 +24,8 @@ const DEFAULT_PAGINATION: PaginationInput = { page: 1, pageSize: 6 };
 export function BlogHomePage() {
   const navigate = useNavigate();
   const [pagination, setPagination] = useState<PaginationInput>(DEFAULT_PAGINATION);
-  const [selectedCategoryId, setSelectedCategoryId] = useState<string | undefined>();
-  const [selectedTagId, setSelectedTagId] = useState<string | undefined>();
+
+  const { filters, selectedCategoryIdStr, selectedTagIdStr, setCategory, setTag } = useBlogFilter();
 
   const {
     data: postsData,
@@ -33,6 +34,8 @@ export function BlogHomePage() {
     refetch: refetchPosts,
   } = useBlogPosts({
     pagination,
+    categoryId: filters.categoryId,
+    tagId: filters.tagId,
   });
 
   const { data: categories, isLoading: isLoadingCategories } = useBlogCategories();
@@ -47,15 +50,21 @@ export function BlogHomePage() {
     setPagination(newPagination);
   }, []);
 
-  const handleCategorySelect = useCallback((categoryId: string | undefined) => {
-    setSelectedCategoryId(categoryId);
-    setPagination(DEFAULT_PAGINATION);
-  }, []);
+  const handleCategorySelect = useCallback(
+    (categoryId: string | undefined) => {
+      setPagination(DEFAULT_PAGINATION);
+      setCategory(categoryId != null ? Number(categoryId) : undefined);
+    },
+    [setCategory],
+  );
 
-  const handleTagSelect = useCallback((tagId: string | undefined) => {
-    setSelectedTagId(tagId);
-    setPagination(DEFAULT_PAGINATION);
-  }, []);
+  const handleTagSelect = useCallback(
+    (tagId: string | undefined) => {
+      setPagination(DEFAULT_PAGINATION);
+      setTag(tagId != null ? Number(tagId) : undefined);
+    },
+    [setTag],
+  );
 
   const handlePostClick = useCallback(
     (slug: string) => {
@@ -93,8 +102,8 @@ export function BlogHomePage() {
           <BlogSidebar
             categories={categories}
             profile={profile}
-            selectedCategoryId={selectedCategoryId}
-            selectedTagId={selectedTagId}
+            selectedCategoryId={selectedCategoryIdStr}
+            selectedTagId={selectedTagIdStr}
             tags={tags}
             onCategorySelect={handleCategorySelect}
             onTagSelect={handleTagSelect}

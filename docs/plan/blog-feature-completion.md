@@ -9,16 +9,16 @@
 
 | 任务 | 状态 | 阻塞项 | 开始时间 | 完成时间 | 备注 |
 |------|------|--------|----------|----------|------|
-| 1.1 分类/标签筛选连接后端 | 待开始 | 后端 1.1+1.2 | | | |
+| 1.1 分类/标签筛选连接后端 | 已完成 | 无 | 2026-06-09 | 2026-06-09 | |
 | 1.2 搜索关键词连接后端 | 待开始 | 后端 1.1 | | | |
 | 1.3 文件管理列表连接后端 | 已完成 | 无 | 2026-06-08 | 2026-06-08 | |
 | 1.4 评论管理添加删除按钮 | 已完成 | 无 | 2026-06-08 | 2026-06-08 | |
 | 2.1 上一篇/下一篇导航 | 待开始 | 后端 2.1 | | | |
-| 2.2 Markdown 实时预览 | 待开始 | 无 | | | ⚡ 可立即开始 |
+| 2.2 Markdown 实时预览 | 已完成 | 无 | 2026-06-08 | 2026-06-08 | |
 | 2.3 标签编辑功能 | 待开始 | 后端 1.4 | | | |
 | 2.4 评论管理回复功能 | 待开始 | 后端 1.5 | | | |
 | 2.5 友链页面+管理 | 待开始 | 后端 2.2 | | | |
-| 2.6 封面图上传按钮 | 待开始 | 无 | | | ⚡ 可立即开始 |
+| 2.6 封面图上传按钮 | 已完成 | 无 | 2026-06-08 | 2026-06-08 | |
 | 3.1 头像自动生成 | 待开始 | 可选后端对接 | | | |
 | 3.2 软删除/回收站 | 待开始 | 后端 3.1 | | | |
 | 3.3 评论隐藏状态 | 待开始 | 后端 2.3 | | | |
@@ -69,6 +69,8 @@
 - 刷新页面后筛选状态保持
 
 ### 1.2 搜索关键词连接后端
+
+> **前置步骤**：开始编码前，先阅读项目规范文件：`docs/layer-model.md`、`docs/dependency-rules.md`、`docs/infrastructure-rules.md`、`docs/ui-stack-rules.md`
 
 **问题**：`blog-search` 页面有搜索 UI，但 `useBlogSearch` 的 keyword 未传递到后端 API。
 
@@ -170,6 +172,8 @@
 
 ### 2.1 上一篇/下一篇文章导航
 
+> **前置步骤**：开始编码前，先阅读项目规范文件：`docs/layer-model.md`、`docs/dependency-rules.md`、`docs/infrastructure-rules.md`、`docs/ui-stack-rules.md`
+
 **问题**：文章详情页无上一篇/下一篇导航。
 
 **设计决策**：
@@ -215,6 +219,8 @@
 
 ### 2.3 标签编辑功能
 
+> **前置步骤**：开始编码前，先阅读项目规范文件：`docs/layer-model.md`、`docs/dependency-rules.md`、`docs/infrastructure-rules.md`、`docs/ui-stack-rules.md`
+
 **问题**：标签管理只有创建和删除，无编辑。需后端先完成 `updateBlogTag` mutation。
 
 **设计决策**：
@@ -236,6 +242,8 @@
 
 ### 2.4 评论管理回复功能
 
+> **前置步骤**：开始编码前，先阅读项目规范文件：`docs/layer-model.md`、`docs/dependency-rules.md`、`docs/infrastructure-rules.md`、`docs/ui-stack-rules.md`
+
 **问题**：管理端无法回复评论。需后端先完成 `replyBlogComment` mutation。
 
 **设计决策**：
@@ -255,6 +263,8 @@
 - 管理员回复显示"博主"徽章
 
 ### 2.5 友链页面 + 友链管理
+
+> **前置步骤**：开始编码前，先阅读项目规范文件：`docs/layer-model.md`、`docs/dependency-rules.md`、`docs/infrastructure-rules.md`、`docs/ui-stack-rules.md`、`docs/labs-rules.md`
 
 **问题**：前后端均无友链功能。需后端先完成友链 API。
 
@@ -335,6 +345,8 @@
 
 ### 3.1 头像自动生成（Gravatar/Cravatar）
 
+> **前置步骤**：开始编码前，先阅读项目规范文件：`docs/layer-model.md`、`docs/dependency-rules.md`、`docs/infrastructure-rules.md`、`docs/ui-stack-rules.md`
+
 **设计决策**：
 - 后端已通过 `AvatarGenerator` 契约在评论创建时生成 `authorAvatar` 字段
 - 前端只需确保 `BlogComment` 类型包含 `authorAvatar` 字段并在评论列表中展示
@@ -355,6 +367,8 @@
 - 后端切换 Cravatar 后前端无需改动
 
 ### 3.2 软删除/回收站
+
+> **前置步骤**：开始编码前，先阅读项目规范文件：`docs/layer-model.md`、`docs/dependency-rules.md`、`docs/infrastructure-rules.md`、`docs/ui-stack-rules.md`、`docs/labs-rules.md`
 
 **设计决策**：
 - 文章列表"删除"改为"移入回收站"
@@ -377,6 +391,8 @@
 - 空回收站显示空状态
 
 ### 3.3 评论"隐藏"状态
+
+> **前置步骤**：开始编码前，先阅读项目规范文件：`docs/layer-model.md`、`docs/dependency-rules.md`、`docs/infrastructure-rules.md`、`docs/ui-stack-rules.md`、`docs/labs-rules.md`
 
 **设计决策**：
 - 使用后端 `isHidden` 布尔字段（非枚举）

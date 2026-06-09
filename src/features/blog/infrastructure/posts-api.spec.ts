@@ -123,6 +123,44 @@ describe('posts-api', () => {
       expect(variables.limit).toBe(10);
       expect(options?.authMode).toBe('none');
     });
+
+    it('应传递 categoryId 筛选参数', async () => {
+      mockExecute.mockResolvedValueOnce({ blogPublishedPosts: sampleListResponse });
+
+      await fetchBlogPublishedPosts({ page: 1, pageSize: 10 }, { categoryId: 5 });
+
+      const variables = mockExecute.mock.calls[0][1];
+      expect(variables.categoryId).toBe(5);
+    });
+
+    it('应传递 tagId 筛选参数', async () => {
+      mockExecute.mockResolvedValueOnce({ blogPublishedPosts: sampleListResponse });
+
+      await fetchBlogPublishedPosts({ page: 1, pageSize: 10 }, { tagId: 3 });
+
+      const variables = mockExecute.mock.calls[0][1];
+      expect(variables.tagId).toBe(3);
+    });
+
+    it('应传递 title 搜索参数', async () => {
+      mockExecute.mockResolvedValueOnce({ blogPublishedPosts: sampleListResponse });
+
+      await fetchBlogPublishedPosts({ page: 1, pageSize: 10 }, { title: '关键词' });
+
+      const variables = mockExecute.mock.calls[0][1];
+      expect(variables.title).toBe('关键词');
+    });
+
+    it('应同时传递多个筛选参数', async () => {
+      mockExecute.mockResolvedValueOnce({ blogPublishedPosts: sampleListResponse });
+
+      await fetchBlogPublishedPosts({ page: 1, pageSize: 10 }, { categoryId: 5, tagId: 3, title: '测试' });
+
+      const variables = mockExecute.mock.calls[0][1];
+      expect(variables.categoryId).toBe(5);
+      expect(variables.tagId).toBe(3);
+      expect(variables.title).toBe('测试');
+    });
   });
 
   // ─── fetchBlogPosts：管理端查询 ───

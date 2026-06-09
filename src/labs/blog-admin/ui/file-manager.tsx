@@ -23,7 +23,7 @@ import {
 } from 'antd';
 
 import type { BlogFile } from '@/entities/blog';
-import { formatAbsoluteDate } from '@/entities/blog';
+import { ALLOWED_FILE_MIME_TYPES, formatAbsoluteDate,MAX_FILE_SIZE_BYTES, MAX_FILE_SIZE_MB } from '@/entities/blog';
 
 const { Title, Text } = Typography;
 
@@ -41,18 +41,7 @@ const MSG_FILE_SIZE_EXCEEDED = '文件大小超过限制';
 const MSG_COPIED = '已复制 URL';
 const MSG_COPY_FAILED = '复制失败';
 
-// ── 上传校验常量 ──
-
-const ALLOWED_MIME_TYPES: readonly string[] = [
-  'image/jpeg',
-  'image/png',
-  'image/gif',
-  'image/webp',
-  'image/svg+xml',
-];
-
-const MAX_FILE_SIZE_MB = 5;
-const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
+// ── 上传校验常量已收束到 features/blog/infrastructure/files-api ──
 
 type FileManagerProps = {
   readonly files: readonly BlogFile[];
@@ -89,7 +78,7 @@ export function FileManager({
   const [previewSrc, setPreviewSrc] = useState('');
 
   const handleBeforeUpload = useCallback((file: File) => {
-    if (!ALLOWED_MIME_TYPES.includes(file.type)) {
+    if (!ALLOWED_FILE_MIME_TYPES.includes(file.type)) {
       message.error(`${MSG_UNSUPPORTED_TYPE}：${file.type}，${MSG_IMAGE_ONLY}`);
       return Upload.LIST_IGNORE;
     }
@@ -202,7 +191,7 @@ export function FileManager({
             {LABEL_REFRESH}
           </Button>
           <Upload
-            accept={ALLOWED_MIME_TYPES.join(',')}
+            accept={ALLOWED_FILE_MIME_TYPES.join(',')}
             beforeUpload={handleBeforeUpload}
             customRequest={async ({ file }) => {
               await handleUpload(file as File);
@@ -228,7 +217,7 @@ export function FileManager({
           image={Empty.PRESENTED_IMAGE_SIMPLE}
         >
           <Upload
-            accept={ALLOWED_MIME_TYPES.join(',')}
+            accept={ALLOWED_FILE_MIME_TYPES.join(',')}
             beforeUpload={handleBeforeUpload}
             customRequest={async ({ file }) => {
               await handleUpload(file as File);

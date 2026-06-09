@@ -25,6 +25,8 @@ import { HomePage } from '@/pages/home';
 import { ProjectStructurePage } from '@/pages/project-structure';
 import { changePassword } from '@/features/auth';
 import {
+  MarkdownRenderer,
+  uploadBlogFile,
   useAdminComments,
   useAdminFiles,
   useAdminPosts,
@@ -279,11 +281,16 @@ function AdminPostEditorPage() {
       isLoading={isLoadingPost}
       isSaving={isSaving}
       lastSavedAt={lastSavedAt}
+      markdownRenderer={MarkdownRenderer}
       tags={tagsData}
       onBack={handleBack}
       onCategoryIdChange={editorSetters.setCategoryId}
       onContentChange={editorSetters.setContent}
       onCoverImageChange={editorSetters.setCoverImage}
+      onCoverImageUpload={async (file) => {
+        const result = await uploadBlogFile({ file });
+        return result.storagePath;
+      }}
       onExcerptChange={editorSetters.setExcerpt}
       onSave={handleSave}
       onSlugChange={editorSetters.setSlug}

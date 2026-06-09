@@ -136,10 +136,10 @@ const POST_DETAIL_FRAGMENT = `
   }
 `;
 
-/** 公开：查询已发布文章列表 */
+/** 公开：查询已发布文章列表（支持分类/标签/关键词筛选） */
 const FETCH_PUBLISHED_POSTS_QUERY = `
-  query FetchBlogPublishedPosts($page: Int!, $limit: Int!, $sortBy: String, $sortOrder: SortDirection) {
-    blogPublishedPosts(page: $page, limit: $limit, sortBy: $sortBy, sortOrder: $sortOrder) {
+  query FetchBlogPublishedPosts($page: Int!, $limit: Int!, $sortBy: String, $sortOrder: SortDirection, $categoryId: Int, $tagId: Int, $title: String) {
+    blogPublishedPosts(page: $page, limit: $limit, sortBy: $sortBy, sortOrder: $sortOrder, categoryId: $categoryId, tagId: $tagId, title: $title) {
       list { ...PostListFields }
       current pageSize total
     }
@@ -196,12 +196,15 @@ const DELETE_POST_MUTATION = `
 
 // ── API 函数 ──
 
-/** 公开：查询已发布文章列表 */
+/** 公开：查询已发布文章列表（支持分类/标签/关键词筛选） */
 export async function fetchBlogPublishedPosts(
   pagination: PaginationInput,
   options?: {
     readonly sortBy?: string;
     readonly sortOrder?: string;
+    readonly categoryId?: number;
+    readonly tagId?: number;
+    readonly title?: string;
   },
 ): Promise<PaginatedResult<BlogPost>> {
   const data = await executeGraphQL<{ blogPublishedPosts: BlogPostListDTO }, Record<string, unknown>>(
@@ -211,6 +214,9 @@ export async function fetchBlogPublishedPosts(
       limit: pagination.pageSize,
       sortBy: options?.sortBy,
       sortOrder: options?.sortOrder,
+      categoryId: options?.categoryId,
+      tagId: options?.tagId,
+      title: options?.title,
     },
     { authMode: 'none' },
   );

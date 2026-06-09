@@ -11,7 +11,7 @@ import remarkGfm from 'remark-gfm';
 import { extractToc } from '../lib/extract-toc';
 import type { TocItem } from '../lib/types';
 
-type MarkdownRendererProps = {
+export type MarkdownRendererProps = {
   readonly content: string;
   readonly onTocReady?: (items: readonly TocItem[]) => void;
 };
