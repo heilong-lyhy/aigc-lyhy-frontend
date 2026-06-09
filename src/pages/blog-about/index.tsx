@@ -2,11 +2,9 @@
 
 import { Avatar, Card, Typography } from 'antd';
 
-import { ErrorState, LoadingSkeleton, useBlogProfile } from '@/features/blog';
+import { BlogLayout, ErrorState, LoadingSkeleton, useBlogProfile } from '@/features/blog';
 
 import { PageHeader } from '@/shared/ui';
-
-import { BlogLayout } from './blog-layout';
 
 const { Text, Title, Paragraph } = Typography;
 
@@ -17,7 +15,11 @@ const SOCIAL_LINKS_TITLE = '社交链接';
 const NO_SOCIAL_LINKS = '暂无社交链接';
 
 export function BlogAboutPage() {
-  const { data: profile, isLoading, error } = useBlogProfile({
+  const {
+    data: profile,
+    isLoading,
+    error,
+  } = useBlogProfile({
     autoLoad: true,
     useMockFallback: USE_MOCK_FALLBACK,
   });
@@ -40,9 +42,7 @@ export function BlogAboutPage() {
                 </Avatar>
                 <div className="flex flex-col gap-2 text-center sm:text-left">
                   <div className="blog-typography-no-margin">
-                    <Title level={3}>
-                      {profile.nickname}
-                    </Title>
+                    <Title level={3}>{profile.nickname}</Title>
                   </div>
                   <Paragraph type="secondary">{profile.bio}</Paragraph>
                 </div>

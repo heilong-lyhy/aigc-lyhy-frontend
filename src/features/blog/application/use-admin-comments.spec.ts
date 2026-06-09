@@ -8,6 +8,7 @@ vi.mock('../infrastructure/comments-api', () => ({
   fetchBlogComments: vi.fn(),
   updateBlogCommentStatus: vi.fn(),
   deleteBlogComment: vi.fn(),
+  replyBlogComment: vi.fn(),
 }));
 
 vi.mock('@/shared/hooks', () => ({
@@ -20,6 +21,7 @@ import { useAsyncQuery } from '@/shared/hooks';
 
 import {
   deleteBlogComment,
+  replyBlogComment,
   updateBlogCommentStatus,
 } from '../infrastructure/comments-api';
 
@@ -28,6 +30,7 @@ import { useAdminComments } from './use-admin-comments';
 const mockUseAsyncQuery = vi.mocked(useAsyncQuery);
 const mockUpdateBlogCommentStatus = vi.mocked(updateBlogCommentStatus);
 const mockDeleteBlogComment = vi.mocked(deleteBlogComment);
+const mockReplyBlogComment = vi.mocked(replyBlogComment);
 
 const sampleComment: BlogComment = {
   id: 'c1',
@@ -68,9 +71,7 @@ describe('useAdminComments', () => {
   it('does not auto-load when postId is undefined', () => {
     mockUseAsyncQuery.mockReturnValue(mockAsyncQueryReturn());
 
-    renderHook(() =>
-      useAdminComments({ pagination: { page: 1, pageSize: 10 } }),
-    );
+    renderHook(() => useAdminComments({ pagination: { page: 1, pageSize: 10 } }));
 
     const options = mockUseAsyncQuery.mock.calls[0][0];
     expect(options.autoLoad).toBe(true);
@@ -167,6 +168,65 @@ describe('useAdminComments', () => {
     });
   });
 
+  // ── reply ──
+
+  describe('reply', () => {
+    it('replies to a comment and returns mapped entity', async () => {
+      const replyResult = {
+        ...sampleComment,
+        id: 'c2',
+        content: 'Reply content',
+        isAdminReply: true,
+      };
+      mockUseAsyncQuery.mockReturnValue(mockAsyncQueryReturn());
+      mockReplyBlogComment.mockResolvedValueOnce(replyResult);
+
+      const { result } = renderHook(() =>
+        useAdminComments({ postId: 1, pagination: { page: 1, pageSize: 10 } }),
+      );
+
+      let returned: BlogComment | null = null;
+      await act(async () => {
+        returned = await result.current.reply(1, 'Reply content');
+      });
+
+      expect(returned).toEqual(replyResult);
+      expect(mockReplyBlogComment).toHaveBeenCalledWith({ commentId: 1, content: 'Reply content' });
+    });
+
+    it('captures reply error and returns null', async () => {
+      mockUseAsyncQuery.mockReturnValue(mockAsyncQueryReturn());
+      mockReplyBlogComment.mockRejectedValueOnce(new Error('Forbidden'));
+
+      const { result } = renderHook(() =>
+        useAdminComments({ postId: 1, pagination: { page: 1, pageSize: 10 } }),
+      );
+
+      let returned: BlogComment | null = undefined as unknown as BlogComment | null;
+      await act(async () => {
+        returned = await result.current.reply(1, 'Reply content');
+      });
+
+      expect(returned).toBeNull();
+      expect(result.current.mutationError).toBe('Forbidden');
+    });
+
+    it('captures non-Error rejection with default message', async () => {
+      mockUseAsyncQuery.mockReturnValue(mockAsyncQueryReturn());
+      mockReplyBlogComment.mockRejectedValueOnce('unknown');
+
+      const { result } = renderHook(() =>
+        useAdminComments({ postId: 1, pagination: { page: 1, pageSize: 10 } }),
+      );
+
+      await act(async () => {
+        await result.current.reply(1, 'Reply content');
+      });
+
+      expect(result.current.mutationError).toBe('Failed to reply comment');
+    });
+  });
+
   // ── batchUpdateStatus ──
 
   describe('batchUpdateStatus', () => {
@@ -213,9 +273,7 @@ describe('useAdminComments', () => {
   describe('batchRemove', () => {
     it('deletes multiple comments and returns results', async () => {
       mockUseAsyncQuery.mockReturnValue(mockAsyncQueryReturn());
-      mockDeleteBlogComment
-        .mockResolvedValueOnce(true)
-        .mockResolvedValueOnce(true);
+      mockDeleteBlogComment.mockResolvedValueOnce(true).mockResolvedValueOnce(true);
 
       const { result } = renderHook(() =>
         useAdminComments({ postId: 1, pagination: { page: 1, pageSize: 10 } }),
@@ -251,9 +309,7 @@ describe('useAdminComments', () => {
   // ── isEmpty ──
 
   it('computes isEmpty from data', () => {
-    mockUseAsyncQuery.mockReturnValue(
-      mockAsyncQueryReturn({ data: { ...samplePage, items: [] } }),
-    );
+    mockUseAsyncQuery.mockReturnValue(mockAsyncQueryReturn({ data: { ...samplePage, items: [] } }));
 
     const { result } = renderHook(() =>
       useAdminComments({ postId: 1, pagination: { page: 1, pageSize: 10 } }),

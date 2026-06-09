@@ -12,6 +12,7 @@ type PostNavigationProps = {
 
 const LABEL_PREV = '上一篇';
 const LABEL_NEXT = '下一篇';
+const LABEL_NAV = '文章导航';
 const BLOG_POST_PATH = '/blog';
 
 export function PostNavigation({ prevPost, nextPost }: PostNavigationProps) {
@@ -20,7 +21,7 @@ export function PostNavigation({ prevPost, nextPost }: PostNavigationProps) {
   }
 
   return (
-    <nav className="grid gap-4 sm:grid-cols-2">
+    <nav aria-label={LABEL_NAV} className="grid gap-4 sm:grid-cols-2">
       {prevPost ? (
         <Link
           className="flex items-center gap-2 rounded-block border border-border p-4 transition-colors hover:bg-fill-secondary"

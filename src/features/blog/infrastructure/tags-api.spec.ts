@@ -9,7 +9,7 @@ vi.mock('@/shared/graphql', () => ({
 
 import { executeGraphQL } from '@/shared/graphql';
 
-import { createBlogTag, deleteBlogTag, fetchBlogTags } from './tags-api';
+import { createBlogTag, deleteBlogTag, fetchBlogTags, updateBlogTag } from './tags-api';
 
 const mockExecute = vi.mocked(executeGraphQL);
 
@@ -71,6 +71,25 @@ describe('tags-api', () => {
 
       const [, variables, options] = mockExecute.mock.calls[0];
       expect(variables.id).toBe(1);
+      expect(options?.authMode).toBe('required');
+    });
+  });
+
+  describe('updateBlogTag', () => {
+    it('应使用独立参数更新标签并映射结果', async () => {
+      const updatedDTO = { ...sampleTagDTO, name: 'TypeScript 5', slug: 'typescript-5' };
+      mockExecute.mockResolvedValueOnce({ updateBlogTag: updatedDTO });
+
+      const result = await updateBlogTag({ id: 1, name: 'TypeScript 5', slug: 'typescript-5' });
+
+      expect(result.id).toBe('1');
+      expect(result.name).toBe('TypeScript 5');
+      expect(result.slug).toBe('typescript-5');
+
+      const [, variables, options] = mockExecute.mock.calls[0];
+      expect(variables.id).toBe(1);
+      expect(variables.name).toBe('TypeScript 5');
+      expect(variables.slug).toBe('typescript-5');
       expect(options?.authMode).toBe('required');
     });
   });

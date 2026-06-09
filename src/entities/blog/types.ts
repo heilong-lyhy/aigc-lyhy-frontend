@@ -132,3 +132,15 @@ export interface PostEditorForm {
   readonly tags: readonly string[];
   readonly status: BlogPostStatus;
 }
+
+/** 博客友链（与后端 BlogFriendLinkObjectType 对齐） */
+export interface BlogFriendLink {
+  readonly id: string;
+  readonly name: string;
+  readonly url: string;
+  readonly description: string | null;
+  readonly avatar: string | null;
+  readonly sortOrder: number;
+  readonly createdAt: string;
+  readonly updatedAt: string;
+}

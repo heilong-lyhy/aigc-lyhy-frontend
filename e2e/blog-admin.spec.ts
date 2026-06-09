@@ -176,4 +176,36 @@ test.describe('Blog Admin', () => {
       timeout: 10_000,
     });
   });
+
+  // ── 标签管理页 ──
+
+  test('navigates to tag manager via sidebar', async ({ page }) => {
+    await authenticate(page);
+
+    await page.goto('/admin');
+    await page.getByText('标签管理').click();
+    await expect(page).toHaveURL('/admin/tags');
+  });
+
+  test('shows tag manager page with table', async ({ page }) => {
+    await authenticate(page);
+
+    await page.goto('/admin/tags');
+
+    await expect(page.getByText('标签管理')).toBeVisible({ timeout: 10_000 });
+    // Should show either tag data or empty state
+    await expect(
+      page.getByText('暂无数据').or(page.getByRole('table')),
+    ).toBeVisible({ timeout: 10_000 });
+  });
+
+  test('shows create tag button', async ({ page }) => {
+    await authenticate(page);
+
+    await page.goto('/admin/tags');
+
+    await expect(page.getByRole('button', { name: '新建标签' })).toBeVisible({
+      timeout: 10_000,
+    });
+  });
 });

@@ -51,6 +51,8 @@ const sampleDetailDTO = {
   tags: [
     { id: 1, name: 'TypeScript', slug: 'typescript', postCount: 5, createdAt: '2024-01-01T00:00:00Z', updatedAt: '2024-01-01T00:00:00Z' },
   ],
+  prevPost: { id: 10, title: 'Previous Post', slug: 'previous-post' },
+  nextPost: { id: 20, title: 'Next Post', slug: 'next-post' },
 };
 
 // ── 模拟后端 BlogPostsListResponse ──
@@ -193,7 +195,7 @@ describe('posts-api', () => {
   // ─── fetchBlogPostById ───
 
   describe('fetchBlogPostById', () => {
-    it('应返回 BlogPostDetail（含 content/tags）', async () => {
+    it('应返回 BlogPostDetail（含 content/tags/prevPost/nextPost）', async () => {
       mockExecute.mockResolvedValueOnce({ blogPost: sampleDetailDTO });
 
       const result = await fetchBlogPostById(1);
@@ -203,6 +205,8 @@ describe('posts-api', () => {
       expect(result!.renderedContent).toBe('<h1>Hello</h1>');
       expect(result!.tags).toHaveLength(1);
       expect(result!.tags[0].name).toBe('TypeScript');
+      expect(result!.prevPost).toEqual({ id: '10', title: 'Previous Post', slug: 'previous-post' });
+      expect(result!.nextPost).toEqual({ id: '20', title: 'Next Post', slug: 'next-post' });
     });
 
     it('文章不存在时应返回 null', async () => {
@@ -211,6 +215,17 @@ describe('posts-api', () => {
       const result = await fetchBlogPostById(999);
 
       expect(result).toBeNull();
+    });
+
+    it('prevPost/nextPost 为 null 时应映射为 undefined', async () => {
+      const detailWithoutNav = { ...sampleDetailDTO, prevPost: null, nextPost: null };
+      mockExecute.mockResolvedValueOnce({ blogPost: detailWithoutNav });
+
+      const result = await fetchBlogPostById(1);
+
+      expect(result).not.toBeNull();
+      expect(result!.prevPost).toBeUndefined();
+      expect(result!.nextPost).toBeUndefined();
     });
   });
 

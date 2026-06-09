@@ -126,6 +126,13 @@ const DELETE_COMMENT_MUTATION = `
   }
 `;
 
+const REPLY_COMMENT_MUTATION = `
+  mutation ReplyBlogComment($input: ReplyBlogCommentInput!) {
+    replyBlogComment(input: $input) { ...CommentFields }
+  }
+  ${COMMENT_FRAGMENT}
+`;
+
 // ── API 函数 ──
 
 /** 公开：查询指定文章的评论列表 */
@@ -215,4 +222,20 @@ export async function deleteBlogComment(id: number): Promise<boolean> {
   );
 
   return data.deleteBlogComment;
+}
+
+/** 管理端：回复评论 */
+export async function replyBlogComment(
+  input: Readonly<{
+    commentId: number;
+    content: string;
+  }>,
+): Promise<BlogComment> {
+  const data = await executeGraphQL<{ replyBlogComment: BlogCommentDTO }, Record<string, unknown>>(
+    REPLY_COMMENT_MUTATION,
+    { input },
+    { authMode: 'required' },
+  );
+
+  return mapBlogComment(data.replyBlogComment);
 }

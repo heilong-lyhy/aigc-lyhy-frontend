@@ -42,4 +42,25 @@ test.describe('Blog Post Detail Page', () => {
     // Comments heading should be present
     await expect(page.getByRole('heading', { name: '评论' })).toBeVisible({ timeout: 10_000 });
   });
+
+  test('shows email avatar hint in comment form', async ({ page }) => {
+    await page.goto('/blog');
+    const postLink = page.getByRole('article').first();
+    await expect(postLink).toBeVisible({ timeout: 10_000 });
+    await postLink.click();
+
+    // Comment form should show avatar hint
+    await expect(page.getByText('头像将根据邮箱自动生成')).toBeVisible({ timeout: 10_000 });
+  });
+
+  test('shows post navigation when prev/next posts exist', async ({ page }) => {
+    await page.goto('/blog');
+    const postLink = page.getByRole('article').first();
+    await expect(postLink).toBeVisible({ timeout: 10_000 });
+    await postLink.click();
+
+    // Navigation section should be present (prev/next links)
+    const nav = page.getByRole('navigation', { name: '文章导航' });
+    await expect(nav).toBeVisible({ timeout: 10_000 });
+  });
 });

@@ -17,6 +17,7 @@ import AccountPage from '@/pages/account';
 import AuthPage from '@/pages/auth';
 import { BlogAboutPage } from '@/pages/blog-about';
 import { BlogArchivePage } from '@/pages/blog-archive';
+import { BlogFriendsPage } from '@/pages/blog-friends';
 import { BlogHomePage } from '@/pages/blog-home';
 import { BlogPostPage } from '@/pages/blog-post';
 import { BlogSearchPage } from '@/pages/blog-search';
@@ -28,6 +29,7 @@ import {
   MarkdownRenderer,
   useAdminComments,
   useAdminFiles,
+  useAdminFriendLinks,
   useAdminPosts,
   useAdminProfile,
   useAdminTags,
@@ -50,6 +52,7 @@ import {
   CommentManager,
   DashboardPage,
   FileManager,
+  FriendLinkManager,
   PostEditor,
   PostList,
   ProfileSettings,
@@ -309,7 +312,7 @@ function AdminPostEditorPage() {
 function AdminCommentManagerPage() {
   const [commentPagination, setCommentPagination] = useState<PaginationInput>({ page: 1, pageSize: 10 });
 
-  const { data, isLoading, refetch, updateStatus, remove } = useAdminComments({
+  const { data, isLoading, refetch, updateStatus, remove, reply } = useAdminComments({
     pagination: commentPagination,
     autoLoad: true,
   });
@@ -329,6 +332,10 @@ function AdminCommentManagerPage() {
     void remove(Number(id));
   }, [remove]);
 
+  const handleReply = useCallback((commentId: string, content: string) => {
+    void reply(Number(commentId), content);
+  }, [reply]);
+
   const handleBatchApprove = useCallback((ids: readonly string[]) => {
     void Promise.all(ids.map((id) => updateStatus(Number(id), 'approved'))).then(() => void refetch());
   }, [updateStatus, refetch]);
@@ -347,6 +354,7 @@ function AdminCommentManagerPage() {
       onReject={handleReject}
       onMarkSpam={handleMarkSpam}
       onDelete={handleDelete}
+      onReply={handleReply}
       onBatchApprove={handleBatchApprove}
       onBatchReject={handleBatchReject}
     />
@@ -407,6 +415,42 @@ function AdminTagManagerPage() {
       isLoading={isLoading}
       pagination={tagPagination}
       onPaginationChange={setTagPagination}
+      onCreate={handleCreate}
+      onUpdate={handleUpdate}
+      onDelete={handleDelete}
+    />
+  );
+}
+
+function AdminFriendLinkManagerPage() {
+  const { data, isLoading, mutationError, create, update, remove } = useAdminFriendLinks({ autoLoad: true });
+
+  const handleCreate = useCallback(
+    (input: Readonly<{ name: string; url: string; description?: string; avatar?: string; sortOrder?: number }>) => {
+      void create(input);
+    },
+    [create],
+  );
+
+  const handleUpdate = useCallback(
+    (input: Readonly<{ id: number; name?: string; url?: string; description?: string; avatar?: string; sortOrder?: number }>) => {
+      void update(input);
+    },
+    [update],
+  );
+
+  const handleDelete = useCallback(
+    (id: number) => {
+      void remove(id);
+    },
+    [remove],
+  );
+
+  return (
+    <FriendLinkManager
+      data={data}
+      isLoading={isLoading}
+      mutationError={mutationError}
       onCreate={handleCreate}
       onUpdate={handleUpdate}
       onDelete={handleDelete}
@@ -522,6 +566,10 @@ const router = createBrowserRouter([
         path: 'blog/archive',
       },
       {
+        element: <BlogFriendsPage />,
+        path: 'blog/friends',
+      },
+      {
         element: <BlogAboutPage />,
         path: 'blog/about',
       },
@@ -571,6 +619,10 @@ const router = createBrowserRouter([
           {
             element: <AdminTagManagerPage />,
             path: 'tags',
+          },
+          {
+            element: <AdminFriendLinkManagerPage />,
+            path: 'friend-links',
           },
           {
             element: <AdminCommentManagerPage />,

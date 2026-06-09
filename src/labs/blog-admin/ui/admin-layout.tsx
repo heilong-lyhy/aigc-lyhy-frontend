@@ -5,6 +5,7 @@ import {
   DashboardOutlined,
   FileOutlined,
   FolderOutlined,
+  LinkOutlined,
   SettingOutlined,
   TagsOutlined,
 } from '@ant-design/icons';
@@ -19,6 +20,7 @@ const LABEL_POSTS = '文章管理';
 const LABEL_COMMENTS = '评论管理';
 const LABEL_FILES = '文件管理';
 const LABEL_TAGS = '标签管理';
+const LABEL_FRIEND_LINKS = '友链管理';
 const LABEL_PROFILE = '个人设置';
 const LABEL_BRAND = 'Blog Admin';
 
@@ -35,6 +37,7 @@ const ADMIN_NAV_ITEMS: readonly AdminNavItem[] = [
   { icon: <DashboardOutlined />, key: 'dashboard', label: LABEL_DASHBOARD, path: '/admin' },
   { icon: <FileOutlined />, key: 'posts', label: LABEL_POSTS, path: '/admin/posts' },
   { icon: <TagsOutlined />, key: 'tags', label: LABEL_TAGS, path: '/admin/tags' },
+  { icon: <LinkOutlined />, key: 'friend-links', label: LABEL_FRIEND_LINKS, path: '/admin/friend-links' },
   { icon: <CommentOutlined />, key: 'comments', label: LABEL_COMMENTS, path: '/admin/comments' },
   { icon: <FolderOutlined />, key: 'files', label: LABEL_FILES, path: '/admin/files' },
   { icon: <SettingOutlined />, key: 'profile', label: LABEL_PROFILE, path: '/admin/profile' },

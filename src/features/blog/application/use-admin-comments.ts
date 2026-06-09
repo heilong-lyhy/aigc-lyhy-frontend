@@ -15,6 +15,7 @@ import { useAsyncQuery } from '@/shared/hooks';
 import {
   deleteBlogComment,
   fetchBlogComments,
+  replyBlogComment,
   updateBlogCommentStatus,
 } from '../infrastructure/comments-api';
 import { useMutationError } from '../lib/use-mutation-error';
@@ -35,6 +36,7 @@ type UseAdminCommentsResult = {
   readonly refetch: () => Promise<void>;
   readonly updateStatus: (id: number, status: BlogCommentStatus) => Promise<BlogComment | null>;
   readonly remove: (id: number) => Promise<boolean>;
+  readonly reply: (commentId: number, content: string) => Promise<BlogComment | null>;
   readonly batchUpdateStatus: (
     ids: readonly number[],
     status: BlogCommentStatus,
@@ -77,18 +79,37 @@ export function useAdminComments(options: UseAdminCommentsOptions): UseAdminComm
     [clearMutationError, setMutationError],
   );
 
-  const remove = useCallback(async (id: number): Promise<boolean> => {
-    clearMutationError();
-    try {
-      const result = await deleteBlogComment(id);
-      await refetch();
-      return result;
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Failed to delete comment';
-      setMutationError(message);
-      return false;
-    }
-  }, [clearMutationError, setMutationError, refetch]);
+  const remove = useCallback(
+    async (id: number): Promise<boolean> => {
+      clearMutationError();
+      try {
+        const result = await deleteBlogComment(id);
+        await refetch();
+        return result;
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Failed to delete comment';
+        setMutationError(message);
+        return false;
+      }
+    },
+    [clearMutationError, setMutationError, refetch],
+  );
+
+  const reply = useCallback(
+    async (commentId: number, content: string): Promise<BlogComment | null> => {
+      clearMutationError();
+      try {
+        const result = await replyBlogComment({ commentId, content });
+        await refetch();
+        return result;
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Failed to reply comment';
+        setMutationError(message);
+        return null;
+      }
+    },
+    [clearMutationError, setMutationError, refetch],
+  );
 
   const batchUpdateStatus = useCallback(
     async (
@@ -97,9 +118,12 @@ export function useAdminComments(options: UseAdminCommentsOptions): UseAdminComm
     ): Promise<readonly BlogComment[]> => {
       clearMutationError();
       try {
-        return await Promise.all(ids.map((id) => updateBlogCommentStatus({ id, status: newStatus })));
+        return await Promise.all(
+          ids.map((id) => updateBlogCommentStatus({ id, status: newStatus })),
+        );
       } catch (err) {
-        const message = err instanceof Error ? err.message : 'Failed to batch update comment status';
+        const message =
+          err instanceof Error ? err.message : 'Failed to batch update comment status';
         setMutationError(message);
         return [];
       }
@@ -107,16 +131,19 @@ export function useAdminComments(options: UseAdminCommentsOptions): UseAdminComm
     [clearMutationError, setMutationError],
   );
 
-  const batchRemove = useCallback(async (ids: readonly number[]): Promise<readonly boolean[]> => {
-    clearMutationError();
-    try {
-      return await Promise.all(ids.map((id) => deleteBlogComment(id)));
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Failed to batch delete comments';
-      setMutationError(message);
-      return [];
-    }
-  }, [clearMutationError, setMutationError]);
+  const batchRemove = useCallback(
+    async (ids: readonly number[]): Promise<readonly boolean[]> => {
+      clearMutationError();
+      try {
+        return await Promise.all(ids.map((id) => deleteBlogComment(id)));
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Failed to batch delete comments';
+        setMutationError(message);
+        return [];
+      }
+    },
+    [clearMutationError, setMutationError],
+  );
 
   return {
     data,
@@ -127,6 +154,7 @@ export function useAdminComments(options: UseAdminCommentsOptions): UseAdminComm
     refetch,
     updateStatus,
     remove,
+    reply,
     batchUpdateStatus,
     batchRemove,
   };

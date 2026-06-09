@@ -37,6 +37,7 @@ export type {
   BlogCommentStatus,
   BlogDashboard,
   BlogFile,
+  BlogFriendLink,
   BlogLike,
   BlogPost,
   BlogPostDetail,

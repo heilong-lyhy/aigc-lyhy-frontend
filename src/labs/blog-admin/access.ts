@@ -2,7 +2,7 @@
 
 import type { AppEnv } from '@/shared/env';
 
-const ALLOWED_ENVS: readonly AppEnv[] = ['dev', 'prod'];
+const ALLOWED_ENVS: readonly AppEnv[] = ['dev', 'test', 'prod'];
 
 export function canAccessBlogAdminLab(env: AppEnv): boolean {
   return ALLOWED_ENVS.includes(env);

@@ -6,7 +6,12 @@ import type { BlogTag } from '@/entities/blog';
 
 import { useAsyncQuery } from '@/shared/hooks';
 
-import { createBlogTag, deleteBlogTag, fetchBlogTags, updateBlogTag } from '../infrastructure/tags-api';
+import {
+  createBlogTag,
+  deleteBlogTag,
+  fetchBlogTags,
+  updateBlogTag,
+} from '../infrastructure/tags-api';
 import { useMutationError } from '../lib/use-mutation-error';
 
 type UseAdminTagsOptions = {
@@ -21,7 +26,9 @@ type UseAdminTagsResult = {
   readonly mutationError: string | null;
   readonly refetch: () => Promise<void>;
   readonly create: (input: Readonly<{ name: string; slug: string }>) => Promise<BlogTag | null>;
-  readonly update: (input: Readonly<{ id: number; name: string; slug: string }>) => Promise<BlogTag | null>;
+  readonly update: (
+    input: Readonly<{ id: number; name: string; slug: string }>,
+  ) => Promise<BlogTag | null>;
   readonly remove: (id: number) => Promise<boolean>;
 };
 
@@ -60,7 +67,9 @@ export function useAdminTags(options: UseAdminTagsOptions = {}): UseAdminTagsRes
   );
 
   const update = useCallback(
-    async (input: Readonly<{ id: number; name: string; slug: string }>): Promise<BlogTag | null> => {
+    async (
+      input: Readonly<{ id: number; name: string; slug: string }>,
+    ): Promise<BlogTag | null> => {
       clearMutationError();
       try {
         const result = await updateBlogTag(input);
@@ -75,18 +84,21 @@ export function useAdminTags(options: UseAdminTagsOptions = {}): UseAdminTagsRes
     [clearMutationError, setMutationError, refetch],
   );
 
-  const remove = useCallback(async (id: number): Promise<boolean> => {
-    clearMutationError();
-    try {
-      const result = await deleteBlogTag(id);
-      await refetch();
-      return result;
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Failed to delete tag';
-      setMutationError(message);
-      return false;
-    }
-  }, [clearMutationError, setMutationError, refetch]);
+  const remove = useCallback(
+    async (id: number): Promise<boolean> => {
+      clearMutationError();
+      try {
+        const result = await deleteBlogTag(id);
+        await refetch();
+        return result;
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Failed to delete tag';
+        setMutationError(message);
+        return false;
+      }
+    },
+    [clearMutationError, setMutationError, refetch],
+  );
 
   return {
     data: tags,
