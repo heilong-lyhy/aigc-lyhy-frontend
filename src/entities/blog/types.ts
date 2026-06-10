@@ -12,6 +12,7 @@ export interface BlogPost {
   readonly status: BlogPostStatus;
   readonly categoryId: number | null;
   readonly categoryName: string | null;
+  readonly tagIds: readonly string[];
   readonly isPinned: boolean;
   readonly viewCount: number;
   readonly likeCount: number;
@@ -140,7 +141,7 @@ export interface BlogFriendLink {
   readonly name: string;
   readonly url: string;
   readonly description: string | null;
-  readonly avatar: string | null;
+  readonly logoUrl: string | null;
   readonly sortOrder: number;
   readonly createdAt: string;
   readonly updatedAt: string;

@@ -36,7 +36,7 @@ export function BlogSidebar({
       {profile && (
         <Card>
           <div className="flex flex-col items-center gap-3">
-            <Avatar size={64} src={profile.avatar}>
+            <Avatar size={64} src={profile.avatarUrl}>
               {profile.nickname.charAt(0) || 'U'}
             </Avatar>
             <div className="blog-typography-no-margin">

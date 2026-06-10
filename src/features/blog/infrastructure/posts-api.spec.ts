@@ -35,6 +35,7 @@ const samplePostDTO = {
   status: 'PUBLISHED' as const,
   categoryId: 10,
   categoryName: '技术',
+  tagIds: [1, 2],
   isPinned: false,
   viewCount: 10,
   likeCount: 5,

@@ -26,6 +26,7 @@ export interface BlogPostDTO {
   readonly status: PostStatusDTO;
   readonly categoryId: number | null;
   readonly categoryName: string | null;
+  readonly tagIds: readonly number[];
   readonly isPinned: boolean;
   readonly viewCount: number;
   readonly likeCount: number;
@@ -101,6 +102,7 @@ export function mapBlogPost(raw: BlogPostDTO): BlogPost {
     status: mapPostStatus(raw.status),
     categoryId: raw.categoryId,
     categoryName: raw.categoryName ?? null,
+    tagIds: (raw.tagIds ?? []).map(String),
     isPinned: raw.isPinned,
     viewCount: raw.viewCount,
     likeCount: raw.likeCount,
@@ -139,14 +141,14 @@ function mapBlogPostList(raw: BlogPostListDTO): PaginatedResult<BlogPost> {
 
 const POST_LIST_FRAGMENT = `
   fragment PostListFields on BlogPost {
-    id title slug excerpt coverImage status categoryId categoryName
+    id title slug excerpt coverImage status categoryId categoryName tagIds
     isPinned viewCount likeCount commentCount publishedAt createdAt updatedAt
   }
 `;
 
 const POST_DETAIL_FRAGMENT = `
   fragment PostDetailFields on BlogPostDetail {
-    id title slug excerpt content renderedContent coverImage status categoryId categoryName
+    id title slug excerpt content renderedContent coverImage status categoryId categoryName tagIds
     isPinned viewCount likeCount commentCount publishedAt createdAt updatedAt
     tags { id name slug postCount createdAt updatedAt }
     prevPost { id title slug }

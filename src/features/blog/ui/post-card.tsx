@@ -18,8 +18,8 @@ const LABEL_PINNED = '置顶';
 const { Text } = Typography;
 
 export function PostCard({ post, categories, tags, onClick }: PostCardProps) {
-  const postTags = tags?.filter((t) => post.tags.includes(t.id));
-  const category = categories?.find((c) => c.id === post.categoryId);
+  const postTags = tags?.filter((t) => post.tagIds.includes(t.id));
+  const category = categories?.find((c) => Number(c.id) === post.categoryId);
 
   return (
     <Card

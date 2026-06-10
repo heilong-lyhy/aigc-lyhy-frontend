@@ -101,7 +101,7 @@ export function FriendLinkManager({
         name: link.name,
         url: link.url,
         description: link.description ?? undefined,
-        avatar: link.avatar ?? undefined,
+        avatar: link.logoUrl ?? undefined,
         sortOrder: link.sortOrder,
       });
       setModalOpen(true);
@@ -117,7 +117,7 @@ export function FriendLinkManager({
         key: 'name',
         render: (name: string, record) => (
           <Space>
-            <Avatar shape="square" size={24} src={record.avatar}>
+            <Avatar shape="square" size={24} src={record.logoUrl}>
               {name.charAt(0)}
             </Avatar>
             <span>{name}</span>

@@ -27,6 +27,7 @@ import { ProjectStructurePage } from '@/pages/project-structure';
 import { changePassword } from '@/features/auth';
 import {
   MarkdownRenderer,
+  useAdminCategories,
   useAdminComments,
   useAdminFiles,
   useAdminFriendLinks,
@@ -49,6 +50,7 @@ import { getAppEnv } from '@/shared/env';
 import {
   AdminLayout,
   canAccessBlogAdminLab,
+  CategoryManager,
   CommentManager,
   DashboardPage,
   FileManager,
@@ -389,6 +391,57 @@ function AdminFileManagerPage() {
   );
 }
 
+function AdminCategoryManagerPage() {
+  const { data, isLoading, create, update, remove } = useAdminCategories({ autoLoad: true });
+
+  const handleCreate = useCallback(
+    (input: { readonly name: string; readonly slug: string; readonly parentId?: string }) => {
+      void create({
+        name: input.name,
+        slug: input.slug,
+        parentId: input.parentId ? Number(input.parentId) : undefined,
+      });
+    },
+    [create],
+  );
+
+  const handleUpdate = useCallback(
+    (id: string, input: { readonly name?: string; readonly slug?: string }) => {
+      void update({ id: Number(id), ...input });
+    },
+    [update],
+  );
+
+  const handleDelete = useCallback(
+    (id: string) => {
+      void remove(Number(id));
+    },
+    [remove],
+  );
+
+  const handleReorder = useCallback(
+    (id: string, parentId: string | null, sortOrder: number) => {
+      void update({
+        id: Number(id),
+        parentId: parentId ? Number(parentId) : null,
+        sortOrder,
+      });
+    },
+    [update],
+  );
+
+  return (
+    <CategoryManager
+      categories={data}
+      isLoading={isLoading}
+      onCreate={handleCreate}
+      onDelete={handleDelete}
+      onReorder={handleReorder}
+      onUpdate={handleUpdate}
+    />
+  );
+}
+
 function AdminTagManagerPage() {
   const [tagPagination, setTagPagination] = useState<PaginationInput>(toPaginationInput(1, DEFAULT_PAGE_SIZE));
   const { data, isLoading, create, update, remove } = useAdminTags({ autoLoad: true });
@@ -659,12 +712,8 @@ const router = createBrowserRouter([
             path: 'posts/:id',
           },
           {
-            element: <AdminPostTrashPage />,
-            path: 'trash',
-          },
-          {
-            element: <AdminFileManagerPage />,
-            path: 'files',
+            element: <AdminCategoryManagerPage />,
+            path: 'categories',
           },
           {
             element: <AdminTagManagerPage />,
@@ -675,8 +724,16 @@ const router = createBrowserRouter([
             path: 'friend-links',
           },
           {
+            element: <AdminPostTrashPage />,
+            path: 'trash',
+          },
+          {
             element: <AdminCommentManagerPage />,
             path: 'comments',
+          },
+          {
+            element: <AdminFileManagerPage />,
+            path: 'files',
           },
           {
             element: <AdminProfileSettingsPage />,

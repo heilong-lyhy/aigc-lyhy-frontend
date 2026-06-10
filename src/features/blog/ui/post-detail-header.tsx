@@ -19,8 +19,8 @@ const LABEL_COMMENTS = '评论';
 const LABEL_PINNED = '置顶';
 
 export function PostDetailHeader({ post, categories, tags }: PostDetailHeaderProps) {
-  const category = categories?.find((c) => c.id === post.categoryId);
-  const postTags = tags?.filter((t) => post.tags.includes(t.id));
+  const category = categories?.find((c) => Number(c.id) === post.categoryId);
+  const postTags = tags?.filter((t) => post.tagIds.includes(t.id));
 
   return (
     <header className="flex flex-col gap-3">

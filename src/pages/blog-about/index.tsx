@@ -37,7 +37,7 @@ export function BlogAboutPage() {
           <div className="flex flex-col gap-6">
             <Card>
               <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-start">
-                <Avatar size={96} src={profile.avatar}>
+                <Avatar size={96} src={profile.avatarUrl}>
                   {profile.nickname.charAt(0) || 'U'}
                 </Avatar>
                 <div className="flex flex-col gap-2 text-center sm:text-left">
@@ -49,18 +49,18 @@ export function BlogAboutPage() {
               </div>
             </Card>
 
-            {profile.socialLinks.length > 0 && (
+            {profile.socialLinks && Object.keys(profile.socialLinks).length > 0 && (
               <Card title={SOCIAL_LINKS_TITLE}>
                 <ul className="list-none p-0">
-                  {profile.socialLinks.map((link) => (
-                    <li key={link.platform} className="mb-2">
+                  {Object.entries(profile.socialLinks).map(([platform, url]) => (
+                    <li key={platform} className="mb-2">
                       <a
                         className="text-text hover:text-primary"
-                        href={link.url}
+                        href={url}
                         rel="noopener noreferrer"
                         target="_blank"
                       >
-                        <Text strong>{link.platform}</Text>
+                        <Text strong>{platform}</Text>
                       </a>
                     </li>
                   ))}
@@ -68,7 +68,7 @@ export function BlogAboutPage() {
               </Card>
             )}
 
-            {profile.socialLinks.length === 0 && (
+            {(!profile.socialLinks || Object.keys(profile.socialLinks).length === 0) && (
               <Card title={SOCIAL_LINKS_TITLE}>
                 <Text type="secondary">{NO_SOCIAL_LINKS}</Text>
               </Card>

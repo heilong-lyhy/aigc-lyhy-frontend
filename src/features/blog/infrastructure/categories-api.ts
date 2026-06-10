@@ -128,7 +128,7 @@ export async function updateBlogCategory(
     name?: string;
     slug?: string;
     description?: string;
-    parentId?: number;
+    parentId?: number | null;
     sortOrder?: number;
   }>,
 ): Promise<BlogCategory> {

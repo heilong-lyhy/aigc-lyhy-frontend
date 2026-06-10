@@ -16,6 +16,7 @@ export { useComment } from './application/use-comment';
 export { useLike } from './application/use-like';
 
 // ── 管理端 Hooks ──
+export { useAdminCategories } from './application/use-admin-categories';
 export { useAdminComments } from './application/use-admin-comments';
 export { useAdminFiles } from './application/use-admin-files';
 export { useAdminFriendLinks } from './application/use-admin-friend-links';

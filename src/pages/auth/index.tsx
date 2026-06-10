@@ -109,7 +109,7 @@ function RegisterTab() {
       });
 
       if (result.success) {
-        navigate('/login');
+        navigate('/auth');
       } else {
         setErrorMessage(result.message || '注册失败');
       }

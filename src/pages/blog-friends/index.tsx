@@ -34,7 +34,7 @@ function FriendLinkCard({ link }: FriendLinkCardProps) {
     >
       <Card hoverable size="small">
         <div className="flex items-center gap-3">
-          <Avatar shape="square" size={40} src={link.avatar}>
+          <Avatar shape="square" size={40} src={link.logoUrl}>
             {link.name.charAt(0)}
           </Avatar>
           <div className="flex flex-col gap-0.5 overflow-hidden">

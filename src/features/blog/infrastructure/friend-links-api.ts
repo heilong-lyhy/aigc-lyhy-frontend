@@ -11,7 +11,7 @@ interface BlogFriendLinkDTO {
   readonly name: string;
   readonly url: string;
   readonly description: string | null;
-  readonly avatar: string | null;
+  readonly logoUrl: string | null;
   readonly sortOrder: number;
   readonly createdAt: string;
   readonly updatedAt: string;
@@ -25,7 +25,7 @@ function mapBlogFriendLink(raw: BlogFriendLinkDTO): BlogFriendLink {
     name: raw.name,
     url: raw.url,
     description: raw.description,
-    avatar: raw.avatar,
+    logoUrl: raw.logoUrl,
     sortOrder: raw.sortOrder,
     createdAt: raw.createdAt,
     updatedAt: raw.updatedAt,
@@ -36,19 +36,19 @@ function mapBlogFriendLink(raw: BlogFriendLinkDTO): BlogFriendLink {
 
 const FETCH_FRIEND_LINKS_QUERY = `
   query FetchBlogFriendLinks {
-    blogFriendLinks { id name url description avatar sortOrder createdAt updatedAt }
+    blogFriendLinks { id name url description logoUrl sortOrder createdAt updatedAt }
   }
 `;
 
 const CREATE_FRIEND_LINK_MUTATION = `
   mutation CreateBlogFriendLink($input: CreateBlogFriendLinkInput!) {
-    createBlogFriendLink(input: $input) { id name url description avatar sortOrder createdAt updatedAt }
+    createBlogFriendLink(input: $input) { id name url description logoUrl sortOrder createdAt updatedAt }
   }
 `;
 
 const UPDATE_FRIEND_LINK_MUTATION = `
   mutation UpdateBlogFriendLink($input: UpdateBlogFriendLinkInput!) {
-    updateBlogFriendLink(input: $input) { id name url description avatar sortOrder createdAt updatedAt }
+    updateBlogFriendLink(input: $input) { id name url description logoUrl sortOrder createdAt updatedAt }
   }
 `;
 
@@ -76,7 +76,7 @@ export async function createBlogFriendLink(
     name: string;
     url: string;
     description?: string;
-    avatar?: string;
+    logoUrl?: string;
     sortOrder?: number;
   }>,
 ): Promise<BlogFriendLink> {
@@ -95,7 +95,7 @@ export async function updateBlogFriendLink(
     name?: string;
     url?: string;
     description?: string;
-    avatar?: string;
+    logoUrl?: string;
     sortOrder?: number;
   }>,
 ): Promise<BlogFriendLink> {
