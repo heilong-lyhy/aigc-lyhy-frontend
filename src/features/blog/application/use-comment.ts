@@ -5,7 +5,8 @@ import { useCallback, useReducer } from 'react';
 import type { BlogComment } from '@/entities/blog';
 
 import { createBlogComment, deleteBlogComment } from '../infrastructure/comments-api';
-import { useMutationError } from '../lib/use-mutation-error';
+
+import { useMutationError } from './use-mutation-error';
 
 type UseCommentResult = {
   readonly isSubmitting: boolean;

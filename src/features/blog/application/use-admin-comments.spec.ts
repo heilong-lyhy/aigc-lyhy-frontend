@@ -9,6 +9,8 @@ vi.mock('../infrastructure/comments-api', () => ({
   updateBlogCommentStatus: vi.fn(),
   deleteBlogComment: vi.fn(),
   replyBlogComment: vi.fn(),
+  hideBlogComment: vi.fn(),
+  unhideBlogComment: vi.fn(),
 }));
 
 vi.mock('@/shared/hooks', () => ({
@@ -21,7 +23,9 @@ import { useAsyncQuery } from '@/shared/hooks';
 
 import {
   deleteBlogComment,
+  hideBlogComment,
   replyBlogComment,
+  unhideBlogComment,
   updateBlogCommentStatus,
 } from '../infrastructure/comments-api';
 
@@ -31,6 +35,8 @@ const mockUseAsyncQuery = vi.mocked(useAsyncQuery);
 const mockUpdateBlogCommentStatus = vi.mocked(updateBlogCommentStatus);
 const mockDeleteBlogComment = vi.mocked(deleteBlogComment);
 const mockReplyBlogComment = vi.mocked(replyBlogComment);
+const mockHideBlogComment = vi.mocked(hideBlogComment);
+const mockUnhideBlogComment = vi.mocked(unhideBlogComment);
 
 const sampleComment: BlogComment = {
   id: 'c1',
@@ -303,6 +309,198 @@ describe('useAdminComments', () => {
 
       expect(results).toEqual([]);
       expect(result.current.mutationError).toBe('Forbidden');
+    });
+  });
+
+  // ── hide ──
+
+  describe('hide', () => {
+    it('hides a comment and returns mapped entity', async () => {
+      const hidden = { ...sampleComment, isHidden: true };
+      mockUseAsyncQuery.mockReturnValue(mockAsyncQueryReturn());
+      mockHideBlogComment.mockResolvedValueOnce(hidden);
+
+      const { result } = renderHook(() =>
+        useAdminComments({ postId: 1, pagination: { page: 1, pageSize: 10 } }),
+      );
+
+      let returned: BlogComment | null = null;
+      await act(async () => {
+        returned = await result.current.hide(1);
+      });
+
+      expect(returned).toEqual(hidden);
+      expect(mockHideBlogComment).toHaveBeenCalledWith(1);
+    });
+
+    it('calls refetch after successful hide', async () => {
+      const refetch = vi.fn().mockResolvedValue(undefined);
+      mockUseAsyncQuery.mockReturnValue(mockAsyncQueryReturn({ refetch }));
+      mockHideBlogComment.mockResolvedValueOnce({ ...sampleComment, isHidden: true });
+
+      const { result } = renderHook(() =>
+        useAdminComments({ postId: 1, pagination: { page: 1, pageSize: 10 } }),
+      );
+
+      await act(async () => {
+        await result.current.hide(1);
+      });
+
+      expect(refetch).toHaveBeenCalledTimes(1);
+    });
+
+    it('captures hide error and returns null', async () => {
+      mockUseAsyncQuery.mockReturnValue(mockAsyncQueryReturn());
+      mockHideBlogComment.mockRejectedValueOnce(new Error('Forbidden'));
+
+      const { result } = renderHook(() =>
+        useAdminComments({ postId: 1, pagination: { page: 1, pageSize: 10 } }),
+      );
+
+      let returned: BlogComment | null = undefined as unknown as BlogComment | null;
+      await act(async () => {
+        returned = await result.current.hide(1);
+      });
+
+      expect(returned).toBeNull();
+      expect(result.current.mutationError).toBe('Forbidden');
+    });
+
+    it('captures non-Error rejection with default message', async () => {
+      mockUseAsyncQuery.mockReturnValue(mockAsyncQueryReturn());
+      mockHideBlogComment.mockRejectedValueOnce('unknown');
+
+      const { result } = renderHook(() =>
+        useAdminComments({ postId: 1, pagination: { page: 1, pageSize: 10 } }),
+      );
+
+      await act(async () => {
+        await result.current.hide(1);
+      });
+
+      expect(result.current.mutationError).toBe('Failed to hide comment');
+    });
+  });
+
+  // ── unhide ──
+
+  describe('unhide', () => {
+    it('unhides a comment and returns mapped entity', async () => {
+      const unhidden = { ...sampleComment, isHidden: false };
+      mockUseAsyncQuery.mockReturnValue(mockAsyncQueryReturn());
+      mockUnhideBlogComment.mockResolvedValueOnce(unhidden);
+
+      const { result } = renderHook(() =>
+        useAdminComments({ postId: 1, pagination: { page: 1, pageSize: 10 } }),
+      );
+
+      let returned: BlogComment | null = null;
+      await act(async () => {
+        returned = await result.current.unhide(1);
+      });
+
+      expect(returned).toEqual(unhidden);
+      expect(mockUnhideBlogComment).toHaveBeenCalledWith(1);
+    });
+
+    it('calls refetch after successful unhide', async () => {
+      const refetch = vi.fn().mockResolvedValue(undefined);
+      mockUseAsyncQuery.mockReturnValue(mockAsyncQueryReturn({ refetch }));
+      mockUnhideBlogComment.mockResolvedValueOnce({ ...sampleComment, isHidden: false });
+
+      const { result } = renderHook(() =>
+        useAdminComments({ postId: 1, pagination: { page: 1, pageSize: 10 } }),
+      );
+
+      await act(async () => {
+        await result.current.unhide(1);
+      });
+
+      expect(refetch).toHaveBeenCalledTimes(1);
+    });
+
+    it('captures unhide error and returns null', async () => {
+      mockUseAsyncQuery.mockReturnValue(mockAsyncQueryReturn());
+      mockUnhideBlogComment.mockRejectedValueOnce(new Error('Not found'));
+
+      const { result } = renderHook(() =>
+        useAdminComments({ postId: 1, pagination: { page: 1, pageSize: 10 } }),
+      );
+
+      let returned: BlogComment | null = undefined as unknown as BlogComment | null;
+      await act(async () => {
+        returned = await result.current.unhide(1);
+      });
+
+      expect(returned).toBeNull();
+      expect(result.current.mutationError).toBe('Not found');
+    });
+
+    it('captures non-Error rejection with default message', async () => {
+      mockUseAsyncQuery.mockReturnValue(mockAsyncQueryReturn());
+      mockUnhideBlogComment.mockRejectedValueOnce('unknown');
+
+      const { result } = renderHook(() =>
+        useAdminComments({ postId: 1, pagination: { page: 1, pageSize: 10 } }),
+      );
+
+      await act(async () => {
+        await result.current.unhide(1);
+      });
+
+      expect(result.current.mutationError).toBe('Failed to unhide comment');
+    });
+  });
+
+  // ── refetch after mutation ──
+
+  describe('refetch after mutation', () => {
+    it('calls refetch after successful updateStatus', async () => {
+      const refetch = vi.fn().mockResolvedValue(undefined);
+      mockUseAsyncQuery.mockReturnValue(mockAsyncQueryReturn({ refetch }));
+      mockUpdateBlogCommentStatus.mockResolvedValueOnce({ ...sampleComment, status: 'approved' });
+
+      const { result } = renderHook(() =>
+        useAdminComments({ postId: 1, pagination: { page: 1, pageSize: 10 } }),
+      );
+
+      await act(async () => {
+        await result.current.updateStatus(1, 'approved');
+      });
+
+      expect(refetch).toHaveBeenCalledTimes(1);
+    });
+
+    it('calls refetch after successful remove', async () => {
+      const refetch = vi.fn().mockResolvedValue(undefined);
+      mockUseAsyncQuery.mockReturnValue(mockAsyncQueryReturn({ refetch }));
+      mockDeleteBlogComment.mockResolvedValueOnce(true);
+
+      const { result } = renderHook(() =>
+        useAdminComments({ postId: 1, pagination: { page: 1, pageSize: 10 } }),
+      );
+
+      await act(async () => {
+        await result.current.remove(1);
+      });
+
+      expect(refetch).toHaveBeenCalledTimes(1);
+    });
+
+    it('calls refetch after successful reply', async () => {
+      const refetch = vi.fn().mockResolvedValue(undefined);
+      mockUseAsyncQuery.mockReturnValue(mockAsyncQueryReturn({ refetch }));
+      mockReplyBlogComment.mockResolvedValueOnce(sampleComment);
+
+      const { result } = renderHook(() =>
+        useAdminComments({ postId: 1, pagination: { page: 1, pageSize: 10 } }),
+      );
+
+      await act(async () => {
+        await result.current.reply(1, 'Reply');
+      });
+
+      expect(refetch).toHaveBeenCalledTimes(1);
     });
   });
 

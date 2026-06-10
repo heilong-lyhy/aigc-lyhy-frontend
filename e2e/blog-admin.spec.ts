@@ -208,4 +208,81 @@ test.describe('Blog Admin', () => {
       timeout: 10_000,
     });
   });
+
+  // ── 回收站页 ──
+
+  test('navigates to trash page via sidebar', async ({ page }) => {
+    await authenticate(page);
+
+    await page.goto('/admin');
+    await page.getByText('回收站').click();
+    await expect(page).toHaveURL('/admin/trash');
+  });
+
+  test('shows trash page with title and table or empty state', async ({ page }) => {
+    await authenticate(page);
+
+    await page.goto('/admin/trash');
+
+    await expect(page.getByText('回收站')).toBeVisible({ timeout: 10_000 });
+    // Should show either table data or empty state
+    await expect(
+      page.getByText('回收站为空').or(page.getByRole('table')),
+    ).toBeVisible({ timeout: 10_000 });
+  });
+
+  test('shows restore and permanent delete buttons for trashed posts', async ({ page }) => {
+    await authenticate(page);
+
+    await page.goto('/admin/trash');
+
+    // If there are trashed posts, the action buttons should be visible
+    const table = page.getByRole('table');
+    const hasTable = await table.isVisible({ timeout: 10_000 }).catch(() => false);
+
+    if (hasTable) {
+      // Check action column headers exist
+      await expect(page.getByText('操作')).toBeVisible();
+      // Restore and permanent delete buttons should exist in rows
+      await expect(page.getByText('恢复').first()).toBeVisible();
+      await expect(page.getByText('永久删除').first()).toBeVisible();
+    }
+  });
+
+  // ── 评论管理页 ──
+
+  test('navigates to comment manager via sidebar', async ({ page }) => {
+    await authenticate(page);
+
+    await page.goto('/admin');
+    await page.getByText('评论管理').click();
+    await expect(page).toHaveURL('/admin/comments');
+  });
+
+  test('shows comment manager page with table or empty state', async ({ page }) => {
+    await authenticate(page);
+
+    await page.goto('/admin/comments');
+
+    await expect(page.getByText('评论管理')).toBeVisible({ timeout: 10_000 });
+    await expect(
+      page.getByText('暂无数据').or(page.getByRole('table')),
+    ).toBeVisible({ timeout: 10_000 });
+  });
+
+  test('shows hide and unhide buttons for comments', async ({ page }) => {
+    await authenticate(page);
+
+    await page.goto('/admin/comments');
+
+    const table = page.getByRole('table');
+    const hasTable = await table.isVisible({ timeout: 10_000 }).catch(() => false);
+
+    if (hasTable) {
+      // Hide or unhide buttons should exist in action column
+      const hideButton = page.getByText('隐藏').first();
+      const unhideButton = page.getByText('取消隐藏').first();
+      await expect(hideButton.or(unhideButton)).toBeVisible({ timeout: 5_000 });
+    }
+  });
 });

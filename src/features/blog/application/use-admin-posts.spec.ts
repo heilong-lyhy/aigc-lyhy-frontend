@@ -10,6 +10,8 @@ vi.mock('../infrastructure/posts-api', () => ({
   updateBlogPost: vi.fn(),
   deleteBlogPost: vi.fn(),
   fetchBlogPostById: vi.fn(),
+  restoreBlogPost: vi.fn(),
+  permanentDeleteBlogPost: vi.fn(),
 }));
 
 vi.mock('@/shared/hooks', () => ({
@@ -24,6 +26,8 @@ import {
   createBlogPost,
   deleteBlogPost,
   fetchBlogPostById,
+  permanentDeleteBlogPost,
+  restoreBlogPost,
   updateBlogPost,
 } from '../infrastructure/posts-api';
 
@@ -34,6 +38,8 @@ const mockCreateBlogPost = vi.mocked(createBlogPost);
 const mockUpdateBlogPost = vi.mocked(updateBlogPost);
 const mockDeleteBlogPost = vi.mocked(deleteBlogPost);
 const mockFetchBlogPostById = vi.mocked(fetchBlogPostById);
+const mockRestoreBlogPost = vi.mocked(restoreBlogPost);
+const mockPermanentDeleteBlogPost = vi.mocked(permanentDeleteBlogPost);
 
 const samplePost: BlogPost = {
   id: 'p1',
@@ -318,5 +324,212 @@ describe('useAdminPosts', () => {
     );
 
     expect(result.current.isEmpty).toBe(true);
+  });
+
+  // ── restore ──
+
+  describe('restore', () => {
+    it('restores a deleted post and returns detail', async () => {
+      const restored = { ...samplePostDetail, status: 'draft' as const };
+      mockUseAsyncQuery.mockReturnValue(mockAsyncQueryReturn());
+      mockRestoreBlogPost.mockResolvedValueOnce(restored);
+
+      const { result } = renderHook(() =>
+        useAdminPosts({ pagination: { page: 1, pageSize: 10 } }),
+      );
+
+      let returned: BlogPostDetail | null = null;
+      await act(async () => {
+        returned = await result.current.restore(1);
+      });
+
+      expect(returned).toEqual(restored);
+      expect(mockRestoreBlogPost).toHaveBeenCalledWith(1);
+    });
+
+    it('calls refetch after successful restore', async () => {
+      const refetch = vi.fn().mockResolvedValue(undefined);
+      mockUseAsyncQuery.mockReturnValue(mockAsyncQueryReturn({ refetch }));
+      mockRestoreBlogPost.mockResolvedValueOnce(samplePostDetail);
+
+      const { result } = renderHook(() =>
+        useAdminPosts({ pagination: { page: 1, pageSize: 10 } }),
+      );
+
+      await act(async () => {
+        await result.current.restore(1);
+      });
+
+      expect(refetch).toHaveBeenCalledTimes(1);
+    });
+
+    it('captures restore error and returns null', async () => {
+      mockUseAsyncQuery.mockReturnValue(mockAsyncQueryReturn());
+      mockRestoreBlogPost.mockRejectedValueOnce(new Error('Not found'));
+
+      const { result } = renderHook(() =>
+        useAdminPosts({ pagination: { page: 1, pageSize: 10 } }),
+      );
+
+      let returned: BlogPostDetail | null = undefined as unknown as BlogPostDetail | null;
+      await act(async () => {
+        returned = await result.current.restore(999);
+      });
+
+      expect(returned).toBeNull();
+      expect(result.current.mutationError).toBe('Not found');
+    });
+
+    it('captures non-Error rejection with default message', async () => {
+      mockUseAsyncQuery.mockReturnValue(mockAsyncQueryReturn());
+      mockRestoreBlogPost.mockRejectedValueOnce('unknown');
+
+      const { result } = renderHook(() =>
+        useAdminPosts({ pagination: { page: 1, pageSize: 10 } }),
+      );
+
+      await act(async () => {
+        await result.current.restore(1);
+      });
+
+      expect(result.current.mutationError).toBe('Failed to restore post');
+    });
+  });
+
+  // ── permanentDelete ──
+
+  describe('permanentDelete', () => {
+    it('permanently deletes a post and returns true', async () => {
+      mockUseAsyncQuery.mockReturnValue(mockAsyncQueryReturn());
+      mockPermanentDeleteBlogPost.mockResolvedValueOnce(true);
+
+      const { result } = renderHook(() =>
+        useAdminPosts({ pagination: { page: 1, pageSize: 10 } }),
+      );
+
+      let deleted = false;
+      await act(async () => {
+        deleted = await result.current.permanentDelete(1);
+      });
+
+      expect(deleted).toBe(true);
+      expect(mockPermanentDeleteBlogPost).toHaveBeenCalledWith(1);
+    });
+
+    it('calls refetch after successful permanentDelete', async () => {
+      const refetch = vi.fn().mockResolvedValue(undefined);
+      mockUseAsyncQuery.mockReturnValue(mockAsyncQueryReturn({ refetch }));
+      mockPermanentDeleteBlogPost.mockResolvedValueOnce(true);
+
+      const { result } = renderHook(() =>
+        useAdminPosts({ pagination: { page: 1, pageSize: 10 } }),
+      );
+
+      await act(async () => {
+        await result.current.permanentDelete(1);
+      });
+
+      expect(refetch).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not call refetch when permanentDelete returns false', async () => {
+      const refetch = vi.fn().mockResolvedValue(undefined);
+      mockUseAsyncQuery.mockReturnValue(mockAsyncQueryReturn({ refetch }));
+      mockPermanentDeleteBlogPost.mockResolvedValueOnce(false);
+
+      const { result } = renderHook(() =>
+        useAdminPosts({ pagination: { page: 1, pageSize: 10 } }),
+      );
+
+      await act(async () => {
+        await result.current.permanentDelete(999);
+      });
+
+      expect(refetch).not.toHaveBeenCalled();
+    });
+
+    it('captures permanentDelete error and returns false', async () => {
+      mockUseAsyncQuery.mockReturnValue(mockAsyncQueryReturn());
+      mockPermanentDeleteBlogPost.mockRejectedValueOnce(new Error('Forbidden'));
+
+      const { result } = renderHook(() =>
+        useAdminPosts({ pagination: { page: 1, pageSize: 10 } }),
+      );
+
+      let deleted = true;
+      await act(async () => {
+        deleted = await result.current.permanentDelete(1);
+      });
+
+      expect(deleted).toBe(false);
+      expect(result.current.mutationError).toBe('Forbidden');
+    });
+
+    it('captures non-Error rejection with default message', async () => {
+      mockUseAsyncQuery.mockReturnValue(mockAsyncQueryReturn());
+      mockPermanentDeleteBlogPost.mockRejectedValueOnce('unknown');
+
+      const { result } = renderHook(() =>
+        useAdminPosts({ pagination: { page: 1, pageSize: 10 } }),
+      );
+
+      await act(async () => {
+        await result.current.permanentDelete(1);
+      });
+
+      expect(result.current.mutationError).toBe('Failed to permanently delete post');
+    });
+  });
+
+  // ── refetch after mutation ──
+
+  describe('refetch after mutation', () => {
+    it('calls refetch after successful update', async () => {
+      const refetch = vi.fn().mockResolvedValue(undefined);
+      mockUseAsyncQuery.mockReturnValue(mockAsyncQueryReturn({ refetch }));
+      mockUpdateBlogPost.mockResolvedValueOnce(samplePostDetail);
+
+      const { result } = renderHook(() =>
+        useAdminPosts({ pagination: { page: 1, pageSize: 10 } }),
+      );
+
+      await act(async () => {
+        await result.current.update({ id: 1, title: 'Updated' });
+      });
+
+      expect(refetch).toHaveBeenCalledTimes(1);
+    });
+
+    it('calls refetch after successful remove', async () => {
+      const refetch = vi.fn().mockResolvedValue(undefined);
+      mockUseAsyncQuery.mockReturnValue(mockAsyncQueryReturn({ refetch }));
+      mockDeleteBlogPost.mockResolvedValueOnce(true);
+
+      const { result } = renderHook(() =>
+        useAdminPosts({ pagination: { page: 1, pageSize: 10 } }),
+      );
+
+      await act(async () => {
+        await result.current.remove(1);
+      });
+
+      expect(refetch).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not call refetch when remove returns false', async () => {
+      const refetch = vi.fn().mockResolvedValue(undefined);
+      mockUseAsyncQuery.mockReturnValue(mockAsyncQueryReturn({ refetch }));
+      mockDeleteBlogPost.mockResolvedValueOnce(false);
+
+      const { result } = renderHook(() =>
+        useAdminPosts({ pagination: { page: 1, pageSize: 10 } }),
+      );
+
+      await act(async () => {
+        await result.current.remove(1);
+      });
+
+      expect(refetch).not.toHaveBeenCalled();
+    });
   });
 });

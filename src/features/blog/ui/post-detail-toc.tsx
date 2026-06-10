@@ -2,7 +2,7 @@
 
 import { Anchor } from 'antd';
 
-import type { TocItem } from '../lib/types';
+import type { TocItem } from '../application/types';
 
 type PostDetailTocProps = {
   readonly items: readonly TocItem[];

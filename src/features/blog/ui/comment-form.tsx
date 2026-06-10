@@ -3,8 +3,8 @@
 import { useCallback } from 'react';
 import { Button, Form, Typography } from 'antd';
 
+import { stripHtml } from '../application/strip-html';
 import { useComment } from '../application/use-comment';
-import { stripHtml } from '../lib/strip-html';
 
 import { CommentFields } from './comment-fields';
 

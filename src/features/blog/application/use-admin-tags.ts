@@ -12,7 +12,8 @@ import {
   fetchBlogTags,
   updateBlogTag,
 } from '../infrastructure/tags-api';
-import { useMutationError } from '../lib/use-mutation-error';
+
+import { useMutationError } from './use-mutation-error';
 
 type UseAdminTagsOptions = {
   readonly autoLoad?: boolean;

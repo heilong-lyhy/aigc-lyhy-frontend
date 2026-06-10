@@ -49,7 +49,7 @@ export { SearchBar } from './ui/search-bar';
 export { TagCloud } from './ui/tag-cloud';
 
 // ── UI 类型 ──
-export type { TocItem } from './lib/types';
+export type { TocItem } from './application/types';
 export type { MarkdownRendererProps } from './ui/markdown-renderer';
 
 

@@ -1,4 +1,4 @@
-// src/features/blog/lib/strip-html.spec.ts
+// src/features/blog/application/strip-html.spec.ts
 
 import { describe, expect, it } from 'vitest';
 

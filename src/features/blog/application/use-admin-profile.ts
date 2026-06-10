@@ -7,7 +7,8 @@ import type { BlogProfile } from '@/entities/blog';
 import { useAsyncQuery } from '@/shared/hooks';
 
 import { fetchBlogProfile, updateBlogProfile } from '../infrastructure/profile-api';
-import { useMutationError } from '../lib/use-mutation-error';
+
+import { useMutationError } from './use-mutation-error';
 
 type UseAdminProfileResult = {
   readonly data: BlogProfile | null;

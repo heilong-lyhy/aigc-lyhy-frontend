@@ -20,7 +20,8 @@ import {
   unhideBlogComment,
   updateBlogCommentStatus,
 } from '../infrastructure/comments-api';
-import { useMutationError } from '../lib/use-mutation-error';
+
+import { useMutationError } from './use-mutation-error';
 
 type UseAdminCommentsOptions = {
   readonly postId?: number;

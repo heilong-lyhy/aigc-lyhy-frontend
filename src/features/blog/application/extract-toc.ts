@@ -1,4 +1,4 @@
-// src/features/blog/lib/extract-toc.ts
+// src/features/blog/application/extract-toc.ts
 
 import GithubSlugger from 'github-slugger';
 

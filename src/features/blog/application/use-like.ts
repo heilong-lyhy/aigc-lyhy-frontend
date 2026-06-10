@@ -5,7 +5,8 @@ import { useCallback, useEffect, useReducer } from 'react';
 import type { BlogLike } from '@/entities/blog';
 
 import { checkBlogPostLiked, toggleBlogPostLike } from '../infrastructure/likes-api';
-import { useMutationError } from '../lib/use-mutation-error';
+
+import { useMutationError } from './use-mutation-error';
 
 type UseLikeOptions = {
   readonly postId: number;

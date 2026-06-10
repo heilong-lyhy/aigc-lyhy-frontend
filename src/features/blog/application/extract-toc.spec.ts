@@ -1,4 +1,4 @@
-// src/features/blog/lib/extract-toc.spec.ts
+// src/features/blog/application/extract-toc.spec.ts
 
 import { describe, expect, it } from 'vitest';
 

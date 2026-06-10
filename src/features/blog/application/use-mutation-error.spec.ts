@@ -1,5 +1,5 @@
 // @vitest-environment happy-dom
-// src/features/blog/lib/use-mutation-error.spec.ts
+// src/features/blog/application/use-mutation-error.spec.ts
 
 import { act, renderHook } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';

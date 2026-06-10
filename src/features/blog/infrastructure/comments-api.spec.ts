@@ -14,7 +14,9 @@ import {
   deleteBlogComment,
   fetchBlogComments,
   fetchBlogCommentsByPost,
+  hideBlogComment,
   mapBlogComment,
+  unhideBlogComment,
   updateBlogCommentStatus,
 } from './comments-api';
 
@@ -31,6 +33,8 @@ const sampleCommentDTO = {
   authorAvatar: 'https://example.com/avatar.png',
   content: '好文章！',
   status: 'APPROVED' as const,
+  isAdminReply: false,
+  isHidden: false,
   nestingLevel: 0,
   createdAt: '2024-01-01T00:00:00Z',
   updatedAt: '2024-01-01T00:00:00Z',
@@ -78,6 +82,16 @@ describe('comments-api', () => {
     it('authorAvatar 为 null 时应保留 null', () => {
       const result = mapBlogComment({ ...sampleCommentDTO, authorAvatar: null });
       expect(result.authorAvatar).toBeNull();
+    });
+
+    it('应映射 isHidden: true', () => {
+      const result = mapBlogComment({ ...sampleCommentDTO, isHidden: true });
+      expect(result.isHidden).toBe(true);
+    });
+
+    it('应映射 isAdminReply: true', () => {
+      const result = mapBlogComment({ ...sampleCommentDTO, isAdminReply: true });
+      expect(result.isAdminReply).toBe(true);
     });
   });
 
@@ -160,6 +174,40 @@ describe('comments-api', () => {
       const [, variables, options] = mockExecute.mock.calls[0];
       expect(variables.input.id).toBe(1);
       expect(variables.input.status).toBe('REJECTED');
+      expect(options?.authMode).toBe('required');
+    });
+  });
+
+  // ─── hideBlogComment ───
+
+  describe('hideBlogComment', () => {
+    it('应隐藏评论并返回映射后的实体', async () => {
+      const hiddenDTO = { ...sampleCommentDTO, isHidden: true };
+      mockExecute.mockResolvedValueOnce({ hideBlogComment: hiddenDTO });
+
+      const result = await hideBlogComment(1);
+
+      expect(result.isHidden).toBe(true);
+
+      const [, variables, options] = mockExecute.mock.calls[0];
+      expect(variables.id).toBe(1);
+      expect(options?.authMode).toBe('required');
+    });
+  });
+
+  // ─── unhideBlogComment ───
+
+  describe('unhideBlogComment', () => {
+    it('应取消隐藏评论并返回映射后的实体', async () => {
+      const unhiddenDTO = { ...sampleCommentDTO, isHidden: false };
+      mockExecute.mockResolvedValueOnce({ unhideBlogComment: unhiddenDTO });
+
+      const result = await unhideBlogComment(1);
+
+      expect(result.isHidden).toBe(false);
+
+      const [, variables, options] = mockExecute.mock.calls[0];
+      expect(variables.id).toBe(1);
       expect(options?.authMode).toBe('required');
     });
   });

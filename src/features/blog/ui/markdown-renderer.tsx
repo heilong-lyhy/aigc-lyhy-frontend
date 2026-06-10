@@ -8,8 +8,8 @@ import rehypeHighlight from 'rehype-highlight';
 import rehypeSlug from 'rehype-slug';
 import remarkGfm from 'remark-gfm';
 
-import { extractToc } from '../lib/extract-toc';
-import type { TocItem } from '../lib/types';
+import { extractToc } from '../application/extract-toc';
+import type { TocItem } from '../application/types';
 
 export type MarkdownRendererProps = {
   readonly content: string;

@@ -2,7 +2,7 @@
 
 import { describe, expect, it } from 'vitest';
 
-import { extractToc } from '../lib/extract-toc';
+import { extractToc } from '../application/extract-toc';
 
 describe('extractToc', () => {
   it('extracts headings from markdown content', () => {

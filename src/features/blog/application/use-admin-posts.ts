@@ -16,7 +16,8 @@ import {
   restoreBlogPost,
   updateBlogPost,
 } from '../infrastructure/posts-api';
-import { useMutationError } from '../lib/use-mutation-error';
+
+import { useMutationError } from './use-mutation-error';
 
 type UseAdminPostsOptions = {
   readonly pagination: PaginationInput;

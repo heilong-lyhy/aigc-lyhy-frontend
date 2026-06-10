@@ -11,6 +11,9 @@ export {
   createBlogComment,
   deleteBlogComment,
   fetchBlogComments,
+  hideBlogComment,
+  replyBlogComment,
+  unhideBlogComment,
   updateBlogCommentStatus,
 } from './comments-api';
 export { fetchBlogDashboard } from './dashboard-api';
@@ -22,6 +25,8 @@ export {
   fetchBlogPostById,
   fetchBlogPostBySlug,
   fetchBlogPosts,
+  permanentDeleteBlogPost,
+  restoreBlogPost,
   updateBlogPost,
 } from './posts-api';
 export { fetchBlogProfile, updateBlogProfile } from './profile-api';

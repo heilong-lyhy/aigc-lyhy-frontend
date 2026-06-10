@@ -1,4 +1,4 @@
-// src/features/blog/lib/types.ts
+// src/features/blog/application/types.ts
 
 /** 从 Markdown 内容中提取的目录条目 */
 export type TocItem = {

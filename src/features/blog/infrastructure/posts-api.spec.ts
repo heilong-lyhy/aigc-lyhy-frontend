@@ -17,6 +17,8 @@ import {
   fetchBlogPosts,
   fetchBlogPublishedPosts,
   mapBlogPost,
+  permanentDeleteBlogPost,
+  restoreBlogPost,
   updateBlogPost,
 } from './posts-api';
 
@@ -97,6 +99,11 @@ describe('posts-api', () => {
     it('应映射 ARCHIVED 状态', () => {
       const result = mapBlogPost({ ...samplePostDTO, status: 'ARCHIVED' });
       expect(result.status).toBe('archived');
+    });
+
+    it('应映射 DELETED 状态', () => {
+      const result = mapBlogPost({ ...samplePostDTO, status: 'DELETED' });
+      expect(result.status).toBe('deleted');
     });
 
     it('categoryId 为 null 时应保留 null', () => {
@@ -289,6 +296,62 @@ describe('posts-api', () => {
       const [, variables, options] = mockExecute.mock.calls[0];
       expect(variables.id).toBe(1);
       expect(options?.authMode).toBe('required');
+    });
+  });
+
+  // ─── restoreBlogPost ───
+
+  describe('restoreBlogPost', () => {
+    it('应恢复已删除文章并返回详情', async () => {
+      mockExecute.mockResolvedValueOnce({ restoreBlogPost: sampleDetailDTO });
+
+      const result = await restoreBlogPost(1);
+
+      expect(result.id).toBe('1');
+      expect(result.content).toBe('# Hello');
+
+      const [, variables, options] = mockExecute.mock.calls[0];
+      expect(variables.id).toBe(1);
+      expect(options?.authMode).toBe('required');
+    });
+  });
+
+  // ─── permanentDeleteBlogPost ───
+
+  describe('permanentDeleteBlogPost', () => {
+    it('应永久删除文章并返回 true', async () => {
+      mockExecute.mockResolvedValueOnce({ permanentDeleteBlogPost: true });
+
+      const result = await permanentDeleteBlogPost(1);
+
+      expect(result).toBe(true);
+
+      const [, variables, options] = mockExecute.mock.calls[0];
+      expect(variables.id).toBe(1);
+      expect(options?.authMode).toBe('required');
+    });
+
+    it('永久删除失败时应返回 false', async () => {
+      mockExecute.mockResolvedValueOnce({ permanentDeleteBlogPost: false });
+
+      const result = await permanentDeleteBlogPost(999);
+
+      expect(result).toBe(false);
+    });
+  });
+
+  // ─── fetchBlogPosts status: DELETED ───
+
+  describe('fetchBlogPosts with DELETED status', () => {
+    it('应传递 DELETED 状态筛选参数', async () => {
+      mockExecute.mockResolvedValueOnce({ blogPosts: { list: [{ ...samplePostDTO, status: 'DELETED' }], current: 1, pageSize: 10, total: 1 } });
+
+      const result = await fetchBlogPosts({ page: 1, pageSize: 10 }, { status: 'deleted' });
+
+      expect(result.items[0].status).toBe('deleted');
+
+      const variables = mockExecute.mock.calls[0][1];
+      expect(variables.status).toBe('DELETED');
     });
   });
 });

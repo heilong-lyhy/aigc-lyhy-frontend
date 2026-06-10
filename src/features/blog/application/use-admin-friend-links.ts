@@ -9,9 +9,9 @@ import {
   deleteBlogFriendLink,
   updateBlogFriendLink,
 } from '../infrastructure/friend-links-api';
-import { useMutationError } from '../lib/use-mutation-error';
 
 import { useBlogFriendLinks } from './use-blog-friend-links';
+import { useMutationError } from './use-mutation-error';
 
 type CreateFriendLinkInput = Readonly<{
   name: string;
