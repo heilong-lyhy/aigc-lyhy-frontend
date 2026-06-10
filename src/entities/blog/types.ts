@@ -1,6 +1,6 @@
 // src/entities/blog/types.ts
 
-export type BlogPostStatus = 'draft' | 'published' | 'archived';
+export type BlogPostStatus = 'draft' | 'published' | 'archived' | 'deleted';
 
 /** 博客文章（列表项，与后端 BlogPostObjectType 对齐） */
 export interface BlogPost {
@@ -74,6 +74,7 @@ export interface BlogComment {
   readonly content: string;
   readonly status: BlogCommentStatus;
   readonly isAdminReply?: boolean;
+  readonly isHidden?: boolean;
   readonly nestingLevel: number;
   readonly createdAt: string;
   readonly updatedAt: string;

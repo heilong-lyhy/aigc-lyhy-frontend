@@ -3,6 +3,7 @@
 import {
   CommentOutlined,
   DashboardOutlined,
+  DeleteOutlined,
   FileOutlined,
   FolderOutlined,
   LinkOutlined,
@@ -21,6 +22,7 @@ const LABEL_COMMENTS = '评论管理';
 const LABEL_FILES = '文件管理';
 const LABEL_TAGS = '标签管理';
 const LABEL_FRIEND_LINKS = '友链管理';
+const LABEL_TRASH = '回收站';
 const LABEL_PROFILE = '个人设置';
 const LABEL_BRAND = 'Blog Admin';
 
@@ -36,6 +38,7 @@ type AdminNavItem = {
 const ADMIN_NAV_ITEMS: readonly AdminNavItem[] = [
   { icon: <DashboardOutlined />, key: 'dashboard', label: LABEL_DASHBOARD, path: '/admin' },
   { icon: <FileOutlined />, key: 'posts', label: LABEL_POSTS, path: '/admin/posts' },
+  { icon: <DeleteOutlined />, key: 'trash', label: LABEL_TRASH, path: '/admin/trash' },
   { icon: <TagsOutlined />, key: 'tags', label: LABEL_TAGS, path: '/admin/tags' },
   { icon: <LinkOutlined />, key: 'friend-links', label: LABEL_FRIEND_LINKS, path: '/admin/friend-links' },
   { icon: <CommentOutlined />, key: 'comments', label: LABEL_COMMENTS, path: '/admin/comments' },

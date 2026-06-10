@@ -22,8 +22,8 @@ const LABEL_COL_ACTIONS = '操作';
 const LABEL_EDIT = '编辑';
 const LABEL_UNPUBLISH = '取消发布';
 const LABEL_PUBLISH = '发布';
-const LABEL_DELETE = '删除';
-const LABEL_CONFIRM_DELETE = '确定删除这篇文章？';
+const LABEL_DELETE = '移入回收站';
+const LABEL_CONFIRM_DELETE = '确定将这篇文章移入回收站？';
 const LABEL_FILTER_STATUS = '按状态筛选';
 const LABEL_FILTER_CATEGORY = '按分类筛选';
 
@@ -46,6 +46,7 @@ const STATUS_COLOR_MAP: Readonly<Record<BlogPostStatus, string>> = {
   draft: 'default',
   published: 'green',
   archived: 'orange',
+  deleted: 'red',
 };
 
 function renderStatusTag(status: BlogPostStatus) {
@@ -171,7 +172,7 @@ export function PostList({
             placeholder={LABEL_FILTER_STATUS}
             value={filterStatus}
             onChange={(value) => onFilterStatusChange(value ?? undefined)}
-            options={STATUS_OPTIONS.map((o) => ({ label: o.label, value: o.value }))}
+            options={STATUS_OPTIONS.filter((o) => o.value !== 'deleted').map((o) => ({ label: o.label, value: o.value }))}
           />
         </div>
         <div className="w-40">

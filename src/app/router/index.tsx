@@ -41,7 +41,7 @@ import {
 } from '@/features/blog';
 import { Error403, Error404, Error500, ErrorRouteCrash } from '@/features/error-feedback';
 
-import type { BlogPostStatus, PaginationInput } from '@/entities/blog';
+import type { BlogCommentStatus, BlogPostStatus, PaginationInput } from '@/entities/blog';
 import { toPaginationInput } from '@/entities/blog';
 
 import { getAppEnv } from '@/shared/env';
@@ -55,6 +55,7 @@ import {
   FriendLinkManager,
   PostEditor,
   PostList,
+  PostTrash,
   ProfileSettings,
   TagManager,
 } from '@/labs/blog-admin';
@@ -94,7 +95,7 @@ function AdminPostListPage() {
   const [filterStatus, setFilterStatus] = useState<BlogPostStatus | undefined>();
   const [filterCategoryId, setFilterCategoryId] = useState<string | undefined>();
 
-  const { data, isLoading, refetch, remove, update } = useAdminPosts({
+  const { data, isLoading, remove, update } = useAdminPosts({
     pagination,
     status: filterStatus,
     autoLoad: true,
@@ -114,22 +115,16 @@ function AdminPostListPage() {
 
   const handleDelete = useCallback(
     async (id: string) => {
-      const ok = await remove(Number(id));
-      if (ok) {
-        await refetch();
-      }
+      await remove(Number(id));
     },
-    [remove, refetch],
+    [remove],
   );
 
   const handleTogglePublish = useCallback(
     async (id: string, status: BlogPostStatus) => {
-      const ok = await update({ id: Number(id), status });
-      if (ok) {
-        await refetch();
-      }
+      await update({ id: Number(id), status });
     },
-    [update, refetch],
+    [update],
   );
 
   return (
@@ -311,19 +306,21 @@ function AdminPostEditorPage() {
 
 function AdminCommentManagerPage() {
   const [commentPagination, setCommentPagination] = useState<PaginationInput>({ page: 1, pageSize: 10 });
+  const [commentStatusFilter, setCommentStatusFilter] = useState<BlogCommentStatus | undefined>(undefined);
 
-  const { data, isLoading, refetch, updateStatus, remove, reply } = useAdminComments({
+  const { data, isLoading, updateStatus, remove, reply, hide, unhide } = useAdminComments({
     pagination: commentPagination,
+    status: commentStatusFilter,
     autoLoad: true,
   });
 
   const handleApprove = useCallback((id: string) => {
-    void updateStatus(Number(id), 'approved').then(() => void refetch());
-  }, [updateStatus, refetch]);
+    void updateStatus(Number(id), 'approved');
+  }, [updateStatus]);
 
   const handleReject = useCallback((id: string) => {
-    void updateStatus(Number(id), 'rejected').then(() => void refetch());
-  }, [updateStatus, refetch]);
+    void updateStatus(Number(id), 'rejected');
+  }, [updateStatus]);
 
   // 当前 BlogCommentStatus 无 'spam' 状态，标记垃圾暂映射为 rejected
   const handleMarkSpam = handleReject;
@@ -336,25 +333,37 @@ function AdminCommentManagerPage() {
     void reply(Number(commentId), content);
   }, [reply]);
 
+  const handleHide = useCallback((id: string) => {
+    void hide(Number(id));
+  }, [hide]);
+
+  const handleUnhide = useCallback((id: string) => {
+    void unhide(Number(id));
+  }, [unhide]);
+
   const handleBatchApprove = useCallback((ids: readonly string[]) => {
-    void Promise.all(ids.map((id) => updateStatus(Number(id), 'approved'))).then(() => void refetch());
-  }, [updateStatus, refetch]);
+    void Promise.all(ids.map((id) => updateStatus(Number(id), 'approved')));
+  }, [updateStatus]);
 
   const handleBatchReject = useCallback((ids: readonly string[]) => {
-    void Promise.all(ids.map((id) => updateStatus(Number(id), 'rejected'))).then(() => void refetch());
-  }, [updateStatus, refetch]);
+    void Promise.all(ids.map((id) => updateStatus(Number(id), 'rejected')));
+  }, [updateStatus]);
 
   return (
     <CommentManager
       data={data}
       isLoading={isLoading}
       pagination={commentPagination}
+      statusFilter={commentStatusFilter}
       onPaginationChange={setCommentPagination}
+      onStatusFilterChange={setCommentStatusFilter}
       onApprove={handleApprove}
       onReject={handleReject}
       onMarkSpam={handleMarkSpam}
       onDelete={handleDelete}
       onReply={handleReply}
+      onHide={handleHide}
+      onUnhide={handleUnhide}
       onBatchApprove={handleBatchApprove}
       onBatchReject={handleBatchReject}
     />
@@ -488,6 +497,43 @@ function AdminProfileSettingsPage() {
   );
 }
 
+function AdminPostTrashPage() {
+  const [pagination, setPagination] = useState<PaginationInput>(
+    toPaginationInput(1, DEFAULT_PAGE_SIZE),
+  );
+
+  const { data, isLoading, restore, permanentDelete } = useAdminPosts({
+    pagination,
+    status: 'deleted',
+    autoLoad: true,
+  });
+
+  const handleRestore = useCallback(
+    async (id: string) => {
+      await restore(Number(id));
+    },
+    [restore],
+  );
+
+  const handlePermanentDelete = useCallback(
+    async (id: string) => {
+      await permanentDelete(Number(id));
+    },
+    [permanentDelete],
+  );
+
+  return (
+    <PostTrash
+      data={data}
+      isLoading={isLoading}
+      pagination={pagination}
+      onPaginationChange={setPagination}
+      onRestore={handleRestore}
+      onPermanentDelete={handlePermanentDelete}
+    />
+  );
+}
+
 function RouteErrorPage() {
   const error = useRouteError();
 
@@ -611,6 +657,10 @@ const router = createBrowserRouter([
           {
             element: <AdminPostEditorPage />,
             path: 'posts/:id',
+          },
+          {
+            element: <AdminPostTrashPage />,
+            path: 'trash',
           },
           {
             element: <AdminFileManagerPage />,

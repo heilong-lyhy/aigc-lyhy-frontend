@@ -12,6 +12,8 @@ import {
   deleteBlogPost,
   fetchBlogPostById,
   fetchBlogPosts,
+  permanentDeleteBlogPost,
+  restoreBlogPost,
   updateBlogPost,
 } from '../infrastructure/posts-api';
 import { useMutationError } from '../lib/use-mutation-error';
@@ -59,6 +61,8 @@ type UseAdminPostsResult = {
     >,
   ) => Promise<BlogPostDetail | null>;
   readonly remove: (id: number) => Promise<boolean>;
+  readonly restore: (id: number) => Promise<BlogPostDetail | null>;
+  readonly permanentDelete: (id: number) => Promise<boolean>;
 };
 
 export function useAdminPosts(options: UseAdminPostsOptions): UseAdminPostsResult {
@@ -125,14 +129,16 @@ export function useAdminPosts(options: UseAdminPostsOptions): UseAdminPostsResul
     ): Promise<BlogPostDetail | null> => {
       clearMutationError();
       try {
-        return await updateBlogPost(input);
+        const result = await updateBlogPost(input);
+        await refetch();
+        return result;
       } catch (err) {
         const message = err instanceof Error ? err.message : 'Failed to update post';
         setMutationError(message);
         return null;
       }
     },
-    [clearMutationError, setMutationError],
+    [clearMutationError, setMutationError, refetch],
   );
 
   const loadById = useCallback(async (id: number): Promise<BlogPostDetail | null> => {
@@ -149,13 +155,45 @@ export function useAdminPosts(options: UseAdminPostsOptions): UseAdminPostsResul
   const remove = useCallback(async (id: number): Promise<boolean> => {
     clearMutationError();
     try {
-      return await deleteBlogPost(id);
+      const ok = await deleteBlogPost(id);
+      if (ok) {
+        await refetch();
+      }
+      return ok;
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to delete post';
       setMutationError(message);
       return false;
     }
-  }, [clearMutationError, setMutationError]);
+  }, [clearMutationError, setMutationError, refetch]);
+
+  const restore = useCallback(async (id: number): Promise<BlogPostDetail | null> => {
+    clearMutationError();
+    try {
+      const result = await restoreBlogPost(id);
+      await refetch();
+      return result;
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to restore post';
+      setMutationError(message);
+      return null;
+    }
+  }, [clearMutationError, setMutationError, refetch]);
+
+  const permanentDelete = useCallback(async (id: number): Promise<boolean> => {
+    clearMutationError();
+    try {
+      const ok = await permanentDeleteBlogPost(id);
+      if (ok) {
+        await refetch();
+      }
+      return ok;
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to permanently delete post';
+      setMutationError(message);
+      return false;
+    }
+  }, [clearMutationError, setMutationError, refetch]);
 
   return {
     data,
@@ -168,5 +206,7 @@ export function useAdminPosts(options: UseAdminPostsOptions): UseAdminPostsResul
     create,
     update,
     remove,
+    restore,
+    permanentDelete,
   };
 }

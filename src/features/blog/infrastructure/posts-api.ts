@@ -14,7 +14,7 @@ import { executeGraphQL } from '@/shared/graphql';
 
 // ── DTO：后端原始响应类型，只允许停留在 infrastructure ──
 
-export type PostStatusDTO = 'DRAFT' | 'PUBLISHED' | 'ARCHIVED';
+export type PostStatusDTO = 'DRAFT' | 'PUBLISHED' | 'ARCHIVED' | 'DELETED';
 
 /** 后端 BlogPostObjectType（列表项） */
 export interface BlogPostDTO {
@@ -73,6 +73,7 @@ const postStatusMap: Readonly<Record<PostStatusDTO, BlogPostStatus>> = {
   DRAFT: 'draft',
   PUBLISHED: 'published',
   ARCHIVED: 'archived',
+  DELETED: 'deleted',
 };
 
 function mapPostStatus(raw: PostStatusDTO): BlogPostStatus {
@@ -338,7 +339,7 @@ export async function updateBlogPost(
   return mapBlogPostDetail(data.updateBlogPost);
 }
 
-/** 管理端：删除文章 */
+/** 管理端：删除文章（软删除，移入回收站） */
 export async function deleteBlogPost(id: number): Promise<boolean> {
   const data = await executeGraphQL<{ deleteBlogPost: boolean }, { id: number }>(
     DELETE_POST_MUTATION,
@@ -347,4 +348,41 @@ export async function deleteBlogPost(id: number): Promise<boolean> {
   );
 
   return data.deleteBlogPost;
+}
+
+// ── 回收站 ──
+
+const RESTORE_POST_MUTATION = `
+  mutation RestoreBlogPost($id: Int!) {
+    restoreBlogPost(id: $id) { ...PostDetailFields }
+  }
+  ${POST_DETAIL_FRAGMENT}
+`;
+
+const PERMANENT_DELETE_POST_MUTATION = `
+  mutation PermanentDeleteBlogPost($id: Int!) {
+    permanentDeleteBlogPost(id: $id)
+  }
+`;
+
+/** 管理端：恢复已删除文章 */
+export async function restoreBlogPost(id: number): Promise<BlogPostDetail> {
+  const data = await executeGraphQL<{ restoreBlogPost: BlogPostDetailDTO }, { id: number }>(
+    RESTORE_POST_MUTATION,
+    { id },
+    { authMode: 'required' },
+  );
+
+  return mapBlogPostDetail(data.restoreBlogPost);
+}
+
+/** 管理端：永久删除文章（不可恢复） */
+export async function permanentDeleteBlogPost(id: number): Promise<boolean> {
+  const data = await executeGraphQL<{ permanentDeleteBlogPost: boolean }, { id: number }>(
+    PERMANENT_DELETE_POST_MUTATION,
+    { id },
+    { authMode: 'required' },
+  );
+
+  return data.permanentDeleteBlogPost;
 }

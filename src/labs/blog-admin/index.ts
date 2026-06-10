@@ -10,5 +10,6 @@ export { FileManager } from './ui/file-manager';
 export { FriendLinkManager } from './ui/friend-link-manager';
 export { PostEditor } from './ui/post-editor';
 export { PostList } from './ui/post-list';
+export { PostTrash } from './ui/post-trash';
 export { ProfileSettings } from './ui/profile-settings';
 export { TagManager } from './ui/tag-manager';

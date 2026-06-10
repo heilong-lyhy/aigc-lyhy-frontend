@@ -55,11 +55,13 @@ function flattenComments(comments: readonly BlogComment[]): readonly BlogComment
 }
 
 export function CommentList({ comments, onReply }: CommentListProps) {
-  if (comments.length === 0) {
+  const visibleComments = comments.filter((c) => !c.isHidden);
+
+  if (visibleComments.length === 0) {
     return <p className="text-text-tertiary">{LABEL_NO_COMMENTS}</p>;
   }
 
-  const flat = flattenComments(comments);
+  const flat = flattenComments(visibleComments);
 
   return (
     <section aria-label={LABEL_COMMENTS}>

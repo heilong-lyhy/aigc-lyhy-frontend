@@ -24,6 +24,7 @@ export interface BlogCommentDTO {
   readonly content: string;
   readonly status: CommentStatusDTO;
   readonly isAdminReply: boolean;
+  readonly isHidden: boolean;
   readonly nestingLevel: number;
   readonly createdAt: string;
   readonly updatedAt: string;
@@ -60,6 +61,7 @@ export function mapBlogComment(raw: BlogCommentDTO): BlogComment {
     content: raw.content,
     status: mapCommentStatus(raw.status),
     isAdminReply: raw.isAdminReply,
+    isHidden: raw.isHidden,
     nestingLevel: raw.nestingLevel,
     createdAt: raw.createdAt,
     updatedAt: raw.updatedAt,
@@ -80,7 +82,7 @@ function mapBlogCommentList(raw: BlogCommentListDTO): PaginatedResult<BlogCommen
 const COMMENT_FRAGMENT = `
   fragment CommentFields on BlogComment {
     id postId parentId replyToId authorName authorAvatar content
-    status isAdminReply nestingLevel createdAt updatedAt
+    status isAdminReply isHidden nestingLevel createdAt updatedAt
   }
 `;
 
@@ -129,6 +131,20 @@ const DELETE_COMMENT_MUTATION = `
 const REPLY_COMMENT_MUTATION = `
   mutation ReplyBlogComment($input: ReplyBlogCommentInput!) {
     replyBlogComment(input: $input) { ...CommentFields }
+  }
+  ${COMMENT_FRAGMENT}
+`;
+
+const HIDE_COMMENT_MUTATION = `
+  mutation HideBlogComment($id: Int!) {
+    hideBlogComment(id: $id) { ...CommentFields }
+  }
+  ${COMMENT_FRAGMENT}
+`;
+
+const UNHIDE_COMMENT_MUTATION = `
+  mutation UnhideBlogComment($id: Int!) {
+    unhideBlogComment(id: $id) { ...CommentFields }
   }
   ${COMMENT_FRAGMENT}
 `;
@@ -238,4 +254,26 @@ export async function replyBlogComment(
   );
 
   return mapBlogComment(data.replyBlogComment);
+}
+
+/** 管理端：隐藏评论 */
+export async function hideBlogComment(id: number): Promise<BlogComment> {
+  const data = await executeGraphQL<{ hideBlogComment: BlogCommentDTO }, { id: number }>(
+    HIDE_COMMENT_MUTATION,
+    { id },
+    { authMode: 'required' },
+  );
+
+  return mapBlogComment(data.hideBlogComment);
+}
+
+/** 管理端：取消隐藏评论 */
+export async function unhideBlogComment(id: number): Promise<BlogComment> {
+  const data = await executeGraphQL<{ unhideBlogComment: BlogCommentDTO }, { id: number }>(
+    UNHIDE_COMMENT_MUTATION,
+    { id },
+    { authMode: 'required' },
+  );
+
+  return mapBlogComment(data.unhideBlogComment);
 }

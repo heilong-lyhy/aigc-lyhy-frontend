@@ -15,7 +15,9 @@ import { useAsyncQuery } from '@/shared/hooks';
 import {
   deleteBlogComment,
   fetchBlogComments,
+  hideBlogComment,
   replyBlogComment,
+  unhideBlogComment,
   updateBlogCommentStatus,
 } from '../infrastructure/comments-api';
 import { useMutationError } from '../lib/use-mutation-error';
@@ -37,6 +39,8 @@ type UseAdminCommentsResult = {
   readonly updateStatus: (id: number, status: BlogCommentStatus) => Promise<BlogComment | null>;
   readonly remove: (id: number) => Promise<boolean>;
   readonly reply: (commentId: number, content: string) => Promise<BlogComment | null>;
+  readonly hide: (id: number) => Promise<BlogComment | null>;
+  readonly unhide: (id: number) => Promise<BlogComment | null>;
   readonly batchUpdateStatus: (
     ids: readonly number[],
     status: BlogCommentStatus,
@@ -69,14 +73,16 @@ export function useAdminComments(options: UseAdminCommentsOptions): UseAdminComm
     async (id: number, newStatus: BlogCommentStatus): Promise<BlogComment | null> => {
       clearMutationError();
       try {
-        return await updateBlogCommentStatus({ id, status: newStatus });
+        const result = await updateBlogCommentStatus({ id, status: newStatus });
+        await refetch();
+        return result;
       } catch (err) {
         const message = err instanceof Error ? err.message : 'Failed to update comment status';
         setMutationError(message);
         return null;
       }
     },
-    [clearMutationError, setMutationError],
+    [clearMutationError, setMutationError, refetch],
   );
 
   const remove = useCallback(
@@ -111,6 +117,38 @@ export function useAdminComments(options: UseAdminCommentsOptions): UseAdminComm
     [clearMutationError, setMutationError, refetch],
   );
 
+  const hide = useCallback(
+    async (id: number): Promise<BlogComment | null> => {
+      clearMutationError();
+      try {
+        const result = await hideBlogComment(id);
+        await refetch();
+        return result;
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Failed to hide comment';
+        setMutationError(message);
+        return null;
+      }
+    },
+    [clearMutationError, setMutationError, refetch],
+  );
+
+  const unhide = useCallback(
+    async (id: number): Promise<BlogComment | null> => {
+      clearMutationError();
+      try {
+        const result = await unhideBlogComment(id);
+        await refetch();
+        return result;
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Failed to unhide comment';
+        setMutationError(message);
+        return null;
+      }
+    },
+    [clearMutationError, setMutationError, refetch],
+  );
+
   const batchUpdateStatus = useCallback(
     async (
       ids: readonly number[],
@@ -118,9 +156,11 @@ export function useAdminComments(options: UseAdminCommentsOptions): UseAdminComm
     ): Promise<readonly BlogComment[]> => {
       clearMutationError();
       try {
-        return await Promise.all(
+        const results = await Promise.all(
           ids.map((id) => updateBlogCommentStatus({ id, status: newStatus })),
         );
+        await refetch();
+        return results;
       } catch (err) {
         const message =
           err instanceof Error ? err.message : 'Failed to batch update comment status';
@@ -128,21 +168,23 @@ export function useAdminComments(options: UseAdminCommentsOptions): UseAdminComm
         return [];
       }
     },
-    [clearMutationError, setMutationError],
+    [clearMutationError, setMutationError, refetch],
   );
 
   const batchRemove = useCallback(
     async (ids: readonly number[]): Promise<readonly boolean[]> => {
       clearMutationError();
       try {
-        return await Promise.all(ids.map((id) => deleteBlogComment(id)));
+        const results = await Promise.all(ids.map((id) => deleteBlogComment(id)));
+        await refetch();
+        return results;
       } catch (err) {
         const message = err instanceof Error ? err.message : 'Failed to batch delete comments';
         setMutationError(message);
         return [];
       }
     },
-    [clearMutationError, setMutationError],
+    [clearMutationError, setMutationError, refetch],
   );
 
   return {
@@ -155,6 +197,8 @@ export function useAdminComments(options: UseAdminCommentsOptions): UseAdminComm
     updateStatus,
     remove,
     reply,
+    hide,
+    unhide,
     batchUpdateStatus,
     batchRemove,
   };
