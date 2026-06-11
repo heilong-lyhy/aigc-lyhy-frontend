@@ -42,7 +42,7 @@ function FriendLinkCard({ link }: FriendLinkCardProps) {
               {link.name}
             </Text>
             {link.description && (
-              <Text className="text-xs" type="secondary">
+              <Text style={{ fontSize: 12 }} type="secondary">
                 {link.description}
               </Text>
             )}
