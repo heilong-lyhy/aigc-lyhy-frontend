@@ -9,7 +9,8 @@ export const blogAdminLabMeta = {
   exception: [] as const,
   notes: [
     '环境检查由 canAccessBlogAdminLab (labs/access.ts) 在 router loader 执行',
-    '角色检查由 AdminGuard (app/lib) 在路由 element 层执行，内嵌 ADMIN_ROLE 常量',
+    'access list 已实现结构化：env/roles/menu，同时控制导航入口和路由直达',
+    '角色检查由 AdminGuard (app/lib) 在路由 element 层执行，与 access list roles 配合',
     '数据获取由 AdminDashboardPage/AdminPostListPage/AdminPostEditorPage (app/router) 调用 features hook，labs 只承载纯 UI',
     'usePostEditor 已迁至 features/blog/hooks，PostEditorForm 类型定义在 entities/blog/types',
     'useAutoSave (features/blog) 通过 app/router wrapper 调用，使用 blog-storage 持久化草稿',

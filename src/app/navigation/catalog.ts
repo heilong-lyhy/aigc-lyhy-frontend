@@ -2,6 +2,8 @@
 
 import { type AppEnv, getAppEnv } from '@/shared/env';
 
+import { shouldShowBlogAdminMenu } from '@/labs/blog-admin/access';
+
 import type { NavigationItem } from './types';
 
 const STABLE_NAVIGATION_ITEMS: NavigationItem[] = [
@@ -71,10 +73,8 @@ const SUPPORT_NAVIGATION_ITEMS: NavigationItem[] = [
   },
 ];
 
-// Each lab has its own env allowlist.
-// IMPORTANT: These must be kept in sync with the corresponding access.ts in each lab module.
-// When adding a new lab, add its env check here AND in its access.ts.
-const BLOG_ADMIN_ALLOWED_ENVS: readonly AppEnv[] = ['dev', 'prod']; // sync with labs/blog-admin/access.ts
+// Each lab has its own access list in its access.ts.
+// IMPORTANT: Do not duplicate env/role checks here; use the lab's own access functions.
 const GAME_2048_ALLOWED_ENVS: readonly AppEnv[] = ['dev', 'test']; // sync with labs/game-2048/access.ts
 
 function canExposeSandbox(env: AppEnv) {
@@ -84,7 +84,7 @@ function canExposeSandbox(env: AppEnv) {
 function getLabNavigationItems(env: AppEnv): NavigationItem[] {
   const items: NavigationItem[] = [];
 
-  if (BLOG_ADMIN_ALLOWED_ENVS.includes(env)) {
+  if (shouldShowBlogAdminMenu(env)) {
     items.push(BLOG_ADMIN_LAB_ITEM);
   }
 
