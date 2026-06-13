@@ -102,7 +102,11 @@ export function useAdminPosts(options: UseAdminPostsOptions): UseAdminPostsResul
     ): Promise<BlogPostDetail | null> => {
       clearMutationError();
       try {
-        return await createBlogPost(input);
+        const { tags, ...rest } = input;
+        return await createBlogPost({
+          ...rest,
+          tagIds: tags?.map((id) => Number(id)),
+        });
       } catch (err) {
         const message = err instanceof Error ? err.message : 'Failed to create post';
         setMutationError(message);
@@ -130,7 +134,11 @@ export function useAdminPosts(options: UseAdminPostsOptions): UseAdminPostsResul
     ): Promise<BlogPostDetail | null> => {
       clearMutationError();
       try {
-        const result = await updateBlogPost(input);
+        const { tags, ...rest } = input;
+        const result = await updateBlogPost({
+          ...rest,
+          tagIds: tags?.map((id) => Number(id)),
+        });
         await refetch();
         return result;
       } catch (err) {

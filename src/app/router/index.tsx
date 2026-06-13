@@ -9,6 +9,7 @@ import {
   useRouteError,
 } from 'react-router';
 import { useNavigate, useParams } from 'react-router';
+import { message } from 'antd';
 
 import { AppLayout } from '@/app/layout';
 import { AdminGuard } from '@/app/lib';
@@ -158,7 +159,7 @@ function AdminPostEditorPage() {
   const [isLoadingPost, setIsLoadingPost] = useState(!!id);
   const autoSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const { create, loadById, update } = useAdminPosts({
+  const { create, loadById, mutationError, update } = useAdminPosts({
     pagination: toPaginationInput(1, 1),
     autoLoad: false,
   });
@@ -251,6 +252,8 @@ function AdminPostEditorPage() {
         if (result) {
           clear();
           navigate(`/admin/posts/${result.id}`, { replace: true });
+        } else if (mutationError) {
+          void message.error(mutationError);
         }
       } else {
         const result = await update({
@@ -267,12 +270,14 @@ function AdminPostEditorPage() {
         if (result) {
           clear();
           resetEditor();
+        } else if (mutationError) {
+          void message.error(mutationError);
         }
       }
     } finally {
       setIsSaving(false);
     }
-  }, [isNew, id, form, create, update, clear, navigate, resetEditor]);
+  }, [isNew, id, form, create, update, clear, navigate, resetEditor, mutationError]);
 
   const handleBack = useCallback(() => {
     navigate('/admin/posts');

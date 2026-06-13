@@ -70,6 +70,7 @@ export default defineConfig(({ mode }) => {
       host: devServerHost,
       port: devServerPort,
       strictPort: devServerStrictPort,
+      allowedHosts: ['www.u258679.nyat.app'],
     },
     build: {
       outDir: buildOutDir,

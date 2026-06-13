@@ -306,9 +306,10 @@ export async function createBlogPost(
     publishedAt?: string;
   }>,
 ): Promise<BlogPostDetail> {
+  const { status, ...rest } = input;
   const data = await executeGraphQL<{ createBlogPost: BlogPostDetailDTO }, Record<string, unknown>>(
     CREATE_POST_MUTATION,
-    { input },
+    { input: { ...rest, status: status?.toUpperCase() } },
     { authMode: 'required' },
   );
 
@@ -332,9 +333,10 @@ export async function updateBlogPost(
     publishedAt?: string;
   }>,
 ): Promise<BlogPostDetail> {
+  const { status, ...rest } = input;
   const data = await executeGraphQL<{ updateBlogPost: BlogPostDetailDTO }, Record<string, unknown>>(
     UPDATE_POST_MUTATION,
-    { input },
+    { input: { ...rest, status: status?.toUpperCase() } },
     { authMode: 'required' },
   );
 
