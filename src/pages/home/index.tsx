@@ -3,6 +3,8 @@
 import { Button, Card, Descriptions, Tag } from 'antd';
 import { useNavigate } from 'react-router';
 
+import { useAuth } from '@/features/auth';
+
 import { getAppEnv, getGraphQLEndpoint, getHealthEndpoint } from '@/shared/env';
 import { PageHeader } from '@/shared/ui';
 
@@ -23,7 +25,24 @@ const workflowCards = [
 
 export function HomePage() {
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
   const healthEndpoint = getHealthEndpoint();
+
+  if (!isAuthenticated) {
+    return (
+      <div className="page-stack">
+        <PageHeader
+          description="一个小而清晰的 AI 友好前端基线，方便后续稳定扩展。"
+          title="AIGC 工作台"
+        />
+        <div className="surface-panel">
+          <Card>
+            <p>请先登录以使用工作台</p>
+          </Card>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="page-stack">

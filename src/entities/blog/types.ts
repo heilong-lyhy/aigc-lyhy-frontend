@@ -143,6 +143,7 @@ export interface BlogFriendLink {
   readonly description: string | null;
   readonly logoUrl: string | null;
   readonly sortOrder: number;
+  readonly isActive: boolean;
   readonly createdAt: string;
   readonly updatedAt: string;
 }

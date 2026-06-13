@@ -13,6 +13,7 @@ interface BlogFriendLinkDTO {
   readonly description: string | null;
   readonly logoUrl: string | null;
   readonly sortOrder: number;
+  readonly isActive: boolean;
   readonly createdAt: string;
   readonly updatedAt: string;
 }
@@ -27,6 +28,7 @@ function mapBlogFriendLink(raw: BlogFriendLinkDTO): BlogFriendLink {
     description: raw.description,
     logoUrl: raw.logoUrl,
     sortOrder: raw.sortOrder,
+    isActive: raw.isActive,
     createdAt: raw.createdAt,
     updatedAt: raw.updatedAt,
   };
@@ -36,19 +38,19 @@ function mapBlogFriendLink(raw: BlogFriendLinkDTO): BlogFriendLink {
 
 const FETCH_FRIEND_LINKS_QUERY = `
   query FetchBlogFriendLinks {
-    blogFriendLinks { id name url description logoUrl sortOrder createdAt updatedAt }
+    blogFriendLinks { id name url description logoUrl sortOrder isActive createdAt updatedAt }
   }
 `;
 
 const CREATE_FRIEND_LINK_MUTATION = `
   mutation CreateBlogFriendLink($input: CreateBlogFriendLinkInput!) {
-    createBlogFriendLink(input: $input) { id name url description logoUrl sortOrder createdAt updatedAt }
+    createBlogFriendLink(input: $input) { id name url description logoUrl sortOrder isActive createdAt updatedAt }
   }
 `;
 
 const UPDATE_FRIEND_LINK_MUTATION = `
   mutation UpdateBlogFriendLink($input: UpdateBlogFriendLinkInput!) {
-    updateBlogFriendLink(input: $input) { id name url description logoUrl sortOrder createdAt updatedAt }
+    updateBlogFriendLink(input: $input) { id name url description logoUrl sortOrder isActive createdAt updatedAt }
   }
 `;
 
@@ -78,6 +80,7 @@ export async function createBlogFriendLink(
     description?: string;
     logoUrl?: string;
     sortOrder?: number;
+    isActive?: boolean;
   }>,
 ): Promise<BlogFriendLink> {
   const data = await executeGraphQL<
@@ -97,6 +100,7 @@ export async function updateBlogFriendLink(
     description?: string;
     logoUrl?: string;
     sortOrder?: number;
+    isActive?: boolean;
   }>,
 ): Promise<BlogFriendLink> {
   const data = await executeGraphQL<

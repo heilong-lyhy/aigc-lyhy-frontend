@@ -39,7 +39,7 @@ type UseAdminCommentsResult = {
   readonly refetch: () => Promise<void>;
   readonly updateStatus: (id: number, status: BlogCommentStatus) => Promise<BlogComment | null>;
   readonly remove: (id: number) => Promise<boolean>;
-  readonly reply: (commentId: number, content: string) => Promise<BlogComment | null>;
+  readonly reply: (input: Readonly<{ postId: number; content: string; parentId?: number; replyToId?: number }>) => Promise<BlogComment | null>;
   readonly hide: (id: number) => Promise<BlogComment | null>;
   readonly unhide: (id: number) => Promise<BlogComment | null>;
   readonly batchUpdateStatus: (
@@ -103,10 +103,10 @@ export function useAdminComments(options: UseAdminCommentsOptions): UseAdminComm
   );
 
   const reply = useCallback(
-    async (commentId: number, content: string): Promise<BlogComment | null> => {
+    async (input: Readonly<{ postId: number; content: string; parentId?: number; replyToId?: number }>): Promise<BlogComment | null> => {
       clearMutationError();
       try {
-        const result = await replyBlogComment({ commentId, content });
+        const result = await replyBlogComment(input);
         await refetch();
         return result;
       } catch (err) {

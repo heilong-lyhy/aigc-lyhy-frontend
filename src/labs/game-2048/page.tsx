@@ -241,7 +241,7 @@ export function Game2048LabPage() {
   return (
     <div className="page-stack">
       <PageHeader
-        description={game2048LabMeta.description}
+        description={game2048LabMeta.purpose}
         extra={
           <Space>
             <Tag>Lab</Tag>

@@ -39,7 +39,7 @@ const LABEL_NAME_REQUIRED = '请输入名称';
 const LABEL_URL = '链接';
 const LABEL_URL_REQUIRED = '请输入链接';
 const LABEL_DESCRIPTION = '描述';
-const LABEL_AVATAR = '头像 URL';
+const LABEL_AVATAR = 'Logo URL';
 const LABEL_SORT_ORDER = '排序';
 
 type FriendLinkManagerProps = {
@@ -51,7 +51,7 @@ type FriendLinkManagerProps = {
       name: string;
       url: string;
       description?: string;
-      avatar?: string;
+      logoUrl?: string;
       sortOrder?: number;
     }>,
   ) => void;
@@ -61,7 +61,7 @@ type FriendLinkManagerProps = {
       name?: string;
       url?: string;
       description?: string;
-      avatar?: string;
+      logoUrl?: string;
       sortOrder?: number;
     }>,
   ) => void;
@@ -72,7 +72,7 @@ type FriendLinkFormValues = {
   readonly name: string;
   readonly url: string;
   readonly description?: string;
-  readonly avatar?: string;
+  readonly logoUrl?: string;
   readonly sortOrder?: number;
 };
 
@@ -101,7 +101,7 @@ export function FriendLinkManager({
         name: link.name,
         url: link.url,
         description: link.description ?? undefined,
-        avatar: link.logoUrl ?? undefined,
+        logoUrl: link.logoUrl ?? undefined,
         sortOrder: link.sortOrder,
       });
       setModalOpen(true);
@@ -237,8 +237,8 @@ export function FriendLinkManager({
           <Form.Item label={LABEL_DESCRIPTION} name="description">
             <Input placeholder={LABEL_DESCRIPTION} />
           </Form.Item>
-          <Form.Item label={LABEL_AVATAR} name="avatar">
-            <Input placeholder="https://example.com/avatar.png" />
+          <Form.Item label={LABEL_AVATAR} name="logoUrl">
+            <Input placeholder="https://example.com/logo.png" />
           </Form.Item>
           <Form.Item label={LABEL_SORT_ORDER} name="sortOrder">
             <InputNumber min={0} placeholder="0" />

@@ -243,8 +243,10 @@ export async function deleteBlogComment(id: number): Promise<boolean> {
 /** 管理端：回复评论 */
 export async function replyBlogComment(
   input: Readonly<{
-    commentId: number;
+    postId: number;
     content: string;
+    parentId?: number;
+    replyToId?: number;
   }>,
 ): Promise<BlogComment> {
   const data = await executeGraphQL<{ replyBlogComment: BlogCommentDTO }, Record<string, unknown>>(

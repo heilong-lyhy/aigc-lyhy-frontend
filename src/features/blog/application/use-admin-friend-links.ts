@@ -17,8 +17,9 @@ type CreateFriendLinkInput = Readonly<{
   name: string;
   url: string;
   description?: string;
-  avatar?: string;
+  logoUrl?: string;
   sortOrder?: number;
+  isActive?: boolean;
 }>;
 
 type UpdateFriendLinkInput = Readonly<{
@@ -26,8 +27,9 @@ type UpdateFriendLinkInput = Readonly<{
   name?: string;
   url?: string;
   description?: string;
-  avatar?: string;
+  logoUrl?: string;
   sortOrder?: number;
+  isActive?: boolean;
 }>;
 
 type UseAdminFriendLinksOptions = {

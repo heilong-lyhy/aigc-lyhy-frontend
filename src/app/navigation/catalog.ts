@@ -2,8 +2,6 @@
 
 import { type AppEnv, getAppEnv } from '@/shared/env';
 
-import { shouldShowBlogAdminMenu } from '@/labs/blog-admin/access';
-
 import type { NavigationItem } from './types';
 
 const STABLE_NAVIGATION_ITEMS: NavigationItem[] = [
@@ -76,18 +74,35 @@ const SUPPORT_NAVIGATION_ITEMS: NavigationItem[] = [
 // Each lab has its own access list in its access.ts.
 // IMPORTANT: Do not duplicate env/role checks here; use the lab's own access functions.
 const GAME_2048_ALLOWED_ENVS: readonly AppEnv[] = ['dev', 'test']; // sync with labs/game-2048/access.ts
+const BLOG_ADMIN_ALLOWED_ENVS: readonly AppEnv[] = ['dev', 'test']; // sync with labs/blog-admin/access.ts
+
+const ADMIN_ROLE = 'ADMIN';
 
 function canExposeSandbox(env: AppEnv) {
   return env === 'dev' || env === 'test';
 }
 
-function getLabNavigationItems(env: AppEnv): NavigationItem[] {
+export interface NavigationAuthContext {
+  isAuthenticated: boolean;
+  accessGroup: readonly string[];
+}
+
+function getLabNavigationItems(
+  env: AppEnv,
+  auth: NavigationAuthContext | undefined,
+): NavigationItem[] {
   const items: NavigationItem[] = [];
 
-  if (shouldShowBlogAdminMenu(env)) {
+  // Blog Admin：需要已登录 + ADMIN 角色 + 允许的环境
+  if (
+    BLOG_ADMIN_ALLOWED_ENVS.includes(env) &&
+    auth?.isAuthenticated &&
+    auth.accessGroup.some((role) => role === ADMIN_ROLE)
+  ) {
     items.push(BLOG_ADMIN_LAB_ITEM);
   }
 
+  // Lab (Game2048)：环境允许即可显示，未登录时页面内容显示"请先登录"
   if (GAME_2048_ALLOWED_ENVS.includes(env)) {
     items.push(GAME_2048_LAB_ITEM);
   }
@@ -95,11 +110,25 @@ function getLabNavigationItems(env: AppEnv): NavigationItem[] {
   return items;
 }
 
-export function getNavigationItems(env = getAppEnv()): NavigationItem[] {
+function getSandboxNavigationItems(
+  env: AppEnv,
+  auth: NavigationAuthContext | undefined,
+): NavigationItem[] {
+  // Sandbox：需要已登录 + 允许的环境
+  if (canExposeSandbox(env) && auth?.isAuthenticated) {
+    return SANDBOX_NAVIGATION_ITEMS;
+  }
+  return [];
+}
+
+export function getNavigationItems(
+  env = getAppEnv(),
+  auth?: NavigationAuthContext,
+): NavigationItem[] {
   return [
     ...STABLE_NAVIGATION_ITEMS,
-    ...getLabNavigationItems(env),
-    ...(canExposeSandbox(env) ? SANDBOX_NAVIGATION_ITEMS : []),
+    ...getLabNavigationItems(env, auth),
+    ...getSandboxNavigationItems(env, auth),
     ...SUPPORT_NAVIGATION_ITEMS,
   ];
 }

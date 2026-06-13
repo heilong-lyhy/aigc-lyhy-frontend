@@ -6,18 +6,30 @@ import { Button, Segmented, Tabs, Tooltip } from 'antd';
 import type { ReactNode } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router';
 
+import type { NavigationAuthContext } from '@/app/navigation';
 import { getNavigationItems } from '@/app/navigation';
 import { FONT_SCALE_OPTIONS, useTheme } from '@/app/providers';
 import { APP_THEME_CSS_VAR_KEY } from '@/app/theme';
 
 import { AigcSidecar } from '@/widgets/aigc-sidecar';
-import { useAuth } from '@/features/auth';
+import { useAuth, useFullUserInfo } from '@/features/auth';
 
 import type { AssistantRouteCandidate } from '@/entities/assistant-session';
 
 import { LoginPrompt } from '@/shared/ui';
 
 import { EntryAccentGlyph } from './entry-accent-glyph';
+
+// 未登录时允许正常展示内容的路径前缀
+// Blog、Errors、Account 页面未登录时可见（Account 页面内部自行处理登录提示）
+// Workspace 未登录时也显示"请先登录"而非自动跳转
+// Labs 未登录时由 AppLayout 统一显示 LoginPrompt，各 lab 页面不再自行依赖 features/auth
+const PUBLIC_PATH_PREFIXES = ['/blog', '/error-preview', '/account'];
+const PUBLIC_PATH_EXACT = ['/'];
+
+function isPublicPage(pathname: string): boolean {
+  return PUBLIC_PATH_EXACT.includes(pathname) || PUBLIC_PATH_PREFIXES.some((prefix) => pathname.startsWith(prefix));
+}
 
 function toRouteCandidate(
   item: ReturnType<typeof getNavigationItems>[number],
@@ -54,8 +66,17 @@ export function AppLayout({ children }: AppLayoutProps = {}) {
   const { fontScale, isDark, setFontScale, setIsDark } = useTheme();
   const location = useLocation();
   const navigate = useNavigate();
-  const { isAuthenticated, logout } = useAuth();
-  const navigationItems = useMemo(() => getNavigationItems(), []);
+  const { isAuthenticated, accountId, logout } = useAuth();
+  const { data: fullUserInfo } = useFullUserInfo(isAuthenticated ? accountId : null);
+
+  // 构建导航鉴权上下文
+  const navigationAuth: NavigationAuthContext | undefined = isAuthenticated && fullUserInfo
+    ? { isAuthenticated: true, accessGroup: fullUserInfo.accessGroup }
+    : isAuthenticated
+      ? { isAuthenticated: true, accessGroup: [] }
+      : undefined;
+
+  const navigationItems = useMemo(() => getNavigationItems(undefined, navigationAuth), [navigationAuth]);
   const activeNavigationPath = resolveActiveNavigationPath(location.pathname, navigationItems);
   const navigationTabs = useMemo(
     () => navigationItems.map((item) => ({ key: item.path, label: item.label })),
@@ -66,12 +87,8 @@ export function AppLayout({ children }: AppLayoutProps = {}) {
     [navigationItems],
   );
 
-  // 未登录时，首页自动跳转至登录页
-  useEffect(() => {
-    if (!isAuthenticated && location.pathname === '/') {
-      navigate('/auth', { replace: true });
-    }
-  }, [isAuthenticated, location.pathname, navigate]);
+  // 未登录时，Workspace 首页显示"请先登录"（由 HomePage 组件内部处理）
+  // 不再自动跳转到登录页
 
   useEffect(() => {
     if (wasSidecarOpenRef.current && !isSidecarOpen) {
@@ -182,7 +199,7 @@ export function AppLayout({ children }: AppLayoutProps = {}) {
       </header>
 
       <main className="app-main">
-        {!isAuthenticated && location.pathname !== '/auth' ? (
+        {!isAuthenticated && location.pathname !== '/auth' && !isPublicPage(location.pathname) ? (
           <LoginPrompt />
         ) : (
           children ?? <Outlet />

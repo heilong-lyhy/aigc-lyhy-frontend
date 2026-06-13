@@ -1,6 +1,7 @@
 // src/app/router/index.tsx
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { message } from 'antd';
 import {
   createBrowserRouter,
   isRouteErrorResponse,
@@ -9,7 +10,6 @@ import {
   useRouteError,
 } from 'react-router';
 import { useNavigate, useParams } from 'react-router';
-import { message } from 'antd';
 
 import { AppLayout } from '@/app/layout';
 import { AdminGuard } from '@/app/lib';
@@ -337,8 +337,15 @@ function AdminCommentManagerPage() {
   }, [remove]);
 
   const handleReply = useCallback((commentId: string, content: string) => {
-    void reply(Number(commentId), content);
-  }, [reply]);
+    const comment = data?.items.find((c) => c.id === commentId);
+    if (!comment) return;
+    void reply({
+      postId: comment.postId,
+      content,
+      parentId: comment.parentId ?? Number(commentId),
+      replyToId: Number(commentId),
+    });
+  }, [reply, data]);
 
   const handleHide = useCallback((id: string) => {
     void hide(Number(id));
@@ -493,14 +500,14 @@ function AdminFriendLinkManagerPage() {
   const { data, isLoading, mutationError, create, update, remove } = useAdminFriendLinks({ autoLoad: true });
 
   const handleCreate = useCallback(
-    (input: Readonly<{ name: string; url: string; description?: string; avatar?: string; sortOrder?: number }>) => {
+    (input: Readonly<{ name: string; url: string; description?: string; logoUrl?: string; sortOrder?: number }>) => {
       void create(input);
     },
     [create],
   );
 
   const handleUpdate = useCallback(
-    (input: Readonly<{ id: number; name?: string; url?: string; description?: string; avatar?: string; sortOrder?: number }>) => {
+    (input: Readonly<{ id: number; name?: string; url?: string; description?: string; logoUrl?: string; sortOrder?: number }>) => {
       void update(input);
     },
     [update],

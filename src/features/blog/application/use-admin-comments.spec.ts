@@ -193,11 +193,11 @@ describe('useAdminComments', () => {
 
       let returned: BlogComment | null = null;
       await act(async () => {
-        returned = await result.current.reply(1, 'Reply content');
+        returned = await result.current.reply({ postId: 1, content: 'Reply content' });
       });
 
       expect(returned).toEqual(replyResult);
-      expect(mockReplyBlogComment).toHaveBeenCalledWith({ commentId: 1, content: 'Reply content' });
+      expect(mockReplyBlogComment).toHaveBeenCalledWith({ postId: 1, content: 'Reply content' });
     });
 
     it('captures reply error and returns null', async () => {
@@ -210,7 +210,7 @@ describe('useAdminComments', () => {
 
       let returned: BlogComment | null = undefined as unknown as BlogComment | null;
       await act(async () => {
-        returned = await result.current.reply(1, 'Reply content');
+        returned = await result.current.reply({ postId: 1, content: 'Reply content' });
       });
 
       expect(returned).toBeNull();
@@ -226,7 +226,7 @@ describe('useAdminComments', () => {
       );
 
       await act(async () => {
-        await result.current.reply(1, 'Reply content');
+        await result.current.reply({ postId: 1, content: 'Reply content' });
       });
 
       expect(result.current.mutationError).toBe('Failed to reply comment');
@@ -497,7 +497,7 @@ describe('useAdminComments', () => {
       );
 
       await act(async () => {
-        await result.current.reply(1, 'Reply');
+        await result.current.reply({ postId: 1, content: 'Reply' });
       });
 
       expect(refetch).toHaveBeenCalledTimes(1);
