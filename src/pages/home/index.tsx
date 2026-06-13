@@ -1,7 +1,7 @@
 // src/pages/home/index.tsx
 
 import { Button, Card, Descriptions, Tag } from 'antd';
-import { useNavigate } from 'react-router';
+import { Link, useNavigate } from 'react-router';
 
 import { useAuth } from '@/features/auth';
 
@@ -37,7 +37,7 @@ export function HomePage() {
         />
         <div className="surface-panel">
           <Card>
-            <p>请先登录以使用工作台</p>
+            <p>请先<Link to="/auth">登录</Link>以使用工作台</p>
           </Card>
         </div>
       </div>

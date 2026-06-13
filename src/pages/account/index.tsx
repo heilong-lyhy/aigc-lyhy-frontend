@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { LogoutOutlined, UserOutlined } from '@ant-design/icons';
 import { Alert, Avatar, Button, Card, Descriptions, Spin } from 'antd';
+import { Link } from 'react-router';
 
 import { useAuth, useFullUserInfo } from '@/features/auth';
 
@@ -23,7 +24,7 @@ export default function AccountPage() {
         <PageHeader description="查看您的账户信息" title="账户" />
         <div className="surface-panel">
           <Card>
-            <p>请先登录以查看账户信息</p>
+            <p>请先<Link to="/auth">登录</Link>以查看账户信息</p>
           </Card>
         </div>
       </div>

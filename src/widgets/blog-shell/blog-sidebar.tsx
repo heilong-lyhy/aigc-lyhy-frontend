@@ -1,14 +1,14 @@
-// src/features/blog/ui/blog-sidebar.tsx
+// src/widgets/blog-shell/blog-sidebar.tsx
 
 import { useCallback } from 'react';
 import { Avatar, Card, Input, Typography } from 'antd';
 import { Link, useNavigate } from 'react-router';
 
+import { CategorySidebar, TagCloud } from '@/features/blog';
+
 import type { BlogCategory, BlogProfile, BlogTag } from '@/entities/blog';
 
 import { BLOG_NAV_ITEMS } from './blog-nav-items';
-import { CategorySidebar } from './category-sidebar';
-import { TagCloud } from './tag-cloud';
 
 const { Search } = Input;
 

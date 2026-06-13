@@ -26,8 +26,6 @@ export { useAdminTags } from './application/use-admin-tags';
 export { usePostEditor } from './application/use-post-editor';
 
 // ── UI 组件 ──
-export { BlogLayout } from './ui/blog-layout';
-export { BlogSidebar } from './ui/blog-sidebar';
 export { CategorySidebar } from './ui/category-sidebar';
 export { CommentForm } from './ui/comment-form';
 export { CommentItem } from './ui/comment-item';

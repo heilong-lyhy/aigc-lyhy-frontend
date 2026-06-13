@@ -4,24 +4,32 @@ import { useCallback, useReducer } from 'react';
 
 import type { BlogComment } from '@/entities/blog';
 
-import { createBlogComment, deleteBlogComment } from '../infrastructure/comments-api';
+import { createBlogComment, createBlogCommentByUser, deleteBlogComment } from '../infrastructure/comments-api';
 
 import { useMutationError } from './use-mutation-error';
+
+type SubmitCommentInput = Readonly<{
+  postId: number;
+  authorName: string;
+  authorEmail: string;
+  content: string;
+  parentId?: number | null;
+  replyToId?: number | null;
+}>;
+
+type SubmitCommentByUserInput = Readonly<{
+  postId: number;
+  content: string;
+  parentId?: number | null;
+  replyToId?: number | null;
+}>;
 
 type UseCommentResult = {
   readonly isSubmitting: boolean;
   readonly isDeleting: boolean;
   readonly error: string | null;
-  readonly submitComment: (
-    input: Readonly<{
-      postId: number;
-      authorName: string;
-      authorEmail: string;
-      content: string;
-      parentId?: number | null;
-      replyToId?: number | null;
-    }>,
-  ) => Promise<BlogComment | null>;
+  readonly submitComment: (input: SubmitCommentInput) => Promise<BlogComment | null>;
+  readonly submitCommentByUser: (input: SubmitCommentByUserInput) => Promise<BlogComment | null>;
   readonly removeComment: (id: number) => Promise<boolean>;
 };
 
@@ -61,20 +69,37 @@ export function useComment(): UseCommentResult {
   const { mutationError: error, clearMutationError, setMutationError } = useMutationError();
 
   const submitComment = useCallback(
-    async (
-      input: Readonly<{
-        postId: number;
-        authorName: string;
-        authorEmail: string;
-        content: string;
-        parentId?: number | null;
-        replyToId?: number | null;
-      }>,
-    ): Promise<BlogComment | null> => {
+    async (input: SubmitCommentInput): Promise<BlogComment | null> => {
       clearMutationError();
       dispatch({ type: 'SUBMIT_START' });
       try {
-        const result = await createBlogComment(input);
+        const result = await createBlogComment({
+          ...input,
+          parentId: input.parentId ?? undefined,
+          replyToId: input.replyToId ?? undefined,
+        });
+        dispatch({ type: 'SUBMIT_SUCCESS' });
+        return result;
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Failed to submit comment';
+        setMutationError(message);
+        dispatch({ type: 'SUBMIT_SUCCESS' });
+        return null;
+      }
+    },
+    [clearMutationError, setMutationError],
+  );
+
+  const submitCommentByUser = useCallback(
+    async (input: SubmitCommentByUserInput): Promise<BlogComment | null> => {
+      clearMutationError();
+      dispatch({ type: 'SUBMIT_START' });
+      try {
+        const result = await createBlogCommentByUser({
+          ...input,
+          parentId: input.parentId ?? undefined,
+          replyToId: input.replyToId ?? undefined,
+        });
         dispatch({ type: 'SUBMIT_SUCCESS' });
         return result;
       } catch (err) {
@@ -107,6 +132,7 @@ export function useComment(): UseCommentResult {
     isDeleting: state.isDeleting,
     error,
     submitComment,
+    submitCommentByUser,
     removeComment,
   };
 }

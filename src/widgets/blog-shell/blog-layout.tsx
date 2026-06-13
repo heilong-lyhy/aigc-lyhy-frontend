@@ -1,4 +1,4 @@
-// src/features/blog/ui/blog-layout.tsx
+// src/widgets/blog-shell/blog-layout.tsx
 
 import { Avatar, Typography } from 'antd';
 import type { ReactNode } from 'react';

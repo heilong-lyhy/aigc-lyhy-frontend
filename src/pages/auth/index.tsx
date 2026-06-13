@@ -14,7 +14,11 @@ type LoginFormValues = {
   audience: AudienceType;
 };
 
-function LoginTab() {
+type AuthPageProps = {
+  readonly defaultTab?: string;
+};
+
+function LoginTab({ registrationSuccess }: { readonly registrationSuccess?: boolean }) {
   const [form] = Form.useForm<LoginFormValues>();
   const { login, isLoading } = useAuth();
   const navigate = useNavigate();
@@ -44,6 +48,16 @@ function LoginTab() {
       onFinish={handleSubmit}
       size="large"
     >
+      {registrationSuccess && (
+        <div className="mb-6">
+          <Alert
+            message="注册成功，请登录"
+            showIcon
+            type="success"
+          />
+        </div>
+      )}
+
       {errorMessage && (
         <div className="mb-6">
           <Alert
@@ -90,10 +104,9 @@ function LoginTab() {
   );
 }
 
-function RegisterTab() {
+function RegisterTab({ onRegisterSuccess }: { readonly onRegisterSuccess: () => void }) {
   const [form] = Form.useForm();
   const { register, isLoading } = useAuth();
-  const navigate = useNavigate();
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const handleSubmit = async (values: { email: string; password: string; nickname: string }) => {
@@ -109,7 +122,7 @@ function RegisterTab() {
       });
 
       if (result.success) {
-        navigate('/auth');
+        onRegisterSuccess();
       } else {
         setErrorMessage(result.message || '注册失败');
       }
@@ -178,7 +191,15 @@ function RegisterTab() {
   );
 }
 
-export default function AuthPage() {
+export default function AuthPage({ defaultTab = 'login' }: AuthPageProps) {
+  const [activeTab, setActiveTab] = useState(defaultTab);
+  const [registrationSuccess, setRegistrationSuccess] = useState(false);
+
+  const handleRegisterSuccess = () => {
+    setRegistrationSuccess(true);
+    setActiveTab('login');
+  };
+
   return (
     <div className="page-stack">
       <PageHeader
@@ -189,19 +210,20 @@ export default function AuthPage() {
       <div className="surface-panel">
         <Card>
           <Tabs
-            defaultActiveKey="login"
+            activeKey={activeTab}
             items={[
               {
                 key: 'login',
                 label: '登录',
-                children: <LoginTab />,
+                children: <LoginTab registrationSuccess={registrationSuccess} />,
               },
               {
                 key: 'register',
                 label: '注册',
-                children: <RegisterTab />,
+                children: <RegisterTab onRegisterSuccess={handleRegisterSuccess} />,
               },
             ]}
+            onChange={setActiveTab}
           />
         </Card>
       </div>

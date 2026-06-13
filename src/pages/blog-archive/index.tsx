@@ -4,8 +4,8 @@ import { useCallback, useMemo } from 'react';
 import { Collapse, Tag, Typography } from 'antd';
 import { useNavigate } from 'react-router';
 
+import { BlogSidebar } from '@/widgets/blog-shell';
 import {
-  BlogSidebar,
   EmptyState,
   ErrorState,
   LoadingSkeleton,

@@ -2,8 +2,8 @@
 
 import { Avatar, Card, Empty, Typography } from 'antd';
 
+import { BlogLayout } from '@/widgets/blog-shell';
 import {
-  BlogLayout,
   ErrorState,
   LoadingSkeleton,
   useBlogFriendLinks,
@@ -42,7 +42,7 @@ function FriendLinkCard({ link }: FriendLinkCardProps) {
               {link.name}
             </Text>
             {link.description && (
-              <Text style={{ fontSize: 12 }} type="secondary">
+              <Text className="text-xs" type="secondary">
                 {link.description}
               </Text>
             )}

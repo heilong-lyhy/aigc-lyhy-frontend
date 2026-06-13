@@ -65,7 +65,12 @@ import {
 import { canAccessGame2048Lab, Game2048LabPage } from '@/labs/game-2048';
 import { canAccessSandboxPlayground, SandboxPlaygroundPage } from '@/sandbox/playground';
 
+// ── Admin 页面组件 ──
+// 这些组件依赖 labs/blog-admin，按依赖规则只能挂在 app/router 下。
+// 页面内容逻辑已拆分到独立函数，router 只负责"挂起来"。
+
 const USE_MOCK_FALLBACK = false;
+const DEFAULT_PAGE_SIZE = 10;
 
 function AdminDashboardPage() {
   const { data, isLoading, error } = useBlogDashboard({
@@ -87,8 +92,6 @@ function AdminDashboardPage() {
 
   return <DashboardPage data={data} tagCount={tags.length} />;
 }
-
-const DEFAULT_PAGE_SIZE = 10;
 
 function AdminPostListPage() {
   const navigate = useNavigate();
@@ -176,7 +179,6 @@ function AdminPostEditorPage() {
 
   const { upload: uploadFile } = useAdminFiles({ autoLoad: false });
 
-  // Load existing post or draft when id changes
   useEffect(() => {
     if (id) {
       loadById(Number(id))
@@ -210,7 +212,6 @@ function AdminPostEditorPage() {
     }
   }, [id, loadById, load, resetEditor]);
 
-  // Auto-save on content change (debounced)
   useEffect(() => {
     if (!isDirty) return;
 
@@ -333,7 +334,6 @@ function AdminCommentManagerPage() {
     void updateStatus(Number(id), 'rejected');
   }, [updateStatus]);
 
-  // 当前 BlogCommentStatus 无 'spam' 状态，标记垃圾暂映射为 rejected
   const handleMarkSpam = handleReject;
 
   const handleDelete = useCallback((id: string) => {
@@ -603,6 +603,8 @@ function AdminPostTrashPage() {
   );
 }
 
+// ── 路由错误边界 ──
+
 function RouteErrorPage() {
   const error = useRouteError();
 
@@ -631,6 +633,8 @@ function RouteErrorBoundary() {
   );
 }
 
+// ── Lab / Sandbox 访问控制 ──
+
 function game2048LabLoader() {
   if (!canAccessGame2048Lab(getAppEnv())) {
     throw redirect('/');
@@ -654,6 +658,8 @@ function sandboxPlaygroundLoader() {
 
   return null;
 }
+
+// ── 路由表 ──
 
 const router = createBrowserRouter([
   {

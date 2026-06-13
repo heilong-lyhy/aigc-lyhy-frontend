@@ -3,8 +3,8 @@
 import { useCallback, useState } from 'react';
 import { useNavigate } from 'react-router';
 
+import { BlogSidebar } from '@/widgets/blog-shell';
 import {
-  BlogSidebar,
   PostList,
   useBlogCategories,
   useBlogFilter,

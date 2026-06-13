@@ -115,6 +115,13 @@ const CREATE_COMMENT_MUTATION = `
   ${COMMENT_FRAGMENT}
 `;
 
+const CREATE_COMMENT_BY_USER_MUTATION = `
+  mutation CreateBlogCommentByUser($input: CreateBlogCommentByUserInput!) {
+    createBlogCommentByUser(input: $input) { ...CommentFields }
+  }
+  ${COMMENT_FRAGMENT}
+`;
+
 const UPDATE_COMMENT_STATUS_MUTATION = `
   mutation UpdateBlogCommentStatus($input: UpdateBlogCommentStatusInput!) {
     updateBlogCommentStatus(input: $input) { ...CommentFields }
@@ -215,6 +222,24 @@ export async function createBlogComment(
   );
 
   return mapBlogComment(data.createBlogComment);
+}
+
+/** 已登录用户创建评论（后端从 JWT 获取 authorName/authorEmail） */
+export async function createBlogCommentByUser(
+  input: Readonly<{
+    postId: number;
+    content: string;
+    parentId?: number | null;
+    replyToId?: number | null;
+  }>,
+): Promise<BlogComment> {
+  const data = await executeGraphQL<{ createBlogCommentByUser: BlogCommentDTO }, Record<string, unknown>>(
+    CREATE_COMMENT_BY_USER_MUTATION,
+    { input },
+    { authMode: 'required' },
+  );
+
+  return mapBlogComment(data.createBlogCommentByUser);
 }
 
 /** 管理端：更新评论审核状态 */

@@ -2,7 +2,8 @@
 
 import { Avatar, Card, Typography } from 'antd';
 
-import { BlogLayout, ErrorState, LoadingSkeleton, useBlogProfile } from '@/features/blog';
+import { BlogLayout } from '@/widgets/blog-shell';
+import { ErrorState, LoadingSkeleton, useBlogProfile } from '@/features/blog';
 
 import { PageHeader } from '@/shared/ui';
 

@@ -3,8 +3,8 @@
 import { useCallback, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router';
 
+import { BlogSidebar } from '@/widgets/blog-shell';
 import {
-  BlogSidebar,
   EmptyState,
   ErrorState,
   LoadingSkeleton,

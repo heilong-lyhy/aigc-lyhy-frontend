@@ -3,6 +3,7 @@
 import { useCallback, useState } from 'react';
 import { useParams } from 'react-router';
 
+import { useAuth } from '@/features/auth';
 import type { TocItem } from '@/features/blog';
 import {
   CommentForm,
@@ -30,6 +31,7 @@ const COMMENTS_PAGINATION: PaginationInput = { page: 1, pageSize: 20 };
 
 export function BlogPostPage() {
   const { slug } = useParams<{ slug: string }>();
+  const { isAuthenticated } = useAuth();
   const [tocItems, setTocItems] = useState<readonly TocItem[]>([]);
   const [replyTarget, setReplyTarget] = useState<BlogComment | null>(null);
 
@@ -111,6 +113,7 @@ export function BlogPostPage() {
 
             {replyTarget && (
               <ReplyForm
+                isAuthenticated={isAuthenticated}
                 onCancel={handleReplyCancel}
                 onSuccess={handleReplySuccess}
                 parentComment={replyTarget}
@@ -118,7 +121,7 @@ export function BlogPostPage() {
               />
             )}
 
-            <CommentForm onSuccess={handleCommentSuccess} postId={post.id} />
+            <CommentForm isAuthenticated={isAuthenticated} onSuccess={handleCommentSuccess} postId={post.id} />
           </main>
 
           <aside className="hidden lg:block">
