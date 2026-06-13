@@ -17,7 +17,7 @@
 |------|------|--------|------|
 | 1.1 标签页可见性与权限控制 | 已完成 | 无 | 已实现导航鉴权上下文，Blog/Errors/Account/Lab/Workspace 未登录可见 |
 | 1.2 Blog Admin 仅 ADMIN 可见 | 已完成 | 无 | 导航项需登录+ADMIN角色才显示 |
-| 1.3 Blog 评论登录态改造 | 待执行 | 后端 2.1 | |
+| 1.3 Blog 评论登录态改造 | 已完成 | 无 | 移除昵称/邮箱输入框，新增 createBlogCommentByUser mutation，未登录点击弹出登录提示 Modal |
 | 1.4 关闭 Throttler 限流 | 已完成 | 无 | 后端已处理 |
 | 1.5 Blog 博主固定为 mahiru | 已完成 | 无 | 当前实现已满足，无需改动 |
 | 2.1 Admin 侧边栏高亮不跟随 | 已完成 | 无 | 修复 selectedKey 逻辑：/admin 精确匹配 dashboard，其余排除 dashboard 防止 /admin/ 前缀误匹配 |
