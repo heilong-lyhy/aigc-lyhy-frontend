@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { EditOutlined, EyeOutlined, PictureOutlined, SaveOutlined, SplitCellsOutlined } from '@ant-design/icons';
-import { Button, Image, Input, message, Segmented, Select, Space, Spin, Typography, Upload } from 'antd';
+import { Button, Image, Input, message, Segmented, Select, Space, Spin, Switch, Typography, Upload } from 'antd';
 import type { ComponentType } from 'react';
 
 import type { BlogCategory, BlogTag, PostEditorForm } from '@/entities/blog';
@@ -27,6 +27,7 @@ const LABEL_EXCERPT_PLACEHOLDER = '文章摘要';
 const LABEL_CONTENT = '正文（Markdown）';
 const LABEL_CONTENT_PLACEHOLDER = 'Markdown content';
 const LABEL_STATUS = '状态';
+const LABEL_PINNED = '置顶';
 const LABEL_CATEGORY = '分类';
 const LABEL_CATEGORY_PLACEHOLDER = '选择分类';
 const LABEL_TAGS = '标签';
@@ -75,6 +76,7 @@ type PostEditorProps = {
   readonly onCategoryIdChange: (value: string) => void;
   readonly onTagsChange: (values: readonly string[]) => void;
   readonly onStatusChange: (value: PostEditorForm['status']) => void;
+  readonly onIsPinnedChange: (value: boolean) => void;
   readonly onSave: () => void;
   readonly onBack: () => void;
 };
@@ -97,6 +99,7 @@ export function PostEditor({
   onCategoryIdChange,
   onTagsChange,
   onStatusChange,
+  onIsPinnedChange,
   onSave,
   onBack,
 }: PostEditorProps) {
@@ -254,6 +257,10 @@ export function PostEditor({
                 options={STATUS_OPTIONS.map((o) => ({ label: o.label, value: o.value }))}
               />
             </div>
+          </div>
+          <div className="flex items-center justify-between">
+            <label className="text-text-secondary text-sm">{LABEL_PINNED}</label>
+            <Switch checked={form.isPinned} onChange={onIsPinnedChange} />
           </div>
           <div>
             <label className="mb-1 block text-text-secondary text-sm" htmlFor="post-category">{LABEL_CATEGORY}</label>

@@ -133,6 +133,7 @@ export interface PostEditorForm {
   readonly categoryId: string;
   readonly tags: readonly string[];
   readonly status: BlogPostStatus;
+  readonly isPinned: boolean;
 }
 
 /** 博客友链（与后端 BlogFriendLinkObjectType 对齐） */

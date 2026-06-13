@@ -191,6 +191,7 @@ function AdminPostEditorPage() {
               categoryId: post.categoryId != null ? String(post.categoryId) : '',
               tags: post.tags.map((t) => t.id),
               status: post.status,
+              isPinned: post.isPinned,
             });
           }
         })
@@ -248,6 +249,7 @@ function AdminPostEditorPage() {
           categoryId,
           tags: form.tags,
           status: form.status,
+          isPinned: form.isPinned,
         });
         if (result) {
           clear();
@@ -266,6 +268,7 @@ function AdminPostEditorPage() {
           categoryId,
           tags: form.tags,
           status: form.status,
+          isPinned: form.isPinned,
         });
         if (result) {
           clear();
@@ -305,6 +308,7 @@ function AdminPostEditorPage() {
       onSave={handleSave}
       onSlugChange={editorSetters.setSlug}
       onStatusChange={editorSetters.setStatus}
+      onIsPinnedChange={editorSetters.setIsPinned}
       onTagsChange={editorSetters.setTags}
       onTitleChange={editorSetters.setTitle}
     />

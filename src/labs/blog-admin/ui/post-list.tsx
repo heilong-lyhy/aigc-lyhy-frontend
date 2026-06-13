@@ -15,6 +15,7 @@ const { Title } = Typography;
 const LABEL_PAGE_TITLE = '文章管理';
 const LABEL_CREATE = '新建文章';
 const LABEL_COL_TITLE = '标题';
+const LABEL_PINNED = '置顶';
 const LABEL_COL_STATUS = '状态';
 const LABEL_COL_CATEGORY = '分类';
 const LABEL_COL_DATE = '日期';
@@ -78,6 +79,12 @@ export function PostList({
       dataIndex: 'title',
       key: 'title',
       ellipsis: true,
+      render: (title: string, record) => (
+        <span>
+          {title}
+          {record.isPinned && <span className="ml-1"><Tag color="blue">{LABEL_PINNED}</Tag></span>}
+        </span>
+      ),
     },
     {
       title: LABEL_COL_STATUS,

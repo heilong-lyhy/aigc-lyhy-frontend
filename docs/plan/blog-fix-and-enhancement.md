@@ -24,10 +24,10 @@
 | 2.2 标签选择框过窄 | 已完成 | 无 | 标签 Select 添加 popupMatchSelectWidth={false} 和 style={{ minWidth: '100%' }} |
 | 2.3 文件上传不生效 | 已完成 | 无 | uploadBlogFile 改用原生 fetch + FormData 发送 multipart 请求，绕过 Apollo Client |
 | 2.4 操作列"移入回收站"超出边框 | 已完成 | 无 | 操作列改为 Dropdown 菜单 + Modal.confirm 确认删除 |
-| 3.1 文章置顶开关 | 待执行 | 无 | 后端已支持 isPinned |
-| 3.2 搜索入口可见性 | 待执行 | 无 | BlogLayout 已有搜索导航 |
-| 3.3 时间归档入口可见性 | 待执行 | 无 | BlogLayout 已有归档导航 |
-| 3.4 关于我/友链页面入口 | 待执行 | 无 | BlogLayout 已有导航 |
+| 3.1 文章置顶开关 | 已完成 | 无 | PostEditorForm 添加 isPinned，编辑器添加 Switch，列表显示置顶标签，create/update 传递 isPinned |
+| 3.2 搜索入口可见性 | 已完成 | 无 | BlogSidebar 添加搜索框 Card，输入关键词跳转 /blog/search?q=xxx |
+| 3.3 时间归档入口可见性 | 已完成 | 无 | BlogSidebar 快捷导航卡片添加归档链接 |
+| 3.4 关于我/友链页面入口 | 已完成 | 无 | BlogSidebar 快捷导航卡片添加友链和关于链接 |
 
 ---
 

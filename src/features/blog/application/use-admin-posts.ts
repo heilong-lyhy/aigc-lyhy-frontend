@@ -43,6 +43,7 @@ type UseAdminPostsResult = {
       categoryId?: number;
       tags?: readonly string[];
       status?: BlogPostStatus;
+      isPinned?: boolean;
     }>,
   ) => Promise<BlogPostDetail | null>;
   readonly update: (
@@ -98,6 +99,7 @@ export function useAdminPosts(options: UseAdminPostsOptions): UseAdminPostsResul
         categoryId?: number;
         tags?: readonly string[];
         status?: BlogPostStatus;
+        isPinned?: boolean;
       }>,
     ): Promise<BlogPostDetail | null> => {
       clearMutationError();

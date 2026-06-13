@@ -12,6 +12,7 @@ describe('usePostEditor', () => {
 
     expect(result.current.form.title).toBe('');
     expect(result.current.form.status).toBe('draft');
+    expect(result.current.form.isPinned).toBe(false);
     expect(result.current.form.tags).toEqual([]);
     expect(result.current.isDirty).toBe(false);
     expect(result.current.lastSavedAt).toBeNull();
@@ -49,6 +50,7 @@ describe('usePostEditor', () => {
     act(() => result.current.setCategoryId('cat-1'));
     act(() => result.current.setTags(['tag-1']));
     act(() => result.current.setStatus('published'));
+    act(() => result.current.setIsPinned(true));
 
     expect(result.current.form.slug).toBe('new-slug');
     expect(result.current.form.excerpt).toBe('New excerpt');
@@ -57,6 +59,7 @@ describe('usePostEditor', () => {
     expect(result.current.form.categoryId).toBe('cat-1');
     expect(result.current.form.tags).toEqual(['tag-1']);
     expect(result.current.form.status).toBe('published');
+    expect(result.current.form.isPinned).toBe(true);
   });
 
   it('markSaved updates lastSavedAt', () => {

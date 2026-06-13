@@ -21,6 +21,7 @@ type UsePostEditorResult = {
   readonly setCategoryId: (value: string) => void;
   readonly setTags: (value: readonly string[]) => void;
   readonly setStatus: (value: BlogPostStatus) => void;
+  readonly setIsPinned: (value: boolean) => void;
   readonly markSaved: () => void;
   readonly reset: (values?: Partial<PostEditorForm>, savedAt?: string | null) => void;
 };
@@ -34,6 +35,7 @@ const DEFAULT_FORM: PostEditorForm = {
   categoryId: '',
   tags: [],
   status: 'draft',
+  isPinned: false,
 };
 
 export function usePostEditor(options: UsePostEditorOptions = {}): UsePostEditorResult {
@@ -59,6 +61,7 @@ export function usePostEditor(options: UsePostEditorOptions = {}): UsePostEditor
   const setCategoryId = useCallback((value: string) => updateField('categoryId', value), [updateField]);
   const setTags = useCallback((value: readonly string[]) => updateField('tags', value), [updateField]);
   const setStatus = useCallback((value: BlogPostStatus) => updateField('status', value), [updateField]);
+  const setIsPinned = useCallback((value: boolean) => updateField('isPinned', value), [updateField]);
 
   const markSaved = useCallback(() => {
     setLastSavedAt(new Date().toISOString());
@@ -84,6 +87,7 @@ export function usePostEditor(options: UsePostEditorOptions = {}): UsePostEditor
     setCategoryId,
     setTags,
     setStatus,
+    setIsPinned,
     markSaved,
     reset,
   };
