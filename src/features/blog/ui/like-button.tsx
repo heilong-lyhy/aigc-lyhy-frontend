@@ -21,13 +21,13 @@ export function LikeButton({
   initialLikeCount = 0,
   size = 'middle',
 }: LikeButtonProps) {
-  const { liked, isLoading, mutationError, toggle } = useLike({
+  const { liked, isLoading, mutationError, likeCountDelta, toggle } = useLike({
     postId,
     userIdentifier,
     autoCheck: postId > 0,
   });
 
-  const displayCount = initialLikeCount + (liked ? 1 : 0);
+  const displayCount = initialLikeCount + likeCountDelta;
 
   return (
     <Tooltip title={mutationError}>

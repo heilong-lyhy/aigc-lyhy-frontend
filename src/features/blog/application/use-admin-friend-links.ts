@@ -4,6 +4,8 @@ import { useCallback } from 'react';
 
 import type { BlogFriendLink } from '@/entities/blog';
 
+import { useMutationError } from '@/shared/hooks';
+
 import {
   createBlogFriendLink,
   deleteBlogFriendLink,
@@ -11,7 +13,6 @@ import {
 } from '../infrastructure/friend-links-api';
 
 import { useBlogFriendLinks } from './use-blog-friend-links';
-import { useMutationError } from './use-mutation-error';
 
 type CreateFriendLinkInput = Readonly<{
   name: string;

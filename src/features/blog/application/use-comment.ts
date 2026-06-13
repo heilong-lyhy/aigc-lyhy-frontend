@@ -4,9 +4,9 @@ import { useCallback, useReducer } from 'react';
 
 import type { BlogComment } from '@/entities/blog';
 
-import { createBlogComment, createBlogCommentByUser, deleteBlogComment } from '../infrastructure/comments-api';
+import { useMutationError } from '@/shared/hooks';
 
-import { useMutationError } from './use-mutation-error';
+import { createBlogComment, createBlogCommentByUser, deleteBlogComment } from '../infrastructure/comments-api';
 
 type SubmitCommentInput = Readonly<{
   postId: number;

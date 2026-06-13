@@ -25,7 +25,7 @@ import { BlogSearchPage } from '@/pages/blog-search';
 import { ErrorPreviewPage } from '@/pages/error-preview';
 import { HomePage } from '@/pages/home';
 import { ProjectStructurePage } from '@/pages/project-structure';
-import { changePassword } from '@/features/auth';
+import { useChangePassword } from '@/features/auth';
 import {
   MarkdownRenderer,
   useAdminCategories,
@@ -133,6 +133,13 @@ function AdminPostListPage() {
     [update],
   );
 
+  const handleTogglePin = useCallback(
+    async (id: string, isPinned: boolean) => {
+      await update({ id: Number(id), isPinned });
+    },
+    [update],
+  );
+
   return (
     <PostList
       categories={categories}
@@ -147,6 +154,7 @@ function AdminPostListPage() {
       onFilterStatusChange={setFilterStatus}
       onPaginationChange={setPagination}
       onTogglePublish={handleTogglePublish}
+      onTogglePin={handleTogglePin}
     />
   );
 }
@@ -538,22 +546,11 @@ function AdminFriendLinkManagerPage() {
 
 function AdminProfileSettingsPage() {
   const { data, isLoading, mutationError, load, update } = useAdminProfile();
+  const { handleChangePassword } = useChangePassword();
 
   useEffect(() => {
     void load();
   }, [load]);
-
-  const handleChangePassword = useCallback(
-    async (currentPassword: string, newPassword: string) => {
-      try {
-        const result = await changePassword(currentPassword, newPassword);
-        return { ok: result.success, message: result.message ?? undefined };
-      } catch {
-        return { ok: false, message: '密码修改失败' };
-      }
-    },
-    [],
-  );
 
   return (
     <ProfileSettings

@@ -1,4 +1,4 @@
-// src/features/blog/ui/use-login-prompt.ts
+// src/features/blog/application/use-login-prompt.ts
 
 import { useCallback, useState } from 'react';
 import { useNavigate } from 'react-router';

@@ -4,7 +4,7 @@ import { useCallback } from 'react';
 
 import type { BlogTag } from '@/entities/blog';
 
-import { useAsyncQuery } from '@/shared/hooks';
+import { useAsyncQuery, useMutationError } from '@/shared/hooks';
 
 import {
   createBlogTag,
@@ -12,8 +12,6 @@ import {
   fetchBlogTags,
   updateBlogTag,
 } from '../infrastructure/tags-api';
-
-import { useMutationError } from './use-mutation-error';
 
 type UseAdminTagsOptions = {
   readonly autoLoad?: boolean;

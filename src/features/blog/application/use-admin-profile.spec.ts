@@ -12,9 +12,6 @@ vi.mock('../infrastructure/profile-api', () => ({
 
 vi.mock('@/shared/hooks', () => ({
   useAsyncQuery: vi.fn(),
-}));
-
-vi.mock('../lib/use-mutation-error', () => ({
   useMutationError: () => {
     const [mutationError, setMutationErrorState] = React.useState<string | null>(null);
     const setMutationError = vi.fn((message: string) => {

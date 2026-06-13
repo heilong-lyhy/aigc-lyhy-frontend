@@ -104,6 +104,7 @@ export function BlogPostPage() {
             <PostDetailFooter
               liked={likeHook.liked}
               likeCount={post.likeCount}
+              likeCountDelta={likeHook.likeCountDelta}
               onToggleLike={likeHook.toggle}
             />
 

@@ -1,12 +1,26 @@
 // @vitest-environment happy-dom
 // src/features/blog/application/use-comment.spec.ts
 
+import * as React from 'react';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('../infrastructure/comments-api', () => ({
   createBlogComment: vi.fn(),
   deleteBlogComment: vi.fn(),
+}));
+
+vi.mock('@/shared/hooks', () => ({
+  useMutationError: () => {
+    const [mutationError, setMutationErrorState] = React.useState<string | null>(null);
+    const setMutationError = vi.fn((message: string) => {
+      setMutationErrorState(message);
+    });
+    const clearMutationError = vi.fn(() => {
+      setMutationErrorState(null);
+    });
+    return { mutationError, setMutationError, clearMutationError };
+  },
 }));
 
 import type { BlogComment } from '@/entities/blog';

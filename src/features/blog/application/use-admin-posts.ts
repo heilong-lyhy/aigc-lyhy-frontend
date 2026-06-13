@@ -5,7 +5,7 @@ import { useCallback, useMemo } from 'react';
 import type { BlogPost, BlogPostDetail, BlogPostStatus, PaginatedResult, PaginationInput } from '@/entities/blog';
 import { isEmptyPage } from '@/entities/blog';
 
-import { useAsyncQuery } from '@/shared/hooks';
+import { useAsyncQuery, useMutationError } from '@/shared/hooks';
 
 import {
   createBlogPost,
@@ -16,8 +16,6 @@ import {
   restoreBlogPost,
   updateBlogPost,
 } from '../infrastructure/posts-api';
-
-import { useMutationError } from './use-mutation-error';
 
 type UseAdminPostsOptions = {
   readonly pagination: PaginationInput;

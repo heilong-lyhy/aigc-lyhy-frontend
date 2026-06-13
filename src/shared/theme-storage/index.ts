@@ -1,3 +1,5 @@
+// src/shared/theme-storage/index.ts
+
 export type FontScale = 'compact' | 'standard' | 'comfortable';
 
 const STORAGE_KEY_FONT_SCALE = 'font-scale';

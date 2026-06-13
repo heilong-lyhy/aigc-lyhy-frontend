@@ -4,9 +4,9 @@ import { useCallback, useEffect, useReducer } from 'react';
 
 import type { BlogLike } from '@/entities/blog';
 
-import { checkBlogPostLiked, toggleBlogPostLike } from '../infrastructure/likes-api';
+import { useMutationError } from '@/shared/hooks';
 
-import { useMutationError } from './use-mutation-error';
+import { checkBlogPostLiked, toggleBlogPostLike } from '../infrastructure/likes-api';
 
 type UseLikeOptions = {
   readonly postId: number;
@@ -21,6 +21,8 @@ type UseLikeResult = {
   readonly isLoading: boolean;
   readonly error: string | null;
   readonly mutationError: string | null;
+  /** 相对于首次检查时的 likeCount 偏移量：+1 表示新增点赞，-1 表示取消点赞，0 表示无变化 */
+  readonly likeCountDelta: number;
   readonly toggle: () => Promise<void>;
   readonly checkStatus: () => Promise<void>;
 };
@@ -30,6 +32,8 @@ type State = {
   like: BlogLike | null;
   isLoading: boolean;
   error: string | null;
+  /** 首次检查时的 liked 状态，用于计算 likeCountDelta */
+  initialLiked: boolean | null;
 };
 
 type Action =
@@ -44,6 +48,7 @@ const initialState: State = {
   like: null,
   isLoading: false,
   error: null,
+  initialLiked: null,
 };
 
 function reducer(state: State, action: Action): State {
@@ -51,7 +56,12 @@ function reducer(state: State, action: Action): State {
     case 'CHECK_START':
       return { ...state, isLoading: true, error: null };
     case 'CHECK_SUCCESS':
-      return { ...state, liked: action.payload, isLoading: false };
+      return {
+        ...state,
+        liked: action.payload,
+        isLoading: false,
+        initialLiked: state.initialLiked ?? action.payload,
+      };
     case 'TOGGLE_START':
       return { ...state, isLoading: true };
     case 'TOGGLE_SUCCESS':
@@ -59,6 +69,8 @@ function reducer(state: State, action: Action): State {
         liked: action.payload.liked,
         like: action.payload.like,
         isLoading: false,
+        error: null,
+        initialLiked: state.initialLiked ?? !action.payload.liked,
       };
     case 'FETCH_ERROR':
       return { ...state, isLoading: false, error: action.payload };
@@ -105,12 +117,20 @@ export function useLike(options: UseLikeOptions): UseLikeResult {
     }
   }, [enabled, postId, userIdentifier, clearMutationError, setMutationError]);
 
+  // 计算偏移量：当前 liked 与初始 liked 的差异
+  const likeCountDelta = state.initialLiked === null
+    ? 0
+    : (state.liked && !state.initialLiked) ? 1
+      : (!state.liked && state.initialLiked) ? -1
+        : 0;
+
   return {
     liked: state.liked,
     like: state.like,
     isLoading: state.isLoading,
     error: state.error,
     mutationError,
+    likeCountDelta,
     toggle,
     checkStatus,
   };

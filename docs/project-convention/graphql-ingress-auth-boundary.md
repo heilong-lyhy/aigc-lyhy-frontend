@@ -80,4 +80,4 @@ configureGraphQLRuntime({
 - 本站 auth token 只用于访问本站 GraphQL API
 - upstream access token 只作为业务请求参数或 feature-owned adapter 输入
 - upstream access token 不进入 `shared/graphql` 的默认 `Authorization`
-- upstream access 生命周期由 `entities/upstream-access` 承接
+- upstream access 生命周期由 `features/upstream-access` 承接（详见 `upstream-access-frontend-ownership.md`）

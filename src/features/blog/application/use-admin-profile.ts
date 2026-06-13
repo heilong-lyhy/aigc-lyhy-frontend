@@ -4,11 +4,9 @@ import { useCallback } from 'react';
 
 import type { BlogProfile } from '@/entities/blog';
 
-import { useAsyncQuery } from '@/shared/hooks';
+import { useAsyncQuery, useMutationError } from '@/shared/hooks';
 
 import { fetchBlogProfile, updateBlogProfile } from '../infrastructure/profile-api';
-
-import { useMutationError } from './use-mutation-error';
 
 type UseAdminProfileResult = {
   readonly data: BlogProfile | null;

@@ -5,6 +5,7 @@ import { Button, Space, Tooltip } from 'antd';
 
 type PostDetailFooterProps = {
   readonly likeCount: number;
+  readonly likeCountDelta?: number;
   readonly liked: boolean;
   readonly onToggleLike?: () => void;
   readonly onShare?: () => void;
@@ -16,10 +17,13 @@ const LABEL_SHARE = '分享';
 
 export function PostDetailFooter({
   likeCount,
+  likeCountDelta = 0,
   liked,
   onToggleLike,
   onShare,
 }: PostDetailFooterProps) {
+  const displayLikeCount = likeCount + likeCountDelta;
+
   return (
     <footer className="flex items-center justify-between">
       <Space size="middle">
@@ -28,7 +32,7 @@ export function PostDetailFooter({
           type={liked ? 'primary' : 'default'}
           onClick={onToggleLike}
         >
-          {liked ? LABEL_LIKED : LABEL_LIKE} ({likeCount})
+          {liked ? LABEL_LIKED : LABEL_LIKE} ({displayLikeCount})
         </Button>
       </Space>
 

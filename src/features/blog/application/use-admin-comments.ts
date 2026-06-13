@@ -10,7 +10,7 @@ import type {
 } from '@/entities/blog';
 import { isEmptyPage } from '@/entities/blog';
 
-import { useAsyncQuery } from '@/shared/hooks';
+import { useAsyncQuery, useMutationError } from '@/shared/hooks';
 
 import {
   deleteBlogComment,
@@ -20,8 +20,6 @@ import {
   unhideBlogComment,
   updateBlogCommentStatus,
 } from '../infrastructure/comments-api';
-
-import { useMutationError } from './use-mutation-error';
 
 type UseAdminCommentsOptions = {
   readonly postId?: number;

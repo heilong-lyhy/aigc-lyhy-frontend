@@ -1,7 +1,7 @@
 // src/labs/blog-admin/ui/post-list.tsx
 
 import { useMemo } from 'react';
-import { DeleteOutlined, EditOutlined, EllipsisOutlined } from '@ant-design/icons';
+import { DeleteOutlined, EditOutlined, EllipsisOutlined, PushpinFilled, PushpinOutlined } from '@ant-design/icons';
 import { Button, Dropdown, Modal, Select, Table, Tag, Typography } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 
@@ -20,6 +20,8 @@ const LABEL_COL_STATUS = '状态';
 const LABEL_COL_CATEGORY = '分类';
 const LABEL_COL_DATE = '日期';
 const LABEL_COL_ACTIONS = '操作';
+const LABEL_PIN = '置顶';
+const LABEL_UNPIN = '取消置顶';
 const LABEL_EDIT = '编辑';
 const LABEL_UNPUBLISH = '取消发布';
 const LABEL_PUBLISH = '发布';
@@ -41,6 +43,7 @@ type PostListProps = {
   readonly onEdit: (id: string) => void;
   readonly onDelete: (id: string) => void;
   readonly onTogglePublish: (id: string, status: BlogPostStatus) => void;
+  readonly onTogglePin: (id: string, isPinned: boolean) => void;
 };
 
 const STATUS_COLOR_MAP: Readonly<Record<BlogPostStatus, string>> = {
@@ -68,6 +71,7 @@ export function PostList({
   onEdit,
   onDelete,
   onTogglePublish,
+  onTogglePin,
 }: PostListProps) {
   const items = data?.items ?? [];
   const total = data ? toEffectiveTotal(data.total) : 0;
@@ -124,6 +128,19 @@ export function PostList({
                 label: LABEL_EDIT,
                 onClick: () => onEdit(record.id),
               },
+              record.isPinned
+                ? {
+                    icon: <PushpinFilled />,
+                    key: 'toggle-pin',
+                    label: LABEL_UNPIN,
+                    onClick: () => onTogglePin(record.id, false),
+                  }
+                : {
+                    icon: <PushpinOutlined />,
+                    key: 'toggle-pin',
+                    label: LABEL_PIN,
+                    onClick: () => onTogglePin(record.id, true),
+                  },
               record.status === 'published'
                 ? {
                     key: 'toggle-publish',
@@ -156,7 +173,7 @@ export function PostList({
         </Dropdown>
       ),
     },
-  ], [categories, onEdit, onDelete, onTogglePublish]);
+  ], [categories, onEdit, onDelete, onTogglePublish, onTogglePin]);
 
   return (
     <div className="flex flex-col gap-4">

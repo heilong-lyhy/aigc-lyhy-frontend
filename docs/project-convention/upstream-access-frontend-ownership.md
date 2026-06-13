@@ -31,10 +31,12 @@
 
 ## 当前代码归属
 
-- `entities/upstream-access` 是 upstream access token 生命周期的公共入口
-- 它只暴露 port、hook、storage 与 rolling token helper
-- 它不直接定义任何具体 GraphQL operation
-- 它不承接任何具体 upstream 业务 DTO
+- `entities/upstream-access` 已移除（无外部消费方，且结构违反 architecture.md 中 entities 只放 domain 的规则）
+- 当未来需要 upstream access token 生命周期管理时，应在 `features/upstream-access/` 下按 feature 结构创建：
+  - `features/upstream-access/application/` — hook、rolling token helper、错误分类
+  - `features/upstream-access/infrastructure/` — storage adapter
+  - `features/upstream-access/domain/` — 纯类型与纯函数策略
+- 纯类型（如 `UpstreamAccessTokenResult`）可按需在 `entities/upstream-access/` 扁平放置（仅 domain 层内容）
 
 具体业务接口落点：
 
@@ -72,8 +74,8 @@
 
 后续生成 upstream 相关功能时默认遵守：
 
-- 复用 `entities/upstream-access` 管 token 生命周期
-- 不在 entity 内新增具体 upstream 业务接口
+- 在 `features/upstream-access/` 下管理 token 生命周期（application + infrastructure + domain）
+- 纯类型可按需放在 `entities/upstream-access/`（仅 domain 层内容，不含 application/infrastructure）
 - 不新增 payload crypto、接口载荷加解密或私有调试工具
 - 具体接口先找拥有者，放在 feature/lab/sandbox 自己的 infrastructure 内
-- 若后端新增不同 token contract，只在 `entities/upstream-access` 扩展通用生命周期，不把具体业务接口带进来
+- 若后端新增不同 token contract，只在 `features/upstream-access/` 扩展通用生命周期，不把具体业务接口带进来

@@ -1,3 +1,5 @@
+// src/features/auth/application/auth-context.ts
+
 import { createContext } from 'react';
 
 import type {
@@ -7,7 +9,7 @@ import type {
   RegisterInput,
   RegisterResult,
   ResetPasswordResult,
-} from './types';
+} from '../types';
 
 type AuthState = {
   isAuthenticated: boolean;

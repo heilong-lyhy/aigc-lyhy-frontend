@@ -1,6 +1,7 @@
 // @vitest-environment happy-dom
 // src/features/blog/application/use-like.spec.ts
 
+import * as React from 'react';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
@@ -13,22 +14,16 @@ vi.mock('../infrastructure/likes-api', () => ({
   toggleBlogPostLike: vi.fn(),
 }));
 
-// eslint-disable-next-line prefer-const
-let mockMutationErrorState = { mutationError: null as string | null };
-
-vi.mock('../lib/use-mutation-error', () => ({
+vi.mock('@/shared/hooks', () => ({
   useMutationError: () => {
+    const [mutationError, setMutationErrorState] = React.useState<string | null>(null);
     const setMutationError = vi.fn((message: string) => {
-      mockMutationErrorState.mutationError = message;
+      setMutationErrorState(message);
     });
     const clearMutationError = vi.fn(() => {
-      mockMutationErrorState.mutationError = null;
+      setMutationErrorState(null);
     });
-    return {
-      mutationError: mockMutationErrorState.mutationError,
-      setMutationError,
-      clearMutationError,
-    };
+    return { mutationError, setMutationError, clearMutationError };
   },
 }));
 
@@ -37,7 +32,6 @@ const mockToggleBlogPostLike = vi.mocked(toggleBlogPostLike);
 
 afterEach(() => {
   vi.clearAllMocks();
-  mockMutationErrorState.mutationError = null;
 });
 
 describe('useLike', () => {

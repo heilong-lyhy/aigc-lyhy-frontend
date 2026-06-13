@@ -12,11 +12,9 @@ import { FONT_SCALE_OPTIONS, useTheme } from '@/app/providers';
 import { APP_THEME_CSS_VAR_KEY } from '@/app/theme';
 
 import { AigcSidecar } from '@/widgets/aigc-sidecar';
-import { useAuth, useFullUserInfo } from '@/features/auth';
+import { useAuth, useFullUserInfo, LoginPrompt } from '@/features/auth';
 
 import type { AssistantRouteCandidate } from '@/entities/assistant-session';
-
-import { LoginPrompt } from '@/shared/ui';
 
 import { EntryAccentGlyph } from './entry-accent-glyph';
 

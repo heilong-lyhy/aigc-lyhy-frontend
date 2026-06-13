@@ -4,7 +4,7 @@ import { useCallback } from 'react';
 
 import type { BlogCategory } from '@/entities/blog';
 
-import { useAsyncQuery } from '@/shared/hooks';
+import { useAsyncQuery, useMutationError } from '@/shared/hooks';
 
 import {
   createBlogCategory,
@@ -12,8 +12,6 @@ import {
   fetchBlogCategoryTree,
   updateBlogCategory,
 } from '../infrastructure/categories-api';
-
-import { useMutationError } from './use-mutation-error';
 
 type UseAdminCategoriesOptions = {
   readonly autoLoad?: boolean;

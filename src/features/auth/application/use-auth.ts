@@ -1,3 +1,5 @@
+// src/features/auth/application/use-auth.ts
+
 import { useContext } from 'react';
 
 import { AuthContext } from './auth-context';

@@ -1,6 +1,7 @@
 // @vitest-environment happy-dom
 // src/features/blog/application/use-admin-friend-links.spec.ts
 
+import * as React from 'react';
 import { act, renderHook } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
@@ -8,6 +9,16 @@ import type { BlogFriendLink } from '@/entities/blog';
 
 vi.mock('@/shared/hooks', () => ({
   useAsyncQuery: vi.fn(),
+  useMutationError: () => {
+    const [mutationError, setMutationErrorState] = React.useState<string | null>(null);
+    const setMutationError = vi.fn((message: string) => {
+      setMutationErrorState(message);
+    });
+    const clearMutationError = vi.fn(() => {
+      setMutationErrorState(null);
+    });
+    return { mutationError, setMutationError, clearMutationError };
+  },
 }));
 
 vi.mock('../infrastructure/friend-links-api', () => ({

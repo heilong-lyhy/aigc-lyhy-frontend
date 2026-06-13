@@ -243,7 +243,7 @@ src/app/layout/
 
 ### 当前最适合试点第二维的部分
 
-- `entities/upstream-access`
+- 未来需要 upstream access token 生命周期管理时，在 `features/upstream-access/` 下按 feature 结构创建（详见 `docs/project-convention/upstream-access-frontend-ownership.md`）
 - 未来若 Sidecar 协作流程出现稳定 use case，可在对应 `features` 中引入第二维，而不是堆在 `app/layout`
 - 当前没有达到第二维阈值的稳定切片时，不为了推进计划而硬拆新 feature
 

@@ -1,6 +1,7 @@
 // @vitest-environment happy-dom
 // src/features/blog/application/use-admin-files.spec.ts
 
+import * as React from 'react';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
@@ -12,6 +13,16 @@ vi.mock('../infrastructure/files-api', () => ({
 
 vi.mock('@/shared/hooks', () => ({
   useAsyncQuery: vi.fn(),
+  useMutationError: () => {
+    const [mutationError, setMutationErrorState] = React.useState<string | null>(null);
+    const setMutationError = vi.fn((message: string) => {
+      setMutationErrorState(message);
+    });
+    const clearMutationError = vi.fn(() => {
+      setMutationErrorState(null);
+    });
+    return { mutationError, setMutationError, clearMutationError };
+  },
 }));
 
 import type { BlogFile } from '@/entities/blog';

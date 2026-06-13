@@ -1,4 +1,4 @@
-// src/features/blog/application/use-mutation-error.ts
+// src/shared/hooks/use-mutation-error.ts
 
 import { useCallback, useReducer } from 'react';
 

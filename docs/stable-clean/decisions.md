@@ -28,18 +28,18 @@
 
 ### 判定
 
-- `upstream access` 作为稳定访问能力进入 `entities/upstream-access`。
+- `upstream access` 的 token 生命周期管理归属 `features/upstream-access`（纯类型可按需在 `entities/upstream-access/` 扁平放置，仅 domain 层内容）。
 - 只保留前端持有 access token、按当前账号绑定存储、登录/刷新由外部 port 注入、滚动 token 持久化和失败恢复这类访问形态。
 - 不保留任何具体 upstream 业务 query/mutation、接口载荷加解密能力或具体业务目录接口。
 
 ### 依据
 
-- access token 生命周期与本地持有规则是稳定业务对象能力，适合放入 `entities`。
+- access token 生命周期与本地持有规则是稳定业务对象能力，适合放入 `features`（含 application + infrastructure + domain）。
 - 具体 upstream 业务接口应由未来拥有者 feature 或 lab 自己承接，不能下沉成通用 entity 默认能力。
 - 接口载荷加解密属于具体协议/业务适配，不是这个极小分支的通用基线。
 
 ### 后续动作
 
-- 未来新增 upstream 功能时，优先复用 `entities/upstream-access` 的 port 和 token 生命周期。
+- 未来新增 upstream 功能时，优先复用 `features/upstream-access` 的 port 和 token 生命周期。
 - 若需要调用具体 upstream 业务接口，应放在拥有它的 `feature/infrastructure` 或对应 `labs/<name>/api.ts` 内。
-- 不得把具体接口再次回填到 `entities/upstream-access`。
+- 不得把具体接口再次回填到 `features/upstream-access`。

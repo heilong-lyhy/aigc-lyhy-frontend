@@ -8,7 +8,7 @@ import {
   readStoredFontScale,
   writeStoredColorScheme,
   writeStoredFontScale,
-} from '@/shared/theme-infrastructure';
+} from '@/shared/theme-storage';
 
 import { FONT_SCALE_CONFIG, type FontScale } from './theme-constants';
 import { ThemeContext } from './use-theme';

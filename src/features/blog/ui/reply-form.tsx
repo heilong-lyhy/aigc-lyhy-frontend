@@ -7,9 +7,9 @@ import type { BlogComment } from '@/entities/blog';
 
 import { stripHtml } from '../application/strip-html';
 import { useComment } from '../application/use-comment';
+import { useLoginPrompt } from '../application/use-login-prompt';
 
 import { CommentFields } from './comment-fields';
-import { useLoginPrompt } from './use-login-prompt';
 
 type ReplyFormProps = {
   readonly postId: string;

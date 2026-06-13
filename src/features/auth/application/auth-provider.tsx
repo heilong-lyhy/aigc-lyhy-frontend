@@ -1,3 +1,5 @@
+// src/features/auth/application/auth-provider.tsx
+
 import {
   type ReactNode,
   useCallback,
@@ -5,9 +7,8 @@ import {
   useState,
 } from 'react';
 
-import { fetchBasicUserInfo, loginWithPassword, registerAccount, resetPassword } from './infrastructure/auth-api';
-import { clearStoredAuthData, getStoredAuthData, storeAuthData } from './infrastructure/auth-storage';
-import { AuthContext } from './auth-context';
+import { fetchBasicUserInfo, loginWithPassword, registerAccount, resetPassword } from '../infrastructure/auth-api';
+import { clearStoredAuthData, getStoredAuthData, storeAuthData } from '../infrastructure/auth-storage';
 import type {
   AuthCredentials,
   BasicUserInfo,
@@ -15,7 +16,9 @@ import type {
   RegisterInput,
   RegisterResult,
   ResetPasswordResult,
-} from './types';
+} from '../types';
+
+import { AuthContext } from './auth-context';
 
 type AuthProviderProps = {
   children: ReactNode;

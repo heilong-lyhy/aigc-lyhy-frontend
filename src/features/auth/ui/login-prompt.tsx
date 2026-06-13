@@ -1,3 +1,5 @@
+// src/features/auth/ui/login-prompt.tsx
+
 import { Link } from 'react-router';
 
 export function LoginPrompt() {

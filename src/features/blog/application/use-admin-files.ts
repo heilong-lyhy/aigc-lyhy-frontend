@@ -4,12 +4,10 @@ import { useCallback, useMemo, useReducer } from 'react';
 
 import type { BlogFile } from '@/entities/blog';
 
-import { useAsyncQuery } from '@/shared/hooks';
+import { useAsyncQuery, useMutationError } from '@/shared/hooks';
 
 import type { BlogFileListResult } from '../infrastructure/files-api';
 import { deleteBlogFile, fetchBlogFiles, uploadBlogFile } from '../infrastructure/files-api';
-
-import { useMutationError } from './use-mutation-error';
 
 type UseAdminFilesOptions = {
   readonly pagination?: { readonly page: number; readonly pageSize: number };

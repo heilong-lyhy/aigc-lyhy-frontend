@@ -1,4 +1,4 @@
-import type { FontScale } from '@/shared/theme-infrastructure';
+import type { FontScale } from '@/shared/theme-storage';
 
 export type { FontScale };
 
