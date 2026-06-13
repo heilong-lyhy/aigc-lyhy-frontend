@@ -5,7 +5,7 @@ import * as React from 'react';
 import { act, renderHook } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-vi.mock('../infrastructure/posts-api', () => ({
+vi.mock('../infrastructure', () => ({
   fetchBlogPosts: vi.fn(),
   createBlogPost: vi.fn(),
   updateBlogPost: vi.fn(),
@@ -40,7 +40,7 @@ import {
   permanentDeleteBlogPost,
   restoreBlogPost,
   updateBlogPost,
-} from '../infrastructure/posts-api';
+} from '../infrastructure';
 
 import { useAdminPosts } from './use-admin-posts';
 

@@ -6,7 +6,7 @@ import type { BlogFriendLink } from '@/entities/blog';
 
 import { useAsyncQuery } from '@/shared/hooks';
 
-import { fetchBlogFriendLinks } from '../infrastructure/friend-links-api';
+import { fetchBlogFriendLinks } from '../infrastructure';
 
 type UseBlogFriendLinksOptions = {
   readonly autoLoad?: boolean;

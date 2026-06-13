@@ -5,7 +5,7 @@ import * as React from 'react';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-vi.mock('../infrastructure/files-api', () => ({
+vi.mock('../infrastructure', () => ({
   fetchBlogFiles: vi.fn(),
   uploadBlogFile: vi.fn(),
   deleteBlogFile: vi.fn(),
@@ -29,7 +29,7 @@ import type { BlogFile } from '@/entities/blog';
 
 import { useAsyncQuery } from '@/shared/hooks';
 
-import { deleteBlogFile, fetchBlogFiles, uploadBlogFile } from '../infrastructure/files-api';
+import { deleteBlogFile, fetchBlogFiles, uploadBlogFile } from '../infrastructure';
 
 import { useAdminFiles } from './use-admin-files';
 

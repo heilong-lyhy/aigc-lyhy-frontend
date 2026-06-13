@@ -5,7 +5,7 @@ import * as React from 'react';
 import { act, renderHook } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-vi.mock('../infrastructure/tags-api', () => ({
+vi.mock('../infrastructure', () => ({
   createBlogTag: vi.fn(),
   updateBlogTag: vi.fn(),
   deleteBlogTag: vi.fn(),
@@ -29,7 +29,7 @@ import type { BlogTag } from '@/entities/blog';
 
 import { useAsyncQuery } from '@/shared/hooks';
 
-import { createBlogTag, deleteBlogTag, updateBlogTag } from '../infrastructure/tags-api';
+import { createBlogTag, deleteBlogTag, updateBlogTag } from '../infrastructure';
 
 import { useAdminTags } from './use-admin-tags';
 

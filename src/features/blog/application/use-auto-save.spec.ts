@@ -4,9 +4,9 @@
 import { act, renderHook } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import type { DraftData } from '../infrastructure/blog-storage';
+import type { DraftData } from '../infrastructure';
 
-vi.mock('../infrastructure/blog-storage', () => ({
+vi.mock('../infrastructure', () => ({
   blogStorage: {
     saveDraft: vi.fn(),
     loadDraft: vi.fn(),
@@ -14,7 +14,7 @@ vi.mock('../infrastructure/blog-storage', () => ({
   },
 }));
 
-import { blogStorage } from '../infrastructure/blog-storage';
+import { blogStorage } from '../infrastructure';
 
 import { useAutoSave } from './use-auto-save';
 

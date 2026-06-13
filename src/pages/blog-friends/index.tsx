@@ -42,9 +42,9 @@ function FriendLinkCard({ link }: FriendLinkCardProps) {
               {link.name}
             </Text>
             {link.description && (
-              <Text className="text-xs" type="secondary">
-                {link.description}
-              </Text>
+              <div className="text-xs">
+                <Text type="secondary">{link.description}</Text>
+              </div>
             )}
           </div>
         </div>

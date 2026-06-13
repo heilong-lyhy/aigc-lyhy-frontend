@@ -11,7 +11,7 @@ import {
   deleteBlogCategory,
   fetchBlogCategoryTree,
   updateBlogCategory,
-} from '../infrastructure/categories-api';
+} from '../infrastructure';
 
 type UseAdminCategoriesOptions = {
   readonly autoLoad?: boolean;

@@ -6,7 +6,7 @@ import type { BlogProfile } from '@/entities/blog';
 
 import { useAsyncQuery } from '@/shared/hooks';
 
-import { fetchBlogProfile } from '../infrastructure/profile-api';
+import { fetchBlogProfile } from '../infrastructure';
 
 type UseBlogProfileOptions = {
   readonly autoLoad?: boolean;

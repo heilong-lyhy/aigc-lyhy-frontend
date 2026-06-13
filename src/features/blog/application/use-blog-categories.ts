@@ -6,7 +6,7 @@ import type { BlogCategory } from '@/entities/blog';
 
 import { useAsyncQuery } from '@/shared/hooks';
 
-import { fetchBlogCategories } from '../infrastructure/categories-api';
+import { fetchBlogCategories } from '../infrastructure';
 
 type UseBlogCategoriesOptions = {
   readonly autoLoad?: boolean;

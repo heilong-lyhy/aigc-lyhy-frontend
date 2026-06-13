@@ -12,7 +12,7 @@ import { FONT_SCALE_OPTIONS, useTheme } from '@/app/providers';
 import { APP_THEME_CSS_VAR_KEY } from '@/app/theme';
 
 import { AigcSidecar } from '@/widgets/aigc-sidecar';
-import { useAuth, useFullUserInfo, LoginPrompt } from '@/features/auth';
+import { LoginPrompt,useAuth, useFullUserInfo } from '@/features/auth';
 
 import type { AssistantRouteCandidate } from '@/entities/assistant-session';
 
@@ -68,11 +68,12 @@ export function AppLayout({ children }: AppLayoutProps = {}) {
   const { data: fullUserInfo } = useFullUserInfo(isAuthenticated ? accountId : null);
 
   // 构建导航鉴权上下文
-  const navigationAuth: NavigationAuthContext | undefined = isAuthenticated && fullUserInfo
-    ? { isAuthenticated: true, accessGroup: fullUserInfo.accessGroup }
-    : isAuthenticated
-      ? { isAuthenticated: true, accessGroup: [] }
-      : undefined;
+  const navigationAuth = useMemo<NavigationAuthContext | undefined>(() => {
+    if (!isAuthenticated) return undefined;
+    return fullUserInfo
+      ? { isAuthenticated: true, accessGroup: fullUserInfo.accessGroup }
+      : { isAuthenticated: true, accessGroup: [] };
+  }, [isAuthenticated, fullUserInfo]);
 
   const navigationItems = useMemo(() => getNavigationItems(undefined, navigationAuth), [navigationAuth]);
   const activeNavigationPath = resolveActiveNavigationPath(location.pathname, navigationItems);

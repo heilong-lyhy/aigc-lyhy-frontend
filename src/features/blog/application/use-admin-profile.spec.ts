@@ -5,7 +5,7 @@ import * as React from 'react';
 import { act, renderHook } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-vi.mock('../infrastructure/profile-api', () => ({
+vi.mock('../infrastructure', () => ({
   fetchBlogProfile: vi.fn(),
   updateBlogProfile: vi.fn(),
 }));
@@ -28,7 +28,7 @@ import type { BlogProfile } from '@/entities/blog';
 
 import { useAsyncQuery } from '@/shared/hooks';
 
-import { fetchBlogProfile, updateBlogProfile } from '../infrastructure/profile-api';
+import { fetchBlogProfile, updateBlogProfile } from '../infrastructure';
 
 import { useAdminProfile } from './use-admin-profile';
 

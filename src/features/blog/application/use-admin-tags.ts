@@ -11,7 +11,7 @@ import {
   deleteBlogTag,
   fetchBlogTags,
   updateBlogTag,
-} from '../infrastructure/tags-api';
+} from '../infrastructure';
 
 type UseAdminTagsOptions = {
   readonly autoLoad?: boolean;

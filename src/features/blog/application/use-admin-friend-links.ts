@@ -10,7 +10,7 @@ import {
   createBlogFriendLink,
   deleteBlogFriendLink,
   updateBlogFriendLink,
-} from '../infrastructure/friend-links-api';
+} from '../infrastructure';
 
 import { useBlogFriendLinks } from './use-blog-friend-links';
 

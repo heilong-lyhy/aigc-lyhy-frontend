@@ -21,7 +21,7 @@ vi.mock('@/shared/hooks', () => ({
   },
 }));
 
-vi.mock('../infrastructure/friend-links-api', () => ({
+vi.mock('../infrastructure', () => ({
   fetchBlogFriendLinks: vi.fn(),
   createBlogFriendLink: vi.fn(),
   updateBlogFriendLink: vi.fn(),
@@ -34,7 +34,7 @@ import {
   createBlogFriendLink,
   deleteBlogFriendLink,
   updateBlogFriendLink,
-} from '../infrastructure/friend-links-api';
+} from '../infrastructure';
 
 import { useAdminFriendLinks } from './use-admin-friend-links';
 

@@ -12,7 +12,7 @@ import { isEmptyPage } from '@/entities/blog';
 
 import { useAsyncQuery } from '@/shared/hooks';
 
-import { fetchBlogCommentsByPost } from '../infrastructure/comments-api';
+import { fetchBlogCommentsByPost } from '../infrastructure';
 
 type UseBlogCommentsOptions = {
   readonly postId: number;

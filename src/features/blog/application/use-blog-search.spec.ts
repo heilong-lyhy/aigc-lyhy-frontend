@@ -6,20 +6,16 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import type { BlogPost, PaginatedResult } from '@/entities/blog';
 
-vi.mock('../infrastructure/blog-storage', () => ({
+vi.mock('../infrastructure', () => ({
   blogStorage: {
     getSearchHistory: vi.fn(() => []),
     addSearchHistory: vi.fn(),
     clearSearchHistory: vi.fn(),
   },
-}));
-
-vi.mock('../infrastructure/posts-api', () => ({
   fetchBlogPublishedPosts: vi.fn(),
 }));
 
-import { blogStorage } from '../infrastructure/blog-storage';
-import { fetchBlogPublishedPosts } from '../infrastructure/posts-api';
+import { blogStorage, fetchBlogPublishedPosts } from '../infrastructure';
 
 import { useBlogSearch } from './use-blog-search';
 

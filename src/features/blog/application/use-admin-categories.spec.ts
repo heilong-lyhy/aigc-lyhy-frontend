@@ -21,7 +21,7 @@ vi.mock('@/shared/hooks', () => ({
   },
 }));
 
-vi.mock('../infrastructure/categories-api', () => ({
+vi.mock('../infrastructure', () => ({
   createBlogCategory: vi.fn(),
   updateBlogCategory: vi.fn(),
   deleteBlogCategory: vi.fn(),
@@ -30,7 +30,7 @@ vi.mock('../infrastructure/categories-api', () => ({
 
 import { useAsyncQuery } from '@/shared/hooks';
 
-import { createBlogCategory, deleteBlogCategory, updateBlogCategory } from '../infrastructure/categories-api';
+import { createBlogCategory, deleteBlogCategory, updateBlogCategory } from '../infrastructure';
 
 import { useAdminCategories } from './use-admin-categories';
 

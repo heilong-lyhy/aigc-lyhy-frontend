@@ -7,8 +7,7 @@ import {
   useState,
 } from 'react';
 
-import { fetchBasicUserInfo, loginWithPassword, registerAccount, resetPassword } from '../infrastructure/auth-api';
-import { clearStoredAuthData, getStoredAuthData, storeAuthData } from '../infrastructure/auth-storage';
+import { clearStoredAuthData, fetchBasicUserInfo, getStoredAuthData, loginWithPassword, registerAccount, resetPassword, storeAuthData } from '../infrastructure';
 import type {
   AuthCredentials,
   BasicUserInfo,

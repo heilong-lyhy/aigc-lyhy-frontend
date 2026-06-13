@@ -6,7 +6,7 @@ import type { BlogPostDetail } from '@/entities/blog';
 
 import { useAsyncQuery } from '@/shared/hooks';
 
-import { fetchBlogPostBySlug } from '../infrastructure/posts-api';
+import { fetchBlogPostBySlug } from '../infrastructure';
 
 type UseBlogPostDetailResult = {
   readonly data: BlogPostDetail | null;

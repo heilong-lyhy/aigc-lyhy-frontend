@@ -6,8 +6,7 @@ import type { BlogFile } from '@/entities/blog';
 
 import { useAsyncQuery, useMutationError } from '@/shared/hooks';
 
-import type { BlogFileListResult } from '../infrastructure/files-api';
-import { deleteBlogFile, fetchBlogFiles, uploadBlogFile } from '../infrastructure/files-api';
+import { type BlogFileListResult,deleteBlogFile, fetchBlogFiles, uploadBlogFile } from '../infrastructure';
 
 type UseAdminFilesOptions = {
   readonly pagination?: { readonly page: number; readonly pageSize: number };

@@ -7,7 +7,7 @@ import { isEmptyPage } from '@/entities/blog';
 
 import { useAsyncQuery } from '@/shared/hooks';
 
-import { fetchBlogPublishedPosts } from '../infrastructure/posts-api';
+import { fetchBlogPublishedPosts } from '../infrastructure';
 
 type UseBlogPostsOptions = {
   readonly pagination: PaginationInput;

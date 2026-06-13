@@ -6,7 +6,7 @@ import type { BlogTag } from '@/entities/blog';
 
 import { useAsyncQuery } from '@/shared/hooks';
 
-import { fetchBlogTags } from '../infrastructure/tags-api';
+import { fetchBlogTags } from '../infrastructure';
 
 type UseBlogTagsOptions = {
   readonly autoLoad?: boolean;

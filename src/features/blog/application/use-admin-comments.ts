@@ -19,7 +19,7 @@ import {
   replyBlogComment,
   unhideBlogComment,
   updateBlogCommentStatus,
-} from '../infrastructure/comments-api';
+} from '../infrastructure';
 
 type UseAdminCommentsOptions = {
   readonly postId?: number;

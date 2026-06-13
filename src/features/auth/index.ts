@@ -1,10 +1,9 @@
 export { AuthProvider } from './application/auth-provider';
 export { getAccessToken } from './application/get-access-token';
 export { useAuth } from './application/use-auth';
-export { useChangePassword } from './application/use-change-password';
 export type { ChangePasswordHandleResult } from './application/use-change-password';
+export { useChangePassword } from './application/use-change-password';
 export { useFullUserInfo } from './application/use-full-user-info';
-export { LoginPrompt } from './ui/login-prompt';
 export type {
   AccountStatus,
   AudienceType,
@@ -22,3 +21,4 @@ export type {
   ResetPasswordResult,
   UserState,
 } from './types';
+export { LoginPrompt } from './ui/login-prompt';

@@ -5,8 +5,9 @@ import * as React from 'react';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-vi.mock('../infrastructure/comments-api', () => ({
+vi.mock('../infrastructure', () => ({
   createBlogComment: vi.fn(),
+  createBlogCommentByUser: vi.fn(),
   deleteBlogComment: vi.fn(),
 }));
 
@@ -25,7 +26,7 @@ vi.mock('@/shared/hooks', () => ({
 
 import type { BlogComment } from '@/entities/blog';
 
-import { createBlogComment, deleteBlogComment } from '../infrastructure/comments-api';
+import { createBlogComment, deleteBlogComment } from '../infrastructure';
 
 import { useComment } from './use-comment';
 

@@ -6,7 +6,7 @@ import type { BlogProfile } from '@/entities/blog';
 
 import { useAsyncQuery, useMutationError } from '@/shared/hooks';
 
-import { fetchBlogProfile, updateBlogProfile } from '../infrastructure/profile-api';
+import { fetchBlogProfile, updateBlogProfile } from '../infrastructure';
 
 type UseAdminProfileResult = {
   readonly data: BlogProfile | null;

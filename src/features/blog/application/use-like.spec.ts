@@ -5,11 +5,11 @@ import * as React from 'react';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { checkBlogPostLiked, toggleBlogPostLike } from '../infrastructure/likes-api';
+import { checkBlogPostLiked, toggleBlogPostLike } from '../infrastructure';
 
 import { useLike } from './use-like';
 
-vi.mock('../infrastructure/likes-api', () => ({
+vi.mock('../infrastructure', () => ({
   checkBlogPostLiked: vi.fn(),
   toggleBlogPostLike: vi.fn(),
 }));

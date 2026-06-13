@@ -4,11 +4,11 @@
 import { renderHook, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
-import { fetchBlogPostBySlug } from '../infrastructure/posts-api';
+import { fetchBlogPostBySlug } from '../infrastructure';
 
 import { useBlogPostDetail } from './use-blog-post-detail';
 
-vi.mock('../infrastructure/posts-api', () => ({
+vi.mock('../infrastructure', () => ({
   fetchBlogPostBySlug: vi.fn(),
 }));
 

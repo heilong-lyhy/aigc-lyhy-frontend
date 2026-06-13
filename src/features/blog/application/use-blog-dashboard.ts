@@ -6,7 +6,7 @@ import type { BlogDashboard } from '@/entities/blog';
 
 import { useAsyncQuery } from '@/shared/hooks';
 
-import { fetchBlogDashboard } from '../infrastructure/dashboard-api';
+import { fetchBlogDashboard } from '../infrastructure';
 
 type UseBlogDashboardOptions = {
   readonly autoLoad?: boolean;

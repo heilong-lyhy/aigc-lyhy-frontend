@@ -6,7 +6,7 @@ import type { BlogComment } from '@/entities/blog';
 
 import { useMutationError } from '@/shared/hooks';
 
-import { createBlogComment, createBlogCommentByUser, deleteBlogComment } from '../infrastructure/comments-api';
+import { createBlogComment, createBlogCommentByUser, deleteBlogComment } from '../infrastructure';
 
 type SubmitCommentInput = Readonly<{
   postId: number;

@@ -5,7 +5,7 @@ import * as React from 'react';
 import { act, renderHook } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-vi.mock('../infrastructure/comments-api', () => ({
+vi.mock('../infrastructure', () => ({
   fetchBlogComments: vi.fn(),
   updateBlogCommentStatus: vi.fn(),
   deleteBlogComment: vi.fn(),
@@ -38,7 +38,7 @@ import {
   replyBlogComment,
   unhideBlogComment,
   updateBlogCommentStatus,
-} from '../infrastructure/comments-api';
+} from '../infrastructure';
 
 import { useAdminComments } from './use-admin-comments';
 

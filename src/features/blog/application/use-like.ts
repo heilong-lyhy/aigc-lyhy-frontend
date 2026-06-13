@@ -6,7 +6,7 @@ import type { BlogLike } from '@/entities/blog';
 
 import { useMutationError } from '@/shared/hooks';
 
-import { checkBlogPostLiked, toggleBlogPostLike } from '../infrastructure/likes-api';
+import { checkBlogPostLiked, toggleBlogPostLike } from '../infrastructure';
 
 type UseLikeOptions = {
   readonly postId: number;

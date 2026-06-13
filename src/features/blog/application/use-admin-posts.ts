@@ -15,7 +15,7 @@ import {
   permanentDeleteBlogPost,
   restoreBlogPost,
   updateBlogPost,
-} from '../infrastructure/posts-api';
+} from '../infrastructure';
 
 type UseAdminPostsOptions = {
   readonly pagination: PaginationInput;

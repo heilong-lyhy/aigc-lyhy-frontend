@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef } from 'react';
 
-import { blogStorage, type DraftData } from '../infrastructure/blog-storage';
+import { blogStorage, type DraftData } from '../infrastructure';
 
 type UseAutoSaveOptions = {
   readonly intervalMs?: number;

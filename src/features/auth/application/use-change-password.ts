@@ -2,7 +2,7 @@
 
 import { useCallback } from 'react';
 
-import { changePassword } from '../infrastructure/auth-api';
+import { changePassword } from '../infrastructure';
 
 export type ChangePasswordHandleResult = {
   ok: boolean;

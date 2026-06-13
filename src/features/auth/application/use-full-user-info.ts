@@ -4,7 +4,7 @@ import { useCallback } from 'react';
 
 import { useAsyncQuery } from '@/shared/hooks';
 
-import { fetchFullUserInfo } from '../infrastructure/auth-api';
+import { fetchFullUserInfo } from '../infrastructure';
 import type { FullUserInfo } from '../types';
 
 type UseFullUserInfoResult = {

@@ -4,8 +4,7 @@ import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
 
 import type { BlogPost, PaginatedResult, PaginationInput } from '@/entities/blog';
 
-import { blogStorage } from '../infrastructure/blog-storage';
-import { fetchBlogPublishedPosts } from '../infrastructure/posts-api';
+import { blogStorage, fetchBlogPublishedPosts } from '../infrastructure';
 
 type UseBlogSearchOptions = {
   readonly pagination: PaginationInput;
