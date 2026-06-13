@@ -20,10 +20,10 @@
 | 1.3 Blog 评论登录态改造 | 待执行 | 后端 2.1 | |
 | 1.4 关闭 Throttler 限流 | 已完成 | 无 | 后端已处理 |
 | 1.5 Blog 博主固定为 mahiru | 已完成 | 无 | 当前实现已满足，无需改动 |
-| 2.1 Admin 侧边栏高亮不跟随 | 待执行 | 无 | |
-| 2.2 标签选择框过窄 | 待执行 | 无 | |
-| 2.3 文件上传不生效 | 待执行 | 无 | Apollo Client 不支持 Upload |
-| 2.4 操作列"移入回收站"超出边框 | 待执行 | 无 | |
+| 2.1 Admin 侧边栏高亮不跟随 | 已完成 | 无 | 修复 selectedKey 逻辑：/admin 精确匹配 dashboard，其余排除 dashboard 防止 /admin/ 前缀误匹配 |
+| 2.2 标签选择框过窄 | 已完成 | 无 | 标签 Select 添加 popupMatchSelectWidth={false} 和 style={{ minWidth: '100%' }} |
+| 2.3 文件上传不生效 | 已完成 | 无 | uploadBlogFile 改用原生 fetch + FormData 发送 multipart 请求，绕过 Apollo Client |
+| 2.4 操作列"移入回收站"超出边框 | 已完成 | 无 | 操作列改为 Dropdown 菜单 + Modal.confirm 确认删除 |
 | 3.1 文章置顶开关 | 待执行 | 无 | 后端已支持 isPinned |
 | 3.2 搜索入口可见性 | 待执行 | 无 | BlogLayout 已有搜索导航 |
 | 3.3 时间归档入口可见性 | 待执行 | 无 | BlogLayout 已有归档导航 |

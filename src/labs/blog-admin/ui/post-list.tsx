@@ -1,8 +1,8 @@
 // src/labs/blog-admin/ui/post-list.tsx
 
 import { useMemo } from 'react';
-import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
-import { Button, Popconfirm, Select, Space, Table, Tag, Typography } from 'antd';
+import { DeleteOutlined, EditOutlined, EllipsisOutlined } from '@ant-design/icons';
+import { Button, Dropdown, Modal, Select, Table, Tag, Typography } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 
 import type { BlogCategory, BlogPost, BlogPostStatus, PaginatedResult, PaginationInput } from '@/entities/blog';
@@ -106,48 +106,47 @@ export function PostList({
     {
       title: LABEL_COL_ACTIONS,
       key: 'actions',
-      width: 200,
+      width: 80,
       render: (_, record) => (
-        <Space size="small">
-          <Button
-            icon={<EditOutlined />}
-            size="small"
-            type="link"
-            onClick={() => onEdit(record.id)}
-          >
-            {LABEL_EDIT}
-          </Button>
-          {record.status === 'published' ? (
-            <Button
-              size="small"
-              type="link"
-              onClick={() => onTogglePublish(record.id, 'draft')}
-            >
-              {LABEL_UNPUBLISH}
-            </Button>
-          ) : (
-            <Button
-              size="small"
-              type="link"
-              onClick={() => onTogglePublish(record.id, 'published')}
-            >
-              {LABEL_PUBLISH}
-            </Button>
-          )}
-          <Popconfirm
-            title={LABEL_CONFIRM_DELETE}
-            onConfirm={() => onDelete(record.id)}
-          >
-            <Button
-              danger
-              icon={<DeleteOutlined />}
-              size="small"
-              type="link"
-            >
-              {LABEL_DELETE}
-            </Button>
-          </Popconfirm>
-        </Space>
+        <Dropdown
+          menu={{
+            items: [
+              {
+                icon: <EditOutlined />,
+                key: 'edit',
+                label: LABEL_EDIT,
+                onClick: () => onEdit(record.id),
+              },
+              record.status === 'published'
+                ? {
+                    key: 'toggle-publish',
+                    label: LABEL_UNPUBLISH,
+                    onClick: () => onTogglePublish(record.id, 'draft'),
+                  }
+                : {
+                    key: 'toggle-publish',
+                    label: LABEL_PUBLISH,
+                    onClick: () => onTogglePublish(record.id, 'published'),
+                  },
+              {
+                danger: true,
+                icon: <DeleteOutlined />,
+                key: 'delete',
+                label: LABEL_DELETE,
+                onClick: () => {
+                  Modal.confirm({
+                    content: LABEL_CONFIRM_DELETE,
+                    okType: 'danger',
+                    onOk: () => onDelete(record.id),
+                  });
+                },
+              },
+            ],
+          }}
+          trigger={['click']}
+        >
+          <Button icon={<EllipsisOutlined />} size="small" type="text" />
+        </Dropdown>
       ),
     },
   ], [categories, onEdit, onDelete, onTogglePublish]);

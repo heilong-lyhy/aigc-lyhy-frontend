@@ -2,7 +2,8 @@
 
 import type { BlogFile } from '@/entities/blog';
 
-import { executeGraphQL } from '@/shared/graphql';
+import { executeGraphQL, getGraphQLRuntimeConfig } from '@/shared/graphql';
+import { getGraphQLEndpoint } from '@/shared/env';
 
 // ── DTO：后端原始响应类型，只允许停留在 infrastructure ──
 
@@ -105,15 +106,45 @@ export async function fetchBlogFiles(
   };
 }
 
-/** 管理端：上传文件 */
+/** 管理端：上传文件（使用原生 fetch + FormData 绕过 Apollo Client，支持 GraphQL Upload） */
 export async function uploadBlogFile(input: Readonly<{ file: File }>): Promise<BlogFile> {
-  const data = await executeGraphQL<{ uploadBlogFile: BlogFileDTO }, Record<string, unknown>>(
-    UPLOAD_FILE_MUTATION,
-    { input },
-    { authMode: 'required' },
-  );
+  const endpoint = getGraphQLEndpoint();
+  const accessToken = getGraphQLRuntimeConfig().getAccessToken?.() ?? null;
 
-  return mapBlogFile(data.uploadBlogFile);
+  const operations = JSON.stringify({
+    query: UPLOAD_FILE_MUTATION.trim(),
+    variables: { input: { file: null } },
+  });
+
+  const map = JSON.stringify({ '0': ['variables.input.file'] });
+
+  const formData = new FormData();
+  formData.append('operations', operations);
+  formData.append('map', map);
+  formData.append('0', input.file);
+
+  const headers: Record<string, string> = {};
+  if (accessToken) {
+    headers['Authorization'] = `Bearer ${accessToken}`;
+  }
+
+  const response = await fetch(endpoint, {
+    body: formData,
+    headers,
+    method: 'POST',
+  });
+
+  if (!response.ok) {
+    throw new Error(`文件上传请求失败：${response.status} ${response.statusText}`);
+  }
+
+  const json = await response.json();
+
+  if (json.errors?.length) {
+    throw new Error(json.errors[0]?.message ?? '文件上传失败');
+  }
+
+  return mapBlogFile(json.data.uploadBlogFile);
 }
 
 /** 管理端：删除文件 */

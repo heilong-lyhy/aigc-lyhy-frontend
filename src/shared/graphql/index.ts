@@ -33,7 +33,7 @@ export {
   ResetPasswordDocument,
   UserInfoDocument,
 } from './__generated__/operations';
-export { configureGraphQLRuntime, getGraphQLClient } from './client';
+export { configureGraphQLRuntime, getGraphQLClient, getGraphQLRuntimeConfig } from './client';
 export type { GraphQLIngressErrorType } from './errors';
 export { GraphQLIngressError, isGraphQLIngressError, toGraphQLIngressError } from './errors';
 export type { GraphQLAuthMode } from './request';

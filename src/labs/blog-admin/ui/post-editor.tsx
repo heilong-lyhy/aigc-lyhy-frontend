@@ -276,6 +276,7 @@ export function PostEditor({
                 allowClear
                 mode="multiple"
                 placeholder={LABEL_TAGS_PLACEHOLDER}
+                popupMatchSelectWidth={false}
                 value={[...form.tags]}
                 onChange={(values) => onTagsChange(values)}
                 options={tags.map((t) => ({ label: t.name, value: t.id }))}

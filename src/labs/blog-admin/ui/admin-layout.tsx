@@ -52,7 +52,16 @@ export function AdminLayout() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const selectedKey = ADMIN_NAV_ITEMS.find((item) => location.pathname === item.path || location.pathname.startsWith(item.path + '/'))?.key ?? 'dashboard';
+  const selectedKey = (() => {
+    const { pathname } = location;
+    // 精确匹配 /admin → dashboard
+    if (pathname === '/admin') return 'dashboard';
+    // 其余路径用 startsWith 匹配（排除 dashboard 的 /admin 前缀误匹配）
+    const item = ADMIN_NAV_ITEMS.find(
+      (nav) => nav.key !== 'dashboard' && (pathname === nav.path || pathname.startsWith(nav.path + '/')),
+    );
+    return item?.key ?? 'dashboard';
+  })();
 
   return (
     <div className="min-h-screen">
