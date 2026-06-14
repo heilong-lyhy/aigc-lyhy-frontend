@@ -19,11 +19,10 @@ import type { AssistantRouteCandidate } from '@/entities/assistant-session';
 import { EntryAccentGlyph } from './entry-accent-glyph';
 
 // 未登录时允许正常展示内容的路径前缀
-// Blog、Errors、Account 页面未登录时可见（Account 页面内部自行处理登录提示）
-// Workspace 未登录时也显示"请先登录"而非自动跳转
-// Labs 未登录时由 AppLayout 统一显示 LoginPrompt，各 lab 页面不再自行依赖 features/auth
-const PUBLIC_PATH_PREFIXES = ['/blog', '/error-preview', '/account'];
-const PUBLIC_PATH_EXACT = ['/'];
+// 仅 Account 和 Blog 对所有用户公开
+// Workspace、Blog Admin、Lab、Sandbox、Errors 仅 ADMIN 可见（由 AdminGuard 处理路由保护）
+const PUBLIC_PATH_PREFIXES = ['/blog', '/account'];
+const PUBLIC_PATH_EXACT: string[] = [];
 
 function isPublicPage(pathname: string): boolean {
   return PUBLIC_PATH_EXACT.includes(pathname) || PUBLIC_PATH_PREFIXES.some((prefix) => pathname.startsWith(prefix));

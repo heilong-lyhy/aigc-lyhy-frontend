@@ -35,7 +35,7 @@ function LoginTab({ registrationSuccess }: { readonly registrationSuccess?: bool
         type: 'PASSWORD',
       });
 
-      navigate('/');
+      navigate('/blog');
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : '登录时发生未知错误');
     }

@@ -27,12 +27,12 @@ export function AdminGuard({ children }: AdminGuardProps) {
     return null;
   }
 
-  // 非管理员 → 跳转首页
+  // 非管理员 → 跳转博客首页
   const hasAdminRole = fullUserInfo.accessGroup.some(
     (role) => role === ADMIN_ROLE,
   );
   if (!hasAdminRole) {
-    return <Navigate replace to="/" />;
+    return <Navigate replace to="/blog" />;
   }
 
   return <>{children}</>;

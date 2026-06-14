@@ -96,7 +96,11 @@ const router = createBrowserRouter([
   {
     children: [
       {
-        element: <HomePage />,
+        element: (
+          <AdminGuard>
+            <HomePage />
+          </AdminGuard>
+        ),
         index: true,
       },
       {
@@ -134,15 +138,27 @@ const router = createBrowserRouter([
         path: 'account',
       },
       {
-        element: <ProjectStructurePage />,
+        element: (
+          <AdminGuard>
+            <ProjectStructurePage />
+          </AdminGuard>
+        ),
         path: 'project-structure',
       },
       {
-        element: <ErrorPreviewPage />,
+        element: (
+          <AdminGuard>
+            <ErrorPreviewPage />
+          </AdminGuard>
+        ),
         path: 'error-preview',
       },
       {
-        element: <Game2048LabPage />,
+        element: (
+          <AdminGuard>
+            <Game2048LabPage />
+          </AdminGuard>
+        ),
         loader: game2048LabLoader,
         path: 'labs/game-2048',
       },
@@ -201,7 +217,11 @@ const router = createBrowserRouter([
         path: 'admin',
       },
       {
-        element: <SandboxPlaygroundPage />,
+        element: (
+          <AdminGuard>
+            <SandboxPlaygroundPage />
+          </AdminGuard>
+        ),
         loader: sandboxPlaygroundLoader,
         path: 'sandbox/playground',
       },
