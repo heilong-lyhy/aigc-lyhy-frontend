@@ -114,24 +114,27 @@ export function ProfileSettings({
   const [isSavingProfile, setIsSavingProfile] = useState(false);
 
   // 跟踪是否已初始化，避免重复填充
-  const initializedProfileId = useRef<string | null>(null);
+  const initializedProfileVersion = useRef<string | null>(null);
 
-  // profile 到达后初始化表单（仅在 profile.id 变化时触发一次）
+  // profile 到达后初始化表单（在 profile.id + updatedAt 变化时触发）
   useEffect(() => {
-    if (profile && profile.id !== initializedProfileId.current) {
-      initializedProfileId.current = profile.id;
-      profileForm.setFieldsValue({
-        nickname: profile.nickname,
-        bio: profile.bio ?? '',
-        avatar: profile.avatarUrl ?? '',
-      });
-      setSocialLinks(
-        Object.entries(profile.socialLinks ?? {}).map(([platform, url]) => ({
-          platform,
-          url,
-          icon: null,
-        })),
-      );
+    if (profile) {
+      const version = `${profile.id}:${profile.updatedAt}`;
+      if (version !== initializedProfileVersion.current) {
+        initializedProfileVersion.current = version;
+        profileForm.setFieldsValue({
+          nickname: profile.nickname,
+          bio: profile.bio ?? '',
+          avatar: profile.avatarUrl ?? '',
+        });
+        setSocialLinks(
+          Object.entries(profile.socialLinks ?? {}).map(([platform, url]) => ({
+            platform,
+            url,
+            icon: null,
+          })),
+        );
+      }
     }
   }, [profile, profileForm]);
 

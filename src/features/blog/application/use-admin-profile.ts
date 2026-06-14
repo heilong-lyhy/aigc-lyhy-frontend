@@ -64,14 +64,16 @@ export function useAdminProfile(): UseAdminProfileResult {
     ): Promise<BlogProfile | null> => {
       clearMutationError();
       try {
-        return await updateBlogProfile(input);
+        const result = await updateBlogProfile(input);
+        await refetch();
+        return result;
       } catch (err) {
         const message = err instanceof Error ? err.message : 'Failed to update profile';
         setMutationError(message);
         return null;
       }
     },
-    [clearMutationError, setMutationError],
+    [clearMutationError, setMutationError, refetch],
   );
 
   return {
