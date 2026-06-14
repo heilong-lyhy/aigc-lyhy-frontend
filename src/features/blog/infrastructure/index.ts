@@ -34,6 +34,7 @@ export {
 export {
   createBlogPost,
   deleteBlogPost,
+  fetchBlogDeletedPosts,
   fetchBlogPostById,
   fetchBlogPostBySlug,
   fetchBlogPosts,
@@ -44,6 +45,12 @@ export {
 } from './posts-api';
 export { fetchBlogProfile, updateBlogProfile } from './profile-api';
 export { createBlogTag, deleteBlogTag, fetchBlogTags, updateBlogTag } from './tags-api';
+export {
+  ALLOWED_COVER_MIME_TYPES,
+  ALLOWED_FILE_MIME_TYPES,
+  MAX_FILE_SIZE_BYTES,
+  MAX_FILE_SIZE_MB,
+} from './upload-constraints';
 export {
   applyFilterParams,
   type BlogFilterParams,

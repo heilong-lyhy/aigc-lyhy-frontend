@@ -5,8 +5,9 @@ import { EditOutlined, EyeOutlined, PictureOutlined, SaveOutlined, SplitCellsOut
 import { Button, Image, Input, message, Segmented, Select, Space, Spin, Switch, Typography, Upload } from 'antd';
 import type { ComponentType } from 'react';
 
+import { ALLOWED_COVER_MIME_TYPES, MAX_FILE_SIZE_BYTES } from '@/features/blog';
+
 import type { BlogCategory, BlogTag, PostEditorForm } from '@/entities/blog';
-import { ALLOWED_COVER_MIME_TYPES, MAX_FILE_SIZE_BYTES } from '@/entities/blog';
 
 import { STATUS_OPTIONS } from './lib/status-options';
 

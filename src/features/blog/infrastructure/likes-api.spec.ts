@@ -19,17 +19,26 @@ describe('likes-api', () => {
   });
 
   describe('toggleBlogPostLike', () => {
-    it('应调用 toggleBlogPostLike mutation', async () => {
+    it('应调用 toggleBlogPostLike mutation（匿名用户 authMode: none）', async () => {
       mockExecute.mockResolvedValueOnce({ toggleBlogPostLike: true });
 
-      const result = await toggleBlogPostLike(1, 'user-abc');
+      const result = await toggleBlogPostLike(1, 'anon:abc');
 
       expect(result.liked).toBe(true);
 
       const [, variables, options] = mockExecute.mock.calls[0];
       expect(variables.postId).toBe(1);
-      expect(variables.userIdentifier).toBe('user-abc');
+      expect(variables.userIdentifier).toBe('anon:abc');
       expect(options?.authMode).toBe('none');
+    });
+
+    it('已登录用户应使用 authMode: required', async () => {
+      mockExecute.mockResolvedValueOnce({ toggleBlogPostLike: true });
+
+      await toggleBlogPostLike(1, 'user:42');
+
+      const [, , options] = mockExecute.mock.calls[0];
+      expect(options?.authMode).toBe('required');
     });
 
     it('取消点赞应返回 liked: false', async () => {
@@ -42,23 +51,32 @@ describe('likes-api', () => {
   });
 
   describe('checkBlogPostLiked', () => {
-    it('应调用 hasLikedBlogPost 查询', async () => {
+    it('应调用 hasLikedBlogPost 查询（匿名用户 authMode: none）', async () => {
       mockExecute.mockResolvedValueOnce({ hasLikedBlogPost: true });
 
-      const result = await checkBlogPostLiked(1, 'user-abc');
+      const result = await checkBlogPostLiked(1, 'anon:abc');
 
       expect(result).toBe(true);
 
       const [, variables, options] = mockExecute.mock.calls[0];
       expect(variables.postId).toBe(1);
-      expect(variables.userIdentifier).toBe('user-abc');
+      expect(variables.userIdentifier).toBe('anon:abc');
       expect(options?.authMode).toBe('none');
+    });
+
+    it('已登录用户应使用 authMode: required', async () => {
+      mockExecute.mockResolvedValueOnce({ hasLikedBlogPost: true });
+
+      await checkBlogPostLiked(1, 'user:42');
+
+      const [, , options] = mockExecute.mock.calls[0];
+      expect(options?.authMode).toBe('required');
     });
 
     it('未点赞时应返回 false', async () => {
       mockExecute.mockResolvedValueOnce({ hasLikedBlogPost: false });
 
-      const result = await checkBlogPostLiked(1, 'user-abc');
+      const result = await checkBlogPostLiked(1, 'anon:abc');
 
       expect(result).toBe(false);
     });

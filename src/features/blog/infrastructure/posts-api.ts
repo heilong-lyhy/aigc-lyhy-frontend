@@ -34,6 +34,7 @@ export interface BlogPostDTO {
   readonly publishedAt: string | null;
   readonly createdAt: string;
   readonly updatedAt: string;
+  readonly deletedAt: string | null;
 }
 
 /** 后端 BlogPostDetailObjectType（详情，多 content/renderedContent/tags） */
@@ -110,6 +111,7 @@ export function mapBlogPost(raw: BlogPostDTO): BlogPost {
     publishedAt: raw.publishedAt ?? null,
     createdAt: raw.createdAt,
     updatedAt: raw.updatedAt,
+    deletedAt: raw.deletedAt ?? null,
   };
 }
 
@@ -142,14 +144,14 @@ function mapBlogPostList(raw: BlogPostListDTO): PaginatedResult<BlogPost> {
 const POST_LIST_FRAGMENT = `
   fragment PostListFields on BlogPost {
     id title slug excerpt coverImage status categoryId categoryName tagIds
-    isPinned viewCount likeCount commentCount publishedAt createdAt updatedAt
+    isPinned viewCount likeCount commentCount publishedAt createdAt updatedAt deletedAt
   }
 `;
 
 const POST_DETAIL_FRAGMENT = `
   fragment PostDetailFields on BlogPostDetail {
     id title slug excerpt content renderedContent coverImage status categoryId categoryName tagIds
-    isPinned viewCount likeCount commentCount publishedAt createdAt updatedAt
+    isPinned viewCount likeCount commentCount publishedAt createdAt updatedAt deletedAt
     tags { id name slug postCount createdAt updatedAt }
     prevPost { id title slug }
     nextPost { id title slug }
@@ -171,6 +173,17 @@ const FETCH_PUBLISHED_POSTS_QUERY = `
 const FETCH_POSTS_QUERY = `
   query FetchBlogPosts($page: Int!, $limit: Int!, $sortBy: String, $sortOrder: SortDirection, $status: BlogPostStatus, $categoryId: Int, $title: String) {
     blogPosts(page: $page, limit: $limit, sortBy: $sortBy, sortOrder: $sortOrder, status: $status, categoryId: $categoryId, title: $title) {
+      list { ...PostListFields }
+      current pageSize total
+    }
+  }
+  ${POST_LIST_FRAGMENT}
+`;
+
+/** 管理端：查询已删除文章列表（回收站，使用 blogDeletedPosts 绕过 deleted_at 过滤） */
+const FETCH_DELETED_POSTS_QUERY = `
+  query FetchBlogDeletedPosts($page: Int!, $limit: Int!) {
+    blogDeletedPosts(page: $page, limit: $limit) {
       list { ...PostListFields }
       current pageSize total
     }
@@ -266,6 +279,22 @@ export async function fetchBlogPosts(
   );
 
   return mapBlogPostList(data.blogPosts);
+}
+
+/** 管理端：查询已删除文章列表（回收站） */
+export async function fetchBlogDeletedPosts(
+  pagination: PaginationInput,
+): Promise<PaginatedResult<BlogPost>> {
+  const data = await executeGraphQL<{ blogDeletedPosts: BlogPostListDTO }, Record<string, unknown>>(
+    FETCH_DELETED_POSTS_QUERY,
+    {
+      page: pagination.page,
+      limit: pagination.pageSize,
+    },
+    { authMode: 'required' },
+  );
+
+  return mapBlogPostList(data.blogDeletedPosts);
 }
 
 /** 公开：按 ID 查询文章详情 */

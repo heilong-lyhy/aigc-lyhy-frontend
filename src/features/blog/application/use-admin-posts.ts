@@ -10,6 +10,7 @@ import { useAsyncQuery, useMutationError } from '@/shared/hooks';
 import {
   createBlogPost,
   deleteBlogPost,
+  fetchBlogDeletedPosts,
   fetchBlogPostById,
   fetchBlogPosts,
   permanentDeleteBlogPost,
@@ -215,6 +216,85 @@ export function useAdminPosts(options: UseAdminPostsOptions): UseAdminPostsResul
     create,
     update,
     remove,
+    restore,
+    permanentDelete,
+  };
+}
+
+// ── 回收站专用 hook ──
+
+type UseAdminDeletedPostsOptions = {
+  readonly pagination: PaginationInput;
+  readonly autoLoad?: boolean;
+};
+
+type UseAdminDeletedPostsResult = {
+  readonly data: PaginatedResult<BlogPost> | null;
+  readonly isLoading: boolean;
+  readonly isEmpty: boolean;
+  readonly error: string | null;
+  readonly mutationError: string | null;
+  readonly refetch: () => Promise<void>;
+  readonly restore: (id: number) => Promise<BlogPostDetail | null>;
+  readonly permanentDelete: (id: number) => Promise<boolean>;
+};
+
+export function useAdminDeletedPosts(options: UseAdminDeletedPostsOptions): UseAdminDeletedPostsResult {
+  const { autoLoad = true } = options;
+
+  /* eslint-disable react-hooks/exhaustive-deps -- 字段级 deps 防止调用方传字面量对象导致引用不稳定 */
+  const pagination = useMemo(
+    () => options.pagination,
+    [options.pagination?.page, options.pagination?.pageSize],
+  );
+  /* eslint-enable react-hooks/exhaustive-deps */
+
+  const fetcher = useCallback(async (): Promise<PaginatedResult<BlogPost>> => {
+    return await fetchBlogDeletedPosts(pagination);
+  }, [pagination]);
+
+  const { data, isLoading, error, refetch } = useAsyncQuery<PaginatedResult<BlogPost>>({
+    fetcher,
+    autoLoad,
+  });
+
+  const { mutationError, clearMutationError, setMutationError } = useMutationError();
+
+  const restore = useCallback(async (id: number): Promise<BlogPostDetail | null> => {
+    clearMutationError();
+    try {
+      const result = await restoreBlogPost(id);
+      await refetch();
+      return result;
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to restore post';
+      setMutationError(message);
+      return null;
+    }
+  }, [clearMutationError, setMutationError, refetch]);
+
+  const permanentDelete = useCallback(async (id: number): Promise<boolean> => {
+    clearMutationError();
+    try {
+      const ok = await permanentDeleteBlogPost(id);
+      if (ok) {
+        await refetch();
+      }
+      return ok;
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to permanently delete post';
+      setMutationError(message);
+      return false;
+    }
+  }, [clearMutationError, setMutationError, refetch]);
+
+  return {
+    data,
+    isLoading,
+    isEmpty: isEmptyPage(data, isLoading, error),
+    error,
+    mutationError,
+    refetch,
     restore,
     permanentDelete,
   };

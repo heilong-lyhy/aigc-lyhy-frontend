@@ -87,7 +87,7 @@ export function BlogArchivePage() {
                           {monthGroup.posts.map((post) => (
                             <li key={post.id}>
                               <button
-                                className="flex w-full items-start gap-3 rounded p-2 text-left transition-colors hover:bg-bg-container"
+                                className={`flex w-full items-start gap-3 rounded p-2 text-left transition-colors hover:bg-bg-container ${post.isPinned ? 'border-l-4 border-primary pl-3' : 'pl-4'}`}
                                 type="button"
                                 onClick={() => handlePostClick(post.slug)}
                               >
@@ -96,7 +96,7 @@ export function BlogArchivePage() {
                                     {formatAbsoluteDate(post.publishedAt ?? post.createdAt)}
                                   </Text>
                                 </span>
-                                <span className="text-sm font-medium">{post.title}</span>
+                                <span className={`text-sm ${post.isPinned ? 'font-bold' : 'font-medium'}`}>{post.title}</span>
                                 {post.isPinned && <Tag color="blue">{LABEL_PINNED}</Tag>}
                               </button>
                             </li>

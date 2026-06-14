@@ -22,8 +22,10 @@ import {
   Upload,
 } from 'antd';
 
+import { ALLOWED_FILE_MIME_TYPES, MAX_FILE_SIZE_BYTES, MAX_FILE_SIZE_MB } from '@/features/blog';
+
 import type { BlogFile } from '@/entities/blog';
-import { ALLOWED_FILE_MIME_TYPES, formatAbsoluteDate, MAX_FILE_SIZE_BYTES, MAX_FILE_SIZE_MB } from '@/entities/blog';
+import { formatAbsoluteDate } from '@/entities/blog';
 
 const { Title, Text } = Typography;
 

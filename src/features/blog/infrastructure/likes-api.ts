@@ -27,13 +27,15 @@ export async function toggleBlogPostLike(
   postId: number,
   userIdentifier: string,
 ): Promise<BlogLike> {
+  const authMode = userIdentifier.startsWith('user:') ? 'required' : 'none';
+
   const data = await executeGraphQL<
     { toggleBlogPostLike: boolean },
     { postId: number; userIdentifier: string }
   >(
     TOGGLE_LIKE_MUTATION,
     { postId, userIdentifier },
-    { authMode: 'none' },
+    { authMode },
   );
 
   return { liked: data.toggleBlogPostLike };
@@ -44,10 +46,12 @@ export async function checkBlogPostLiked(
   postId: number,
   userIdentifier: string,
 ): Promise<boolean> {
+  const authMode = userIdentifier.startsWith('user:') ? 'required' : 'none';
+
   const data = await executeGraphQL<
     { hasLikedBlogPost: boolean },
     { postId: number; userIdentifier: string }
-  >(CHECK_LIKED_QUERY, { postId, userIdentifier }, { authMode: 'none' });
+  >(CHECK_LIKED_QUERY, { postId, userIdentifier }, { authMode });
 
   return data.hasLikedBlogPost;
 }

@@ -27,11 +27,13 @@ import { Error404 } from '@/features/error-feedback';
 
 import type { BlogComment, PaginationInput } from '@/entities/blog';
 
+import { getAnonymousId } from '@/shared/anonymous-id';
+
 const COMMENTS_PAGINATION: PaginationInput = { page: 1, pageSize: 20 };
 
 export function BlogPostPage() {
   const { slug } = useParams<{ slug: string }>();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, accountId } = useAuth();
   const [tocItems, setTocItems] = useState<readonly TocItem[]>([]);
   const [replyTarget, setReplyTarget] = useState<BlogComment | null>(null);
 
@@ -45,9 +47,13 @@ export function BlogPostPage() {
   const { data: categories } = useBlogCategories();
   const { data: tags } = useBlogTags();
 
+  const userIdentifier = isAuthenticated && accountId != null
+    ? `user:${accountId}`
+    : getAnonymousId();
+
   const likeHook = useLike({
     postId: post?.id ? Number(post.id) : 0,
-    userIdentifier: 'anonymous',
+    userIdentifier,
     autoCheck: !!post?.id,
   });
 

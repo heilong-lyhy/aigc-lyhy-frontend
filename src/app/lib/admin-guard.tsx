@@ -5,7 +5,7 @@ import { Navigate } from 'react-router';
 
 import { useAuth, useFullUserInfo } from '@/features/auth';
 
-const ADMIN_ROLE = 'ADMIN';
+import { ADMIN_ROLE } from './admin-role';
 
 type AdminGuardProps = {
   readonly children: ReactNode;

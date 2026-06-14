@@ -21,7 +21,7 @@ export function PostCard({ post, categories, tags, onClick }: PostCardProps) {
   const postTags = tags?.filter((t) => post.tagIds.includes(t.id));
   const category = categories?.find((c) => Number(c.id) === post.categoryId);
 
-  return (
+  const card = (
     <Card
       cover={
         post.coverImage ? (
@@ -34,6 +34,7 @@ export function PostCard({ post, categories, tags, onClick }: PostCardProps) {
       }
       hoverable
       role="article"
+      variant={post.isPinned ? 'borderless' : undefined}
       onClick={onClick ? () => onClick(post.slug) : undefined}
     >
       <Card.Meta
@@ -65,4 +66,10 @@ export function PostCard({ post, categories, tags, onClick }: PostCardProps) {
       />
     </Card>
   );
+
+  if (post.isPinned) {
+    return <div className="rounded-lg border-2 border-primary">{card}</div>;
+  }
+
+  return card;
 }

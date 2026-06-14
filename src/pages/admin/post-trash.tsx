@@ -51,10 +51,10 @@ export function PostTrash({
       },
       {
         title: LABEL_COL_DELETED_DATE,
-        dataIndex: 'updatedAt',
-        key: 'updatedAt',
+        dataIndex: 'deletedAt',
+        key: 'deletedAt',
         width: 120,
-        render: (date: string) => formatAbsoluteDate(date),
+        render: (date: string | null) => date ? formatAbsoluteDate(date) : '-',
       },
       {
         title: LABEL_COL_ACTIONS,

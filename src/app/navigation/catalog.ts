@@ -1,5 +1,7 @@
 // src/app/navigation/catalog.ts
 
+import { ADMIN_ROLE } from '@/app/lib';
+
 import { type AppEnv, getAppEnv } from '@/shared/env';
 
 import type { NavigationItem } from './types';
@@ -74,8 +76,6 @@ const SUPPORT_NAVIGATION_ITEMS: NavigationItem[] = [
 // Each lab has its own access list in its access.ts.
 // IMPORTANT: Do not duplicate env/role checks here; use the lab's own access functions.
 const GAME_2048_ALLOWED_ENVS: readonly AppEnv[] = ['dev', 'test']; // sync with labs/game-2048/access.ts
-
-const ADMIN_ROLE = 'ADMIN';
 
 function canExposeSandbox(env: AppEnv) {
   return env === 'dev' || env === 'test';

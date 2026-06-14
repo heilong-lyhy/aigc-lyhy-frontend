@@ -20,6 +20,7 @@ export { useAdminCategories } from './application/use-admin-categories';
 export { useAdminComments } from './application/use-admin-comments';
 export { useAdminFiles } from './application/use-admin-files';
 export { useAdminFriendLinks } from './application/use-admin-friend-links';
+export { useAdminDeletedPosts } from './application/use-admin-posts';
 export { useAdminPosts } from './application/use-admin-posts';
 export { useAdminProfile } from './application/use-admin-profile';
 export { useAdminTags } from './application/use-admin-tags';
@@ -50,5 +51,13 @@ export { TagCloud } from './ui/tag-cloud';
 // ── UI 类型 ──
 export type { TocItem } from './application/types';
 export type { MarkdownRendererProps } from './ui/markdown-renderer';
+
+// ── 上传校验常量 ──
+export {
+  ALLOWED_COVER_MIME_TYPES,
+  ALLOWED_FILE_MIME_TYPES,
+  MAX_FILE_SIZE_BYTES,
+  MAX_FILE_SIZE_MB,
+} from './infrastructure';
 
 

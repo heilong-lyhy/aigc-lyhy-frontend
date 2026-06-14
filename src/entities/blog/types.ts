@@ -20,6 +20,7 @@ export interface BlogPost {
   readonly publishedAt: string | null;
   readonly createdAt: string;
   readonly updatedAt: string;
+  readonly deletedAt: string | null;
 }
 
 /** 上一篇/下一篇文章导航摘要 */
