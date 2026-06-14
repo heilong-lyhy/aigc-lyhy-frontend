@@ -1,4 +1,4 @@
-// src/labs/blog-admin/ui/dashboard.tsx
+// src/pages/admin/dashboard.tsx
 
 import {
   CommentOutlined,

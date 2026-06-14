@@ -4,11 +4,10 @@ import type {
   Gender,
   IdentityTypeEnum,
   LoginTypeEnum,
-  RegisterTypeEnum,
   UserState,
 } from '@/shared/graphql';
 
-export type { AccountStatus, AudienceTypeEnum as AudienceType, Gender, IdentityTypeEnum as IdentityType, LoginTypeEnum as LoginType, RegisterTypeEnum as RegisterType, UserState };
+export type { AccountStatus, AudienceTypeEnum as AudienceType, Gender, IdentityTypeEnum as IdentityType, LoginTypeEnum as LoginType, UserState };
 
 export interface BasicUserInfo {
   readonly accountId: number;
@@ -73,5 +72,4 @@ export interface RegisterInput {
   readonly loginPassword: string;
   readonly nickname?: string;
   readonly inviteToken?: string;
-  readonly type?: RegisterType;
 }

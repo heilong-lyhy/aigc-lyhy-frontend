@@ -1,4 +1,4 @@
-// src/labs/blog-admin/lib/status-options.ts
+// src/pages/admin/lib/status-options.ts
 
 import type { BlogPostStatus } from '@/entities/blog';
 

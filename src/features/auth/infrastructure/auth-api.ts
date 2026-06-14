@@ -144,34 +144,23 @@ export async function fetchFullUserInfo(accountId: number): Promise<FullUserInfo
 }
 
 // ── ChangePassword ──
-// TODO(backend): 后端加入 changePassword mutation 后，迁移至 codegen document 并移除此内联定义
+// 后端提供 changeBlogAdminPassword mutation，返回 accountId (Int!)
 
 const CHANGE_PASSWORD_MUTATION = `
-  mutation ChangePassword($input: ChangePasswordInput!) {
-    changePassword(input: $input) {
-      success
-      message
-    }
+  mutation ChangeBlogAdminPassword($input: ChangeBlogAdminPasswordInput!) {
+    changeBlogAdminPassword(input: $input)
   }
 `;
-
-type ChangePasswordDTO = {
-  readonly success: boolean;
-  readonly message: string | null;
-};
 
 export async function changePassword(
   currentPassword: string,
   newPassword: string,
 ): Promise<ChangePasswordResult> {
-  const data = await executeGraphQL<
-    { changePassword: ChangePasswordDTO },
-    Record<string, unknown>
-  >(
+  await executeGraphQL<{ changeBlogAdminPassword: number }, Record<string, unknown>>(
     CHANGE_PASSWORD_MUTATION,
     { input: { currentPassword, newPassword } },
     { authMode: 'required' },
   );
 
-  return data.changePassword;
+  return { success: true, message: null };
 }

@@ -1,4 +1,4 @@
-// src/labs/blog-admin/ui/friend-link-manager.tsx
+// src/pages/admin/friend-link-manager.tsx
 
 import { useCallback, useMemo, useState } from 'react';
 import { DeleteOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons';

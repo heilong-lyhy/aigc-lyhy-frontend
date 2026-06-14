@@ -118,7 +118,6 @@ function RegisterTab({ onRegisterSuccess }: { readonly onRegisterSuccess: () => 
         loginName: values.nickname,
         loginPassword: values.password,
         nickname: values.nickname,
-        type: 'REGISTRANT',
       });
 
       if (result.success) {

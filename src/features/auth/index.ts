@@ -17,7 +17,6 @@ export type {
   LoginType,
   RegisterInput,
   RegisterResult,
-  RegisterType,
   ResetPasswordResult,
   UserState,
 } from './types';

@@ -1,4 +1,4 @@
-// src/labs/blog-admin/ui/post-trash.tsx
+// src/pages/admin/post-trash.tsx
 
 import { useMemo } from 'react';
 import { DeleteOutlined, UndoOutlined } from '@ant-design/icons';

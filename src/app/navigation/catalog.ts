@@ -31,10 +31,10 @@ const STABLE_NAVIGATION_ITEMS: NavigationItem[] = [
   },
 ];
 
-const BLOG_ADMIN_LAB_ITEM: NavigationItem = {
+const BLOG_ADMIN_ITEM: NavigationItem = {
   description: '博客管理后台：文章、评论、标签、文件等。',
-  id: 'blog-admin-lab',
-  kind: 'labs',
+  id: 'blog-admin',
+  kind: 'stable',
   label: 'Blog Admin',
   path: '/admin',
   tags: ['blog', 'admin', 'dashboard', 'management', '博客', '管理', '后台'],
@@ -74,7 +74,6 @@ const SUPPORT_NAVIGATION_ITEMS: NavigationItem[] = [
 // Each lab has its own access list in its access.ts.
 // IMPORTANT: Do not duplicate env/role checks here; use the lab's own access functions.
 const GAME_2048_ALLOWED_ENVS: readonly AppEnv[] = ['dev', 'test']; // sync with labs/game-2048/access.ts
-const BLOG_ADMIN_ALLOWED_ENVS: readonly AppEnv[] = ['dev', 'test']; // sync with labs/blog-admin/access.ts
 
 const ADMIN_ROLE = 'ADMIN';
 
@@ -87,20 +86,26 @@ export interface NavigationAuthContext {
   accessGroup: readonly string[];
 }
 
-function getLabNavigationItems(
-  env: AppEnv,
+function getStableAdminNavigationItems(
   auth: NavigationAuthContext | undefined,
 ): NavigationItem[] {
   const items: NavigationItem[] = [];
 
-  // Blog Admin：需要已登录 + ADMIN 角色 + 允许的环境
+  // Blog Admin：需要已登录 + ADMIN 角色（stable 区，所有环境可见）
   if (
-    BLOG_ADMIN_ALLOWED_ENVS.includes(env) &&
     auth?.isAuthenticated &&
     auth.accessGroup.some((role) => role === ADMIN_ROLE)
   ) {
-    items.push(BLOG_ADMIN_LAB_ITEM);
+    items.push(BLOG_ADMIN_ITEM);
   }
+
+  return items;
+}
+
+function getLabNavigationItems(
+  env: AppEnv,
+): NavigationItem[] {
+  const items: NavigationItem[] = [];
 
   // Lab (Game2048)：环境允许即可显示，未登录时页面内容显示"请先登录"
   if (GAME_2048_ALLOWED_ENVS.includes(env)) {
@@ -127,7 +132,8 @@ export function getNavigationItems(
 ): NavigationItem[] {
   return [
     ...STABLE_NAVIGATION_ITEMS,
-    ...getLabNavigationItems(env, auth),
+    ...getStableAdminNavigationItems(auth),
+    ...getLabNavigationItems(env),
     ...getSandboxNavigationItems(env, auth),
     ...SUPPORT_NAVIGATION_ITEMS,
   ];

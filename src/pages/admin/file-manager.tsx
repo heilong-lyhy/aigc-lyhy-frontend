@@ -1,4 +1,4 @@
-// src/labs/blog-admin/ui/file-manager.tsx
+// src/pages/admin/file-manager.tsx
 
 import { useCallback, useMemo, useState } from 'react';
 import {

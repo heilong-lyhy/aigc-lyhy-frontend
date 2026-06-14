@@ -7,7 +7,6 @@ export type {
   Gender,
   IdentityTypeEnum,
   LoginTypeEnum,
-  RegisterTypeEnum,
   UserState,
 } from './__generated__/schema-types';
 

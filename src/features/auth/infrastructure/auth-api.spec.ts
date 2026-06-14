@@ -26,9 +26,9 @@ describe('auth-api — changePassword', () => {
     vi.clearAllMocks();
   });
 
-  it('calls changePassword mutation with auth required', async () => {
+  it('calls changeBlogAdminPassword mutation with auth required', async () => {
     mockExecute.mockResolvedValueOnce({
-      changePassword: { success: true, message: null },
+      changeBlogAdminPassword: 1,
     });
 
     const result = await changePassword('old-pass', 'new-pass');
@@ -40,17 +40,6 @@ describe('auth-api — changePassword', () => {
     expect(variables.input.currentPassword).toBe('old-pass');
     expect(variables.input.newPassword).toBe('new-pass');
     expect(options?.authMode).toBe('required');
-  });
-
-  it('returns failure result when password change is rejected', async () => {
-    mockExecute.mockResolvedValueOnce({
-      changePassword: { success: false, message: 'Current password is incorrect' },
-    });
-
-    const result = await changePassword('wrong-pass', 'new-pass');
-
-    expect(result.success).toBe(false);
-    expect(result.message).toBe('Current password is incorrect');
   });
 
   it('propagates errors from executeGraphQL', async () => {

@@ -1,4 +1,4 @@
-// src/labs/blog-admin/ui/category-manager.tsx
+// src/pages/admin/category-manager.tsx
 
 import { useCallback, useMemo, useState } from 'react';
 import {

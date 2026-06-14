@@ -1,4 +1,4 @@
-// src/labs/blog-admin/ui/comment-manager.tsx
+// src/pages/admin/comment-manager.tsx
 
 import { useCallback, useMemo, useState } from 'react';
 import {

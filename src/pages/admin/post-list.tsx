@@ -1,4 +1,4 @@
-// src/labs/blog-admin/ui/post-list.tsx
+// src/pages/admin/post-list.tsx
 
 import { useMemo } from 'react';
 import { DeleteOutlined, EditOutlined, EllipsisOutlined, PushpinFilled, PushpinOutlined } from '@ant-design/icons';
@@ -8,7 +8,7 @@ import type { ColumnsType } from 'antd/es/table';
 import type { BlogCategory, BlogPost, BlogPostStatus, PaginatedResult, PaginationInput } from '@/entities/blog';
 import { formatAbsoluteDate, toCurrentPage, toEffectiveTotal, toPaginationInput } from '@/entities/blog';
 
-import { STATUS_OPTIONS } from '../lib/status-options';
+import { STATUS_OPTIONS } from './lib/status-options';
 
 const { Title } = Typography;
 

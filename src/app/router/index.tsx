@@ -15,6 +15,19 @@ import { AppLayout } from '@/app/layout';
 import { AdminGuard } from '@/app/lib';
 
 import AccountPage from '@/pages/account';
+import {
+  AdminLayout,
+  CategoryManager,
+  CommentManager,
+  DashboardPage,
+  FileManager,
+  FriendLinkManager,
+  PostEditor,
+  PostList,
+  PostTrash,
+  ProfileSettings,
+  TagManager,
+} from '@/pages/admin';
 import AuthPage from '@/pages/auth';
 import { BlogAboutPage } from '@/pages/blog-about';
 import { BlogArchivePage } from '@/pages/blog-archive';
@@ -48,25 +61,11 @@ import { toPaginationInput } from '@/entities/blog';
 
 import { getAppEnv } from '@/shared/env';
 
-import {
-  AdminLayout,
-  canAccessBlogAdminLab,
-  CategoryManager,
-  CommentManager,
-  DashboardPage,
-  FileManager,
-  FriendLinkManager,
-  PostEditor,
-  PostList,
-  PostTrash,
-  ProfileSettings,
-  TagManager,
-} from '@/labs/blog-admin';
 import { canAccessGame2048Lab, Game2048LabPage } from '@/labs/game-2048';
 import { canAccessSandboxPlayground, SandboxPlaygroundPage } from '@/sandbox/playground';
 
 // ── Admin 页面组件 ──
-// 这些组件依赖 labs/blog-admin，按依赖规则只能挂在 app/router 下。
+// 这些组件来自 pages/admin，按依赖规则挂在 app/router 下。
 // 页面内容逻辑已拆分到独立函数，router 只负责"挂起来"。
 
 const USE_MOCK_FALLBACK = false;
@@ -640,14 +639,6 @@ function game2048LabLoader() {
   return null;
 }
 
-function blogAdminLoader() {
-  if (!canAccessBlogAdminLab(getAppEnv())) {
-    throw redirect('/');
-  }
-
-  return null;
-}
-
 function sandboxPlaygroundLoader() {
   if (!canAccessSandboxPlayground(getAppEnv())) {
     throw redirect('/');
@@ -764,7 +755,6 @@ const router = createBrowserRouter([
             <AdminLayout />
           </AdminGuard>
         ),
-        loader: blogAdminLoader,
         path: 'admin',
       },
       {

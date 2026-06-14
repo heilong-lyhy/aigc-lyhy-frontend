@@ -1,4 +1,4 @@
-// src/labs/blog-admin/ui/profile-settings.tsx
+// src/pages/admin/profile-settings.tsx
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
@@ -289,7 +289,7 @@ export function ProfileSettings({
         {passwordError && (
           <div className="mb-4">
             <Alert
-              title={passwordError}
+              message={passwordError}
               showIcon
               type="error"
             />

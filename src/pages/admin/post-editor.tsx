@@ -1,4 +1,4 @@
-// src/labs/blog-admin/ui/post-editor.tsx
+// src/pages/admin/post-editor.tsx
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { EditOutlined, EyeOutlined, PictureOutlined, SaveOutlined, SplitCellsOutlined } from '@ant-design/icons';
@@ -8,7 +8,7 @@ import type { ComponentType } from 'react';
 import type { BlogCategory, BlogTag, PostEditorForm } from '@/entities/blog';
 import { ALLOWED_COVER_MIME_TYPES, MAX_FILE_SIZE_BYTES } from '@/entities/blog';
 
-import { STATUS_OPTIONS } from '../lib/status-options';
+import { STATUS_OPTIONS } from './lib/status-options';
 
 const { Title } = Typography;
 const { TextArea } = Input;

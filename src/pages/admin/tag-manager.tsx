@@ -1,4 +1,4 @@
-// src/labs/blog-admin/ui/tag-manager.tsx
+// src/pages/admin/tag-manager.tsx
 
 import { useCallback, useMemo, useState } from 'react';
 import { DeleteOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons';
