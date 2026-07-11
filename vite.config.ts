@@ -49,7 +49,7 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, envDir, '');
 
   const devServerHost = env.DEV_SERVER_HOST || 'localhost';
-  const devServerPort = parseInteger(env.DEV_SERVER_PORT, 5173);
+  const devServerPort = parseInteger(env.DEV_SERVER_PORT, 16100);
   const devServerStrictPort = parseBoolean(env.DEV_SERVER_STRICT_PORT, false);
   const buildOutDir = env.BUILD_OUT_DIR || 'dist';
   const buildSourcemap = parseBoolean(env.BUILD_SOURCEMAP, false);
