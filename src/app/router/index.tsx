@@ -9,7 +9,6 @@ import {
 } from 'react-router';
 
 import { AppLayout } from '@/app/layout';
-import { AdminGuard } from '@/app/lib';
 
 import AccountPage from '@/pages/account';
 import {
@@ -41,6 +40,8 @@ import { getAppEnv } from '@/shared/env';
 
 import { canAccessGame2048Lab, Game2048LabPage } from '@/labs/game-2048';
 import { canAccessSandboxPlayground, SandboxPlaygroundPage } from '@/sandbox/playground';
+
+import { AdminGuard } from './admin-guard';
 
 // ── 路由错误边界 ──
 

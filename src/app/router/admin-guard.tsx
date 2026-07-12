@@ -1,11 +1,11 @@
-// src/app/lib/admin-guard.tsx
+// src/app/router/admin-guard.tsx
 
 import { type ReactNode } from 'react';
 import { Navigate } from 'react-router';
 
-import { useAuth, useFullUserInfo } from '@/features/auth';
+import { ADMIN_ROLE } from '@/app/lib';
 
-import { ADMIN_ROLE } from './admin-role';
+import { useAuth, useFullUserInfo } from '@/features/auth';
 
 type AdminGuardProps = {
   readonly children: ReactNode;
